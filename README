@@ -1,0 +1,56 @@
+http://www.dattamsha.com/2014/09/using-hadoop-streaming-with-spark/
+
+https://azure.microsoft.com/en-us/documentation/articles/machine-learning-create-experiment/
+
+
+Cenários:
+- Para uma fonte de dados, poder clicar e solicitar "visualizar"
+- Cada passo pode ter uma seção "comentário"
+
+
+
+ML Studio
+---------
+Atributos são chamados de features
+- Parece que cada passo é tido como um experimento. Você pode desabilitar atualizações.
+
+- Saved data set
+    - List of data sets
+- Data format conversion
+    - to ARFF
+    - to CSV
+    - to SVMLight
+    - to Dataset?
+    - to TSV
+- Data input and output
+    - Reader
+        - http
+        - Hive
+        - Azure SQL
+        - Azure Table
+        - Data feed?
+- Data transformation
+    - Manipulation
+        - Missing values scrubber (1x1) (pode ser valor personalizado, usar a média, mediana, moda, remover toda a linha). Pode escolher remover toda a coluna se todos os valores forem ausentes.
+        - Project columns (1x1) (especificar quais colunas usar/excluir)
+        - Metadata editor (1x1) Seleciona as colunas, pode mudar o tipo (??) e se é categórico ou não (ou deixar como estava)
+        - Join (2x1) Tem o tipo de join (inner, outer)
+    - Filter
+        - Apply Filter
+    - Scale and reduce
+        - Apply Quantization Function(?)
+        - Normalize data (1x2) - Tem método de normalização (Z-score é um deles)
+    - Sample and Split
+        - Partition and Sample
+        - Split (percentual e seed para random selection)   
+- Feature selection
+- Machine learning
+- OpenCV !
+    - Image Reader
+- R
+- Statistical Functions
+    - Descriptive Statistics
+        - Para cada feature, avalia count, unique, missing count, min, max, mean, mean deviation, 1st quartile, median, 3rd quartile, mode,  .... mais
+    - Apply Math Operation (1x1): Categorias de operações: trigonométrica, basica, comparação, operações, arredondamento, especial (?). Pode criar uma nova coluna ou substituir antiga 
+- Text analytics
+- Web Services

@@ -1,0 +1,244 @@
+//@import "./node_modules/font-awesome/scss/font-awesome.scss";
+$fa-font-path: "~font-awesome/fonts";
+@import "~font-awesome/scss/font-awesome";
+/* Colors */
+
+$color1: rgba(228, 87, 46, 1);
+$color2: rgba(41, 51, 92, 1);
+$color3: rgba(242, 141, 0, 1);
+$color4: rgba(168, 198, 134, 1);
+$color5: rgba(102, 155, 188, 1);
+$color6: #fafafa;
+
+$elementWidth: 180px;
+$elementHeight: 50px;
+
+/* Elements */
+body {
+    padding-top: 60px;
+}
+
+.buttons-toolbar {
+  background: white;
+  padding: 5px;
+  width: 100%;
+  z-index: 100;
+}
+.no-padding {
+  [class*="col-"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+.small-padding {
+  [class*="col-"] {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+}
+.card-content {
+  background: white;
+}
+#properties-form {
+  background: white;
+  color: #333;
+  height: 480px;
+  overflow: auto;
+  zoom: 0.75;
+
+  .btn-xs {
+    padding: .1rem .3rem !important;
+  }
+  .form-control {
+    padding: .15rem .50rem;
+  }
+  select {
+    height: 1.6em !important;
+    padding: 0 5px;
+  }
+}
+
+.jsplumb-overlay.labelClass {
+  cursor: pointer;
+}
+.labelClass {
+  background: white;
+}
+.dragging {
+  width: $elementWidth;
+  height: $elementHeight;
+  border: 1px solid $color2;
+  border-radius: 10px;
+  font-size: 8pt;
+  text-align: center;
+  font-weight: bold;
+  color: $color2;
+}
+
+.lemonade-container {
+  background: $color6;
+  background-image: url(grid1.png);
+  overflow: auto;
+  height: 80vh;
+  width: 100%;
+}
+#lemonade, .lemonade {
+  position: relative;
+  xoverflow: auto;
+  margin-top: 50px;
+  width: 1000px;
+  z-index: 90;
+  min-height: calc(690px * (90/150));
+  height: 80vh;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none;   /* Chrome/Safari/Opera */
+    -khtml-user-select: none;    /* Konqueror */
+    -moz-user-select: none;      /* Firefox */
+    -ms-user-select: none;       /* Internet Explorer/Edge */
+    user-select: none;           /* Non-prefixed version, currently
+                                  not supported by any browser */
+
+  .diagram {
+    background-repeat:repeat;
+    display: inline-block;
+    height: 200%;
+    width: 200%;
+  }
+  .node {
+    border-width: 1px;
+    font-family: Verdana;
+    font-size: 7pt;
+    
+    
+    &.selected {
+      border-width: 2px !important;
+      border-color: $color3 !important;
+    }
+    em {
+      bottom: 15%;
+      left: 5%;
+      position: absolute;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 6pt !important;
+    }
+    &.data-source {
+      cursor: move;
+      height: $elementHeight;
+      overflow: hidden;
+      position: absolute;
+      width: $elementWidth;
+      &.selected {
+        .middle, .top, .bottom{
+          border-width: 2px !important;
+          border-color: $color3 !important;
+        } 
+      }
+      .middle {
+          width: $elementWidth;
+          height:$elementHeight - 30px;
+          background-color:white;
+          border-left: 1px solid $color2;
+          border-right: 1px solid $color2;
+          position:absolute;
+          top: 10px;
+          > *{
+            margin-top: 5px;
+          }
+      }
+
+      .top{
+         width: $elementWidth;
+          background: white;
+          height: 20px;
+          border: 1px solid $color2;
+          -moz-border-radius: 120px / 25px;
+          -webkit-border-radius: 120px / 25px;
+          border-radius: 120px / 25px;
+          position:absolute;
+      }
+      .bottom{
+         width: $elementWidth;
+          background: white;
+          height: $elementHeight - 30px;
+          border: 1px solid $color2;
+          -moz-border-radius: 120px / 25px;
+          -webkit-border-radius: 120px / 25px;
+          border-radius: 120px / 25px;
+          position:absolute;
+          top: $elementHeight - 30px;
+          box-shadow:0px 0px 10px rgba(0,0,0,0.75)
+      }
+    }
+    &.operation {
+      background: white;
+      border: $color2 1px solid;
+      border-radius: 5px;
+      color: $color2;
+      cursor: move;
+      height: $elementHeight;
+      padding: 0px;
+      position: absolute;
+      width: $elementWidth;
+      z-index: 2;
+    }
+    strong {
+      position: absolute;
+      text-align: center;
+      top: 10%;
+      width: 100%;
+      border-bottom: 1px solid $color2;
+    }
+    span {
+      font-size: 12pt;
+    }
+    p {
+      border-top: 1px solid $color2;
+    }
+  }
+}
+.endpoint {
+  opacity: 1;
+  background: white;
+}
+.endpoint-label {
+  color: $color5;
+  background: $color6;
+  font-size: 8pt;
+  &.input {
+    margin-top: -20px;
+  }
+  &.output {
+    margin-top: 20px;
+  }
+}
+.xendpoint:hover {
+  opacity: 1;
+  background-color: $color3;
+}
+.operation {
+  li {
+    font-size: 9pt;
+    padding:5px 5px;
+    font-weight: bold;
+  }
+}
+/**/
+.glyphicon {
+  @extend .fa
+}
+.glyphicon-remove {
+  @extend .fa-remove
+}
+.icon-union:before {
+  content: "\222A";
+}
+.icon-intersection:before {
+  content: "\2229";
+}
+.icon-projection:before {
+  content: '\2A21';
+}
+.jsplumb-drag-selected {
+    border-width: 2px !important;
+    border-color: $color5 !important;
+}

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Vue Twitter Streaming</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.3/css/bootstrap.min.css">
+
+  <link rel="stylesheet" href="public/style.css">
+  <!--
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+  -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/brutusin.json-forms/1.4.0/css/brutusin-json-forms.min.css">
+</head>
+
+<body>
+
+  <nav class="navbar navbar-fixed-top navbar-dark bg-inverse">
+    <a class="navbar-brand" href="#">Project name</a>
+    <ul class="nav navbar-nav">
+      <li class="nav-item active">
+        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">About</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Contact</a>
+      </li>
+    </ul>
+  </nav>
+  <div class="container-fluid">
+    <div class="row small-padding">
+      <div id="app">
+        <div class="col-md-2">
+          <div id="MainMenu">
+            <div class="list-group panel">
+              <a href="#demo3" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">Data Sources</a>
+              <div class="collapse" id="demo3">
+                <a href="#SubMenu1" class="list-group-item" data-toggle="collapse" data-parent="#SubMenu1">Subitem 1 <i class="fa fa-caret-down"></i></a>
+                <div class="collapse list-group-submenu" id="SubMenu1">
+                  <a href="#" class="list-group-item" data-parent="#SubMenu1">Subitem 1 a</a>
+                  <a href="#" class="list-group-item" data-parent="#SubMenu1">Subitem 2 b</a>
+                  <a href="#SubSubMenu1" class="list-group-item" data-toggle="collapse" data-parent="#SubSubMenu1">Subitem 3 c <i class="fa fa-caret-down"></i></a>
+                  <div class="collapse list-group-submenu list-group-submenu-1" id="SubSubMenu1">
+                    <a href="#" class="list-group-item" data-parent="#SubSubMenu1">Sub sub item 1</a>
+                    <a href="#" class="list-group-item" data-parent="#SubSubMenu1">Sub sub item 2</a>
+                  </div>
+                  <a href="#" class="list-group-item" data-parent="#SubMenu1">Subitem 4 d</a>
+                </div>
+                <a href="javascript:;" class="list-group-item">Subitem 2</a>
+                <a href="javascript:;" class="list-group-item">Subitem 3</a>
+              </div>
+              <a href="#demo4" class="list-group-item list-group-item" data-toggle="collapse" data-parent="#MainMenu">Item 4</a>
+              <div class="collapse" id="demo4">
+                <a href="" class="list-group-item">Subitem 1</a>
+                <a href="" class="list-group-item">Subitem 2</a>
+                <a href="" class="list-group-item">Subitem 3</a>
+              </div>
+              <a href="#demo5" class="list-group-item list-group-item" data-toggle="collapse" data-parent="#MainMenu">Item 5</a>
+              <div class="collapse" id="demo5">
+                <a href="#" class="list-group-item">Subitem 1</a>
+                <a href="" class="list-group-item">Subitem 2</a>
+                <a href="" class="list-group-item">Subitem 3</a>
+              </div>
+            </div>
+          </div>
+          <app-component>
+          </app-component>
+        </div>
+        <div class="col-md-6">
+          <div class="card card-success card-inverse">
+            <div class="card-header">
+              Workflow
+            </div>
+            <div class="card-content">
+              <diagram-component></diagram-component>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card card-inverse card-warning">
+          <div class="card-header">
+            Properties
+          </div>
+          <div class="card-text">
+            <div id="properties-form">
+            </div>
+            <div>
+              <textarea class="form-control" style="font-size:8pt" rows="10">
+              {"nodes":[{"left":329,"top":693,"id":"f1dad2cf-4370-4ef3-89b4-0c8622ff3d33","operationId":"10","title":"Clustering model","type":"operation"},{"left":202,"top":25,"id":"5f905c30-d3a1-4c47-ab41-2f2387007fe8","operationId":"18","title":"Data reader","type":"operation"},{"left":201,"top":171,"id":"3e9e75d1-2a5c-4ce3-ab37-1999ca083fcb","operationId":"7","title":"Transformation","type":"operation"},{"left":200,"top":297,"id":"2bd537fd-4e60-451b-b48e-7c4ee5c8fa0d","operationId":"7","title":"Transformation","type":"operation"},{"left":200,"top":432,"id":"db305e4b-1611-422e-8518-0a6cc828c9dc","operationId":"5","title":"Filter (selection)","type":"operation"},{"left":132,"top":563,"id":"59640f04-e099-4394-989e-d35757168f6b","operationId":"17","title":"Split dataset","type":"operation"},{"left":382,"top":523,"id":"7819ee99-6e9d-4ec6-92bf-33b3dfad2092","operationId":"4","title":"Lazy Associative Classifier","type":"operation"},{"left":136,"top":804,"id":"ad5a0ffb-a0ab-45cd-8cb4-55fc0352c0c4","operationId":"19","title":"Evaluate model","type":"operation"}],"edges":[{"source":"5f905c30-d3a1-4c47-ab41-2f2387007fe8","target":"3e9e75d1-2a5c-4ce3-ab37-1999ca083fcb","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"3e9e75d1-2a5c-4ce3-ab37-1999ca083fcb","target":"2bd537fd-4e60-451b-b48e-7c4ee5c8fa0d","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"2bd537fd-4e60-451b-b48e-7c4ee5c8fa0d","target":"db305e4b-1611-422e-8518-0a6cc828c9dc","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"db305e4b-1611-422e-8518-0a6cc828c9dc","target":"59640f04-e099-4394-989e-d35757168f6b","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"59640f04-e099-4394-989e-d35757168f6b","target":"f1dad2cf-4370-4ef3-89b4-0c8622ff3d33","anchors":[[0.8,1,0,1,0,0],[0.2,0,0,-1,0,0]]},{"source":"7819ee99-6e9d-4ec6-92bf-33b3dfad2092","target":"f1dad2cf-4370-4ef3-89b4-0c8622ff3d33","anchors":[[0.5,1,0,1,0,0],[0.8,0,0,-1,0,0]]},{"source":"59640f04-e099-4394-989e-d35757168f6b","target":"ad5a0ffb-a0ab-45cd-8cb4-55fc0352c0c4","anchors":[[0.2,1,0,1,0,0],[0.2,0,0,-1,0,0]]},{"source":"f1dad2cf-4370-4ef3-89b4-0c8622ff3d33","target":"ad5a0ffb-a0ab-45cd-8cb4-55fc0352c0c4","anchors":[[0.2,1,0,1,0,0],[0.8,0,0,-1,0,0]]}]}
+                </textarea>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  <script src="bundle.js"></script>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.3/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/brutusin.json-forms/1.4.0/js/brutusin-json-forms.min.js"></script>
+<script src="https://cdn.jsdelivr.net/brutusin.json-forms/1.4.0/js/brutusin-json-forms-bootstrap.min.js"></script>
+<script>
+
+xschema = {
+  "$schema": "http://json-schema.org/draft-03/schema#",
+  "type": "object",
+  "properties": {
+    "pageNum": {
+      "type": "integer",
+      "title": "Page number",
+      "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details",
+      "default": 1,
+      "required": true
+    },
+    "pageSize": {
+      "type": "integer",
+      "title": "Page size",
+      "description": "Number of records per page",
+      "required": true,
+      "default": 50,
+      "enum": [
+        10,
+        25,
+        50,
+        100
+      ]
+    },
+    "selectedFacetValues": {
+      "type": "array",
+      "title": "Query terms",
+      "minItems": 2,
+      "items": {
+        "description": "Query item",
+        "type": "object",
+        "properties": {
+          "facetName": {
+            "type": "string",
+            "title": "Field name",
+            "description": "Indexed field name",
+            "required": true
+          },
+          "matchAllNull": {
+            "type": "boolean",
+            "title": "Match nulls"
+          },
+          "matchAllNotNull": {
+            "type": "boolean",
+            "title": "Match not nulls"
+          },
+          "facetValues": {
+            "type": "array",
+            "title": "Field values",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "title": "Value"
+                }
+              }
+            }
+          },
+          "included": {
+            "type": "boolean",
+            "title": "Included"
+          }
+        }
+      }
+    },
+    "sorts": {
+      "type": "array",
+      "title": "Sorting",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fieldName": {
+            "type": "string",
+            "title": "Field name"
+          },
+          "ascending": {
+            "type": "boolean",
+            "title": "Ascending"
+          }
+        }
+      }
+    }
+  }
+}
+var schema = {
+  "$schema": "http://json-schema.org/draft-03/schema#",
+  "type": "object",
+  "properties": {
+    "selectedFacetValues": {
+      "type": "array",
+      "title": "Aggregate by",
+      "minItems": 2,
+      "items": {
+        "description": "Query item",
+        "type": "object",
+        "properties": {
+          "facetName": {
+            "type": "string",
+            "title": "Field name",
+            "description": "Indexed field name",
+            "required": true
+          },
+        }
+      }
+    },
+    "aggregations": {
+      "type": "string",
+      "title": "Aggregation",
+      "enum": ["MIN", "MAX", "COUNT", "SUM", "AVG"]
+      }
+    }
+};
+
+var BrutusinForms = brutusin["json-forms"];
+var bf = BrutusinForms.create(schema);
+var container = document.getElementById('properties-form');
+bf.render(container, {});
+
+</script>
+
+</html>

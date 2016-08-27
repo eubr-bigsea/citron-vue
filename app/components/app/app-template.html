@@ -1,0 +1,31 @@
+<div class="card card-primary card-inverse operation">
+    <div class="card-header">
+        {{title}}
+    </div>
+    <ul class="list-group list-group-flush">
+        <div class="channel" v-for="op in operations">
+          <toolbox-component :operation="op"/>
+        </div>
+    </ul>
+</div>
+<!--
+<div>
+  <div id="search-form">
+    <form>
+      <input class="swish-input" v-model="title" placeholder="JavaScript" />
+      <button class="bright-blue-hover btn-white">Search</button>
+    </form>
+  </div>
+</div>
+
+<div class="container tweets-container">
+  <div id="channels-list">
+    <div class="channel" v-for="op in operations">
+      {{op.name}}
+      <subscription-component
+        :channel="channel"
+        :pusher="pusher"></subscription-component>
+    </div>
+  </div>
+</div>
+-->
