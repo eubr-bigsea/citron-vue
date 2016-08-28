@@ -2,6 +2,9 @@ import Vue from 'vue';
 import template from './diagram-template.html';
 import { getOperationFromId } from '../vuex/actions'
 import store from '../vuex/store';
+import highlight from 'highlight.js';
+import highlightCass from 'highlight.js/styles/default.css';
+import solarizedDark from 'highlight.js/styles/solarized-dark.css';
 /*
 var anchors = [ "TopCenter", "RightMiddle", "BottomCenter",
                 "LeftMiddle", "TopLeft", "TopRight", "BottomLeft",
@@ -107,7 +110,7 @@ const DiagramComponent = Vue.extend({
         zoom: 1
     },
     computed: {
-        zoomPercent: function(){
+        zoomPercent: function () {
             return `${Math.round(100 * this.zoom, 0)}%`;
         }
     },
@@ -148,7 +151,7 @@ const DiagramComponent = Vue.extend({
 
                 self.instance.setContainer("lemonade-diagram");
                 self.instance.getContainer().addEventListener('click', function (ev) {
-                    self.clearSelection();
+                    self.clearSelection(ev);
                 });
                 self.instance.bind("click", self.edgeClick);
 
@@ -161,10 +164,14 @@ const DiagramComponent = Vue.extend({
                 });
             })
         },
-        clearSelection() {
+        clearSelection(ev) {
+            if (ev.target.nodeName === 'path'){
+                // click on edge
+                return;
+            }
             let self = this;
-            let nodes = document.querySelectorAll(".node")
-            Array.prototype.slice.call(nodes,0).forEach((e) => {
+            let nodes = document.querySelectorAll(".node");
+            Array.prototype.slice.call(nodes, 0).forEach((e) => {
                 e.classList.remove('selected');
                 self.instance.clearDragSelection();
                 self.selectedNode = null;
@@ -198,6 +205,8 @@ const DiagramComponent = Vue.extend({
             document.querySelectorAll(".node.selected").forEach(e => {
                 e.classList.remove('selected');
             });
+            e.stopPropagation();
+            e.preventDefault();
         },
         endPointMouseOver(endpoint, event) {
             //console.debug(endpoint)
@@ -205,6 +214,7 @@ const DiagramComponent = Vue.extend({
         createNode(nodeId, operation, target, x, y, adjust, type) {
             let self = this;
 
+            type = 'operation'
             let elem = document.createElement("div");
             elem.title = operation.description || '';
             elem.dataset.operationId = operation.id;
@@ -212,7 +222,10 @@ const DiagramComponent = Vue.extend({
             elem.id = nodeId;
             elem.classList.add(type);
             elem.classList.add("node");
-            if (type === 'data-source') {
+            operation.categories.forEach((c) => {
+                elem.classList.add(c.type.replace(' ', '-'));
+            });
+            if (type === 'data-source' && false) {
                 ['bottom', 'middle', 'top'].forEach(c => {
                     let child = document.createElement('div');
                     if (c === 'middle') {
@@ -238,7 +251,7 @@ const DiagramComponent = Vue.extend({
                 if (ev.ctrlKey) {
                     //this.classList.add('many-selected');
                     self.instance.addToDragSelection(this);
-                } else if (this.classList.contains('jsplumb-drag-selected')){
+                } else if (this.classList.contains('jsplumb-drag-selected')) {
                     //nothing
                 } else {
                     self.instance.clearDragSelection();
@@ -250,17 +263,17 @@ const DiagramComponent = Vue.extend({
             });
             let outputs = operation.ports.filter((p) => {
                 return p.type === 'OUTPUT';
-            }).sort((a,b) => {
+            }).sort((a, b) => {
                 return a.order - b.order;
             });
             let inputs = operation.ports.filter((p) => {
                 return p.type === 'INPUT';
-            }).sort((a,b) => {
+            }).sort((a, b) => {
                 return a.order - b.order;
             });
             var lbls = [
                 // note the cssClass and id parameters here
-                ["Label", { cssClass: "endpoint-label", label: "", id: "lbl" , padding: 20}]
+                ["Label", { cssClass: "endpoint-label", label: "", id: "lbl", padding: 20 }]
             ];
 
             if (inputs.length > 0) {
@@ -268,7 +281,7 @@ const DiagramComponent = Vue.extend({
                 anchors['input'][inputs.length - 1].forEach((anchor, inx) => {
                     lbls[0][1]['label'] = inputs[inx].name;
                     let endpoint = self.instance.addEndpoint(elem, {
-                        anchors: anchor, overlays:lbls
+                        anchors: anchor, overlays: lbls
                     }, endPointOptionsInput);
                     endpoint.bind('mouseover', self.endPointMouseOver);
                 });
@@ -277,9 +290,12 @@ const DiagramComponent = Vue.extend({
                 lbls[0][1]['cssClass'] = "endpoint-label output";
                 anchors['output'][outputs.length - 1].forEach((anchor, inx) => {
                     lbls[0][1]['label'] = outputs[inx].name;
+                    let options = Object.assign({}, endPointOptionsOutput);
+                    options['maxConnections'] =
+                        outputs[inx].multiplicity === 'ONE' ? 1 : 10;
                     let endpoint = self.instance.addEndpoint(elem, {
-                        anchors: anchor, overlays:lbls
-                    }, endPointOptionsOutput);
+                        anchors: anchor, overlays: lbls
+                    }, options);
                     endpoint.bind('mouseover', self.endPointMouseOver);
                 });
             }
@@ -292,13 +308,12 @@ const DiagramComponent = Vue.extend({
         drop(ev) {
             const self = this;
             ev.preventDefault();
-            //console.debug(ev)
             //console.debug(ev.dataTransfer)
 
             let operation = this.getOperationFromId(ev.dataTransfer.getData('id'))[0];
             //console.debug(operation.icon)
             let elem = self.createNode(self.generateId(),
-                operation, ev.target, ev.clientX, ev.clientY, [0, 0], 'operation');
+                operation, ev.target, ev.offsetX, ev.offsetY, [0, 0], 'operation');
 
             //console.debug('Vai', ev.dataTransfer.getData('id'))
 
@@ -313,7 +328,7 @@ const DiagramComponent = Vue.extend({
             self.instance.getConnections().forEach(conn => {
                 self.instance.detach(conn);
             });
-            let nodes = Array.prototype.slice.call(document.querySelectorAll(".diagram .node"), 0); 
+            let nodes = Array.prototype.slice.call(document.querySelectorAll(".diagram .node"), 0);
             nodes.forEach(node => {
                 self.instance.remove(node);
             });
@@ -347,11 +362,17 @@ const DiagramComponent = Vue.extend({
                 return v.toString(16);
             });
         },
-        load() {
-            let self = this;
+        loadSample(ev) {
             let graph = JSON.parse(
-                document.getElementsByTagName('textarea')[0].value);
-
+                document.getElementById('sample-' + ev.target.dataset.sampleId).innerText.replace('\n', ''));
+            this.innerLoad(graph);
+        },
+        load(ev){
+            let graph = JSON.parse(document.getElementsByTagName('textarea')[0].value);
+            this.innerLoad(graph);
+        },
+        innerLoad(graph) {
+            let self = this;
             self.clear();
             graph.nodes.forEach((node) => {
                 //console.debug(node)
@@ -375,6 +396,7 @@ const DiagramComponent = Vue.extend({
                 //console.debug(edge.source, edge.target)
                 self.instance.connect(edge);
             });
+            self.instance.repaintEverything();
         },
         save() {
             let self = this;
@@ -409,12 +431,13 @@ const DiagramComponent = Vue.extend({
                     })
                 })
             });
-            var result = { nodes, edges };
+            let result = { nodes, edges };
 
-            document.getElementsByTagName('textarea')[0].value =
-                JSON.stringify(result);
-            //console.debug(result);
-            return
+            let tmp = document.getElementsByTagName('textarea');
+            if (tmp.length)
+                tmp[0].value = JSON.stringify(result);
+
+            return result;
         },
         setZoom(zoom, instance, transformOrigin, el) {
             transformOrigin = transformOrigin || [0.5, 0.5];
@@ -457,7 +480,113 @@ const DiagramComponent = Vue.extend({
             self.zoomInEnabled = true;
             this.setZoom(self.zoom, self.instance, null, diagram);
             return;
+        },
+        tsort(edges) {
+            let info = this.save();
+            info.edges.forEach((edge) => {
+                let sourceNode = info.nodes.filter((node)=> {
+                    return node.id === edge.source;
+                })[0];
+                if (! sourceNode.afters) {
+                    sourceNode.afters = [];
+                }
+                sourceNode.afters.push(edge.target);
+            });
+            let nodes = {}, // hash: stringified id of the node => { id: id, afters: lisf of ids }
+                sorted = [], // sorted list of IDs ( returned value )
+                visited = {}; // hash: id of already visited node => true
+            info.nodes.forEach((n)=> { nodes[n.id] = n ; });
+            //console.debug(nodes);
+            /*
+            var Node = function (id) {
+                this.id = id;
+                this.afters = [];
+            }
+
+            // 1. build data structures
+            edges.forEach(function (v) {
+                var from = v[0], to = v[1];
+                if (!nodes[from]) nodes[from] = new Node(from);
+                if (!nodes[to]) nodes[to] = new Node(to);
+                nodes[from].afters.push(to);
+            });
+            */
+
+            // 2. topological sort
+            Object.keys(nodes).forEach(function visit(idstr, ancestors) {
+                var node = nodes[idstr],
+                    id = node.id;
+
+                // if already exists, do nothing
+                if (visited[idstr]) return;
+
+                if (!Array.isArray(ancestors)) ancestors = [];
+
+                ancestors.push(id);
+
+                visited[idstr] = true;
+                node.afters = node.afters || [];
+                node.afters.forEach(function (afterID) {
+                    if (ancestors.indexOf(afterID) >= 0)  // if already in ancestors, a closed chain exists.
+                        throw new Error('closed chain : ' + afterID + ' is in ' + id);
+
+                    visit(afterID.toString(), ancestors.map(function (v) { return v })); // recursive call
+                });
+
+                sorted.unshift(id);
+            });
+            console.debug(sorted);
+            let saveIntermediate = (rdd, name) => {
+                let randId = 'FIXME';
+                return `${rdd}.saveAsNewAPIHadoopFile('workflow_id/${name}${randId}', \n\    'org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat')\n`;
+            };
+            let op2Cmd = {
+                1: "# Creates a model, e.g., NaiveBayes \nmodel = custom_classifier_factory(params['classifier']).train(training, 1.0)\n"
+                    + "model.save(sc, 'workflow_id/model_123')\n",
+                2: "",
+                3: "",
+                4: "from pyspark.mllib.classification import NaiveBayes, NaiveBayesModel\n" ,
+                5: "# Filter data \nwork_rdd = work_rdd.filter(lambda x: custom_filter_function(x))\n" + saveIntermediate('work_rdd', 'filter_'),
+                6: "# Projection of data \n work_rdd = work_rdd.map(lambda x: custom_projection_function(x)) \n",
+                7: "# Transform data \nwork_rdd = work_rdd.map(lambda x: custom_transformation_function(x))\n" + saveIntermediate('work_rdd', 'transform_'),
+                8: "lr = LinearRegression(maxIter=10, regParam=0.3, elasticNetParam=0.8)\n" + 
+                    '# Fit the model \nlrModel = lr.fit(training)' + 
+                    'lrModel.save("path")',
+                9: "",
+                10: "",
+                11: "",
+                12: "# Union of 2 RDDs \n work_rdd.union(other_work_rdd)\n",
+                13: "",
+                14: "",
+                15: "",
+                16: "",
+                17: "# Split data \ntraining, test = work_rdd.randomSplit([params['split_perc_1'], params['split_perc_2']], params['seed'])\n" + 
+                    saveIntermediate('training', 'training_') + saveIntermediate('test', 'test_'),
+                18: "work_rdd = spark.read.text(params['data-source-path']).rdd\n",
+                19: "# Evaluates the model \nprediction_and_label = test.map(lambda p: (model.predict(custom_select_features(p), custom_select_label(p))))\n" + 
+                    'accuracy = 1.0 * prediction_and_label.filter(lambda (x, v): x == v).count() / test.count()\n' +
+                    saveIntermediate('prediction_and_label') + '\n', 
+                20: "# Workflow will be converted to a web service\n",
+                21: "# Filter or transform missing data \nif params['action'] == 'filter': \n    work_rdd = work_rdd.filter(lambda x: custom_filter_function(x))\nelse: # transform missing\n    work_rdd = work_rdd.map(lamda x: custom_map_function(x))\n" + saveIntermediate('work_rdd', 'filter_'),
+            };
+            let code = [, 
+                'import sys', 'from pyspark.sql import SparkSession',
+                'from pyspark.ml.regression import LinearRegression',
+                'spark = SparkSession.builder.appName("Lemonade").getOrCreate()\n']
+            
+            sorted.forEach((item) => {
+                if (!op2Cmd[nodes[item].operationId])
+                    console.debug(nodes[item].operationId)
+                else
+                    code.push(op2Cmd[nodes[item].operationId].replace('FIXME', 
+                        nodes[item].operationId))
+            });
+            let codeNode = document.getElementsByTagName('code')[0];
+            codeNode.innerText = code.join('\n');
+            highlight.highlightBlock(codeNode);
+            return sorted;
         }
+
     },
 });
 

@@ -13,6 +13,9 @@ $color6: #fafafa;
 $elementWidth: 180px;
 $elementHeight: 50px;
 
+.sample {
+  display: none;
+}
 /* Elements */
 body {
     padding-top: 60px;
@@ -79,24 +82,23 @@ body {
   background: $color6;
   background-image: url(grid1.png);
   overflow: auto;
-  height: 80vh;
+  height: 75vh;
   width: 100%;
 }
 #lemonade, .lemonade {
   position: relative;
-  xoverflow: auto;
-  margin-top: 50px;
+  margin-top: 0px;
   width: 1000px;
   z-index: 90;
   min-height: calc(690px * (90/150));
   height: 80vh;
-    -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none;   /* Chrome/Safari/Opera */
-    -khtml-user-select: none;    /* Konqueror */
-    -moz-user-select: none;      /* Firefox */
-    -ms-user-select: none;       /* Internet Explorer/Edge */
-    user-select: none;           /* Non-prefixed version, currently
-                                  not supported by any browser */
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -khtml-user-select: none;    /* Konqueror */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently
+                                not supported by any browser */
 
   .diagram {
     background-repeat:repeat;
@@ -109,7 +111,18 @@ body {
     font-family: Verdana;
     font-size: 7pt;
     
-    
+    &.service {
+      background-color: lighten($color5, 30%) !important;
+    }
+    &.data-source {
+      background-color: lighten($color1, 30%) !important;
+    }
+    &.algorithm {
+      background-color: lighten($color4, 30%) !important;
+    }
+    &.model {
+      background-color: lighten($color3, 30%) !important;
+    }
     &.selected {
       border-width: 2px !important;
       border-color: $color3 !important;

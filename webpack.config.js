@@ -5,7 +5,9 @@ module.exports = {
     filename: 'bundle.js'
   },
   module: {
-    loaders: [{
+    loaders: [
+    { test: /\.css$/, loader: "style-loader!css-loader" },
+    {
       test: /\.js$/,
       exclude: /node_modules/,
       loader: 'babel',
@@ -26,11 +28,11 @@ module.exports = {
       },
       {
           test: /\.scss$/,
-          loader: ExtractTextPlugin.extract('css!sass')
+          loader: ExtractTextPlugin.extract('css!sass', {publicPath: '../'})
       },
       { 
         test: /\.(jpe?g|gif|png|eot|svg|woff2|ttf|woff)(\?v=\d+\.\d+\.\d+)?$/,
-        loader: 'url-loader?limit=10000&name=../public/[hash].[ext]',
+        loader: 'url-loader?limit=10000&name=./public/[hash].[ext]',
         exclude: '/node_modules/'
       }, // inline base64 URLs for <=10k images, direct URLs for the rest
     ]

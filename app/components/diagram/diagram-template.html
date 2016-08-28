@@ -1,36 +1,33 @@
 <div>
     <div class="buttons-toolbar btn-group pull-right">
-        <button class="btn btn-success btn-sm" v-on:click="save"><span class="fa fa-save"></span></button>
+        
         <button class="btn btn-default btn-sm" v-on:click="load"><span class="fa fa-folder-open-o"></span></button>
+                <button class="btn btn-success btn-sm" v-on:click="save"><span class="fa fa-save"></span></button>
         <button class="btn btn-default btn-sm" v-on:click="deleteSelected"><span class="fa fa-remove"></span></button>
         <button class="btn btn-default btn-sm" v-on:click="zoomIn" :disabled="!zoomInEnabled"><span class="fa fa-search-plus"></span></button>
         <button class="btn btn-default btn-sm" v-on:click="zoomOut" :disabled="!zoomOutEnabled"><span class="fa fa-search-minus"></span></button>
+
+        <button class="btn btn-default pull-right btn-sm" v-on:click="loadSample" data-sample-id="1">
+            Example 1
+        </button>
+        <button class="btn btn-default pull-right btn-sm" v-on:click="loadSample" data-sample-id="2">
+            Example 2
+        </button>
+        <button class="btn btn-default pull-right btn-sm" v-on:click="loadSample" data-sample-id="3">
+            Example 3
+        </button>
+
+        <button class="btn btn-default pull-right btn-sm" v-on:click="tsort" >
+            Translate
+        </button>
+
+        <div class="pull-right">{{zoomPercent}}</div>
     </div>
-    <div class="lemonade-container">{{zoomPercent}}
+    <div class="lemonade-container">
         <div class="lemonade" v-on:drop="drop" v-on:dragover="allowDrop" id="lemonade-diagram">
             <!-- 46 is delete key and tabindex is required to handle div keyup -->
             <div class="diagram" v-on:click="diagramClick" v-on:keyup.46="deleteSelected">
-                <!--
-            <div class="node data-source">
-                <div class="bottom"></div>
-                <div class="middle">
-                    <strong><span class="fa fa-cube"></span> Data source 1</strong>
-                </div>
-                <div class="top"></div>
-            </div>
-            <div id="element1" class="node operation" style="left:100px; top: 200px">
-                <strong><span class="fa fa-bell"></span> Elemento1</strong>
-            </div>
-            <div id="element2" class="node operation" style="left:40px; top: 300px">
-                <strong><span class="fa fa-bug"></span> Elemento2</strong>
-            </div>
-            <div id="element4" class="node operation" style="left:140px; top: 300px">
-                <strong><span class="fa fa-flask"></span> Elemento4</strong>
-            </div>
-            <div id="element3" class="node operation" style="left:409px; top: 200px">
-                <strong><span class="fa fa-clone"></span> Elemento3 </strong>
-            </div>
-            -->
+              
             </div>
         </div>
     </div>

@@ -22,4 +22,7 @@ new Vue({
     'toolbox-component': ToolboxComponent,
     'diagram-component': DiagramComponent,
   },
+  ready(){
+    
+  }
 });

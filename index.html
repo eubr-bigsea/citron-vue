@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>Vue Twitter Streaming</title>
+  <title>Lemonade Citron</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -36,6 +36,7 @@
     <div class="row small-padding">
       <div id="app">
         <div class="col-md-2">
+          <!--
           <div id="MainMenu">
             <div class="list-group panel">
               <a href="#demo3" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">Data Sources</a>
@@ -68,6 +69,7 @@
               </div>
             </div>
           </div>
+          -->
           <app-component>
           </app-component>
         </div>
@@ -83,18 +85,31 @@
         </div>
       </div>
       <div class="col-md-4">
-        <div class="card card-inverse card-warning">
+        <div style="text-align: left">
+          <small><pre><code class="python"></code></pre></small>
+        </div>
+              <textarea class="form-control" style="font-size:8pt" rows="10"></textarea>
+        <div class="card card-inverse card-warning " style="display:none">
           <div class="card-header">
-            Properties
+            Properties (Right now, just a placehoder :) )
           </div>
           <div class="card-text">
+
             <div id="properties-form">
             </div>
             <div>
-              <textarea class="form-control" style="font-size:8pt" rows="10">
-              {"nodes":[{"left":329,"top":693,"id":"f1dad2cf-4370-4ef3-89b4-0c8622ff3d33","operationId":"10","title":"Clustering model","type":"operation"},{"left":202,"top":25,"id":"5f905c30-d3a1-4c47-ab41-2f2387007fe8","operationId":"18","title":"Data reader","type":"operation"},{"left":201,"top":171,"id":"3e9e75d1-2a5c-4ce3-ab37-1999ca083fcb","operationId":"7","title":"Transformation","type":"operation"},{"left":200,"top":297,"id":"2bd537fd-4e60-451b-b48e-7c4ee5c8fa0d","operationId":"7","title":"Transformation","type":"operation"},{"left":200,"top":432,"id":"db305e4b-1611-422e-8518-0a6cc828c9dc","operationId":"5","title":"Filter (selection)","type":"operation"},{"left":132,"top":563,"id":"59640f04-e099-4394-989e-d35757168f6b","operationId":"17","title":"Split dataset","type":"operation"},{"left":382,"top":523,"id":"7819ee99-6e9d-4ec6-92bf-33b3dfad2092","operationId":"4","title":"Lazy Associative Classifier","type":"operation"},{"left":136,"top":804,"id":"ad5a0ffb-a0ab-45cd-8cb4-55fc0352c0c4","operationId":"19","title":"Evaluate model","type":"operation"}],"edges":[{"source":"5f905c30-d3a1-4c47-ab41-2f2387007fe8","target":"3e9e75d1-2a5c-4ce3-ab37-1999ca083fcb","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"3e9e75d1-2a5c-4ce3-ab37-1999ca083fcb","target":"2bd537fd-4e60-451b-b48e-7c4ee5c8fa0d","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"2bd537fd-4e60-451b-b48e-7c4ee5c8fa0d","target":"db305e4b-1611-422e-8518-0a6cc828c9dc","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"db305e4b-1611-422e-8518-0a6cc828c9dc","target":"59640f04-e099-4394-989e-d35757168f6b","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"59640f04-e099-4394-989e-d35757168f6b","target":"f1dad2cf-4370-4ef3-89b4-0c8622ff3d33","anchors":[[0.8,1,0,1,0,0],[0.2,0,0,-1,0,0]]},{"source":"7819ee99-6e9d-4ec6-92bf-33b3dfad2092","target":"f1dad2cf-4370-4ef3-89b4-0c8622ff3d33","anchors":[[0.5,1,0,1,0,0],[0.8,0,0,-1,0,0]]},{"source":"59640f04-e099-4394-989e-d35757168f6b","target":"ad5a0ffb-a0ab-45cd-8cb4-55fc0352c0c4","anchors":[[0.2,1,0,1,0,0],[0.2,0,0,-1,0,0]]},{"source":"f1dad2cf-4370-4ef3-89b4-0c8622ff3d33","target":"ad5a0ffb-a0ab-45cd-8cb4-55fc0352c0c4","anchors":[[0.2,1,0,1,0,0],[0.8,0,0,-1,0,0]]}]}
-                </textarea>
-
+              <!--
+             {"nodes":[{"left":202,"top":25,"id":"5f905c30-d3a1-4c47-ab41-2f2387007fe8","operationId":"18","title":"Data reader","type":"operation"},{"left":201,"top":171,"id":"3e9e75d1-2a5c-4ce3-ab37-1999ca083fcb","operationId":"7","title":"Transformation","type":"operation"},{"left":200,"top":297,"id":"2bd537fd-4e60-451b-b48e-7c4ee5c8fa0d","operationId":"7","title":"Transformation","type":"operation"},{"left":200,"top":432,"id":"db305e4b-1611-422e-8518-0a6cc828c9dc","operationId":"5","title":"Filter (selection)","type":"operation"},{"left":132,"top":563,"id":"59640f04-e099-4394-989e-d35757168f6b","operationId":"17","title":"Split dataset","type":"operation"},{"left":382,"top":523,"id":"7819ee99-6e9d-4ec6-92bf-33b3dfad2092","operationId":"4","title":"Lazy Associative Classifier","type":"operation"},{"left":136,"top":804,"id":"ad5a0ffb-a0ab-45cd-8cb4-55fc0352c0c4","operationId":"19","title":"Evaluate model","type":"operation"},{"left":345,"top":701,"id":"196cd98d-05df-4ae4-bffd-2d9d9cbc5b47","operationId":"1","title":"Train and apply classification model","type":"operation"},{"left":394,"top":862,"id":"fd89674a-1287-4007-a3e6-50a66a0cbdc7","operationId":"20","title":"Publishes a workflow as a web service","type":"operation"}],"edges":[{"source":"5f905c30-d3a1-4c47-ab41-2f2387007fe8","target":"3e9e75d1-2a5c-4ce3-ab37-1999ca083fcb","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"3e9e75d1-2a5c-4ce3-ab37-1999ca083fcb","target":"2bd537fd-4e60-451b-b48e-7c4ee5c8fa0d","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"2bd537fd-4e60-451b-b48e-7c4ee5c8fa0d","target":"db305e4b-1611-422e-8518-0a6cc828c9dc","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"db305e4b-1611-422e-8518-0a6cc828c9dc","target":"59640f04-e099-4394-989e-d35757168f6b","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"59640f04-e099-4394-989e-d35757168f6b","target":"ad5a0ffb-a0ab-45cd-8cb4-55fc0352c0c4","anchors":[[0.2,1,0,1,0,0],[0.2,0,0,-1,0,0]]},{"source":"7819ee99-6e9d-4ec6-92bf-33b3dfad2092","target":"196cd98d-05df-4ae4-bffd-2d9d9cbc5b47","anchors":[[0.5,1,0,1,0,0],[0.8,0,0,-1,0,0]]},{"source":"59640f04-e099-4394-989e-d35757168f6b","target":"196cd98d-05df-4ae4-bffd-2d9d9cbc5b47","anchors":[[0.8,1,0,1,0,0],[0.2,0,0,-1,0,0]]},{"source":"196cd98d-05df-4ae4-bffd-2d9d9cbc5b47","target":"fd89674a-1287-4007-a3e6-50a66a0cbdc7","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]}]}
+              -->
+              <pre id="sample-1" class="sample">
+                {"nodes":[{"left":56,"top":26,"id":"e34cf78d-7c84-452f-a82b-6f6f70e81733","operationId":"18","title":"Data reader","type":"operation"},{"left":293,"top":27,"id":"42016c59-b5b9-42e9-91cb-a4ddc8d77e9f","operationId":"18","title":"Data reader","type":"operation"},{"left":58,"top":160,"id":"5766cde2-ef05-469a-a809-7c6118b965b7","operationId":"7","title":"Transformation","type":"operation"},{"left":294,"top":159,"id":"eaa3672d-93f7-4d6d-893a-b1a3a014522f","operationId":"5","title":"Filter (selection)","type":"operation"},{"left":59,"top":287,"id":"9b46a1fb-a05f-4596-a29b-76941d42598c","operationId":"6","title":"Projection","type":"operation"},{"left":278,"top":373,"id":"14534c26-887c-444d-b29f-b3b30eacb046","operationId":"12","title":"Set union","type":"operation"}],"edges":[{"source":"e34cf78d-7c84-452f-a82b-6f6f70e81733","target":"5766cde2-ef05-469a-a809-7c6118b965b7","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"42016c59-b5b9-42e9-91cb-a4ddc8d77e9f","target":"eaa3672d-93f7-4d6d-893a-b1a3a014522f","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"5766cde2-ef05-469a-a809-7c6118b965b7","target":"9b46a1fb-a05f-4596-a29b-76941d42598c","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"9b46a1fb-a05f-4596-a29b-76941d42598c","target":"14534c26-887c-444d-b29f-b3b30eacb046","anchors":[[0.5,1,0,1,0,0],[0.2,0,0,-1,0,0]]},{"source":"eaa3672d-93f7-4d6d-893a-b1a3a014522f","target":"14534c26-887c-444d-b29f-b3b30eacb046","anchors":[[0.5,1,0,1,0,0],[0.8,0,0,-1,0,0]]}]}
+              </pre>
+              <pre id="sample-2" class="sample">
+                {"nodes":[{"left":11,"top":601,"id":"78ca0e4d-d911-4d4e-b04a-222c9598bcd4","operationId":"8","title":"Linear regression","type":"operation"},{"left":77,"top":45,"id":"17688233-a12e-48d5-972c-1cf54da5548b","operationId":"18","title":"Data reader","type":"data-source"},{"left":80,"top":183,"id":"cc8e5343-3cbe-468b-86a2-cfa3652d50f4","operationId":"6","title":"Projection","type":"operation"},{"left":79,"top":304,"id":"b79210a4-8322-422c-ba1c-b39ad7dc54e6","operationId":"21","title":"Clean missing values","type":"operation"},{"left":74,"top":435,"id":"fab4dde3-0f3a-4e1d-a6b8-c2d0db90ef74","operationId":"17","title":"Split dataset","type":"operation"},{"left":112,"top":727,"id":"ed120259-2872-416c-a951-dbac89ec357c","operationId":"19","title":"Evaluate model","type":"operation"}],"edges":[{"source":"17688233-a12e-48d5-972c-1cf54da5548b","target":"cc8e5343-3cbe-468b-86a2-cfa3652d50f4","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"cc8e5343-3cbe-468b-86a2-cfa3652d50f4","target":"b79210a4-8322-422c-ba1c-b39ad7dc54e6","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"b79210a4-8322-422c-ba1c-b39ad7dc54e6","target":"fab4dde3-0f3a-4e1d-a6b8-c2d0db90ef74","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"fab4dde3-0f3a-4e1d-a6b8-c2d0db90ef74","target":"78ca0e4d-d911-4d4e-b04a-222c9598bcd4","anchors":[[0.2,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"fab4dde3-0f3a-4e1d-a6b8-c2d0db90ef74","target":"ed120259-2872-416c-a951-dbac89ec357c","anchors":[[0.8,1,0,1,0,0],[0.2,0,0,-1,0,0]]},{"source":"78ca0e4d-d911-4d4e-b04a-222c9598bcd4","target":"ed120259-2872-416c-a951-dbac89ec357c","anchors":[[0.5,1,0,1,0,0],[0.8,0,0,-1,0,0]]}]}
+              </pre>
+              <pre id="sample-3" class="sample">
+                {"nodes":[{"left":202,"top":25,"id":"5f905c30-d3a1-4c47-ab41-2f2387007fe8","operationId":"18","title":"Data reader","type":"operation"},{"left":201,"top":171,"id":"3e9e75d1-2a5c-4ce3-ab37-1999ca083fcb","operationId":"7","title":"Transformation","type":"operation"},{"left":200,"top":297,"id":"2bd537fd-4e60-451b-b48e-7c4ee5c8fa0d","operationId":"7","title":"Transformation","type":"operation"},{"left":200,"top":432,"id":"db305e4b-1611-422e-8518-0a6cc828c9dc","operationId":"5","title":"Filter (selection)","type":"operation"},{"left":132,"top":563,"id":"59640f04-e099-4394-989e-d35757168f6b","operationId":"17","title":"Split dataset","type":"operation"},{"left":382,"top":523,"id":"7819ee99-6e9d-4ec6-92bf-33b3dfad2092","operationId":"4","title":"Lazy Associative Classifier","type":"operation"},{"left":136,"top":804,"id":"ad5a0ffb-a0ab-45cd-8cb4-55fc0352c0c4","operationId":"19","title":"Evaluate model","type":"operation"},{"left":345,"top":701,"id":"196cd98d-05df-4ae4-bffd-2d9d9cbc5b47","operationId":"1","title":"Train and apply classification model","type":"operation"},{"left":394,"top":862,"id":"fd89674a-1287-4007-a3e6-50a66a0cbdc7","operationId":"20","title":"Publishes a workflow as a web service","type":"operation"}],"edges":[{"source":"5f905c30-d3a1-4c47-ab41-2f2387007fe8","target":"3e9e75d1-2a5c-4ce3-ab37-1999ca083fcb","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"3e9e75d1-2a5c-4ce3-ab37-1999ca083fcb","target":"2bd537fd-4e60-451b-b48e-7c4ee5c8fa0d","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"2bd537fd-4e60-451b-b48e-7c4ee5c8fa0d","target":"db305e4b-1611-422e-8518-0a6cc828c9dc","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"db305e4b-1611-422e-8518-0a6cc828c9dc","target":"59640f04-e099-4394-989e-d35757168f6b","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]},{"source":"59640f04-e099-4394-989e-d35757168f6b","target":"ad5a0ffb-a0ab-45cd-8cb4-55fc0352c0c4","anchors":[[0.2,1,0,1,0,0],[0.2,0,0,-1,0,0]]},{"source":"7819ee99-6e9d-4ec6-92bf-33b3dfad2092","target":"196cd98d-05df-4ae4-bffd-2d9d9cbc5b47","anchors":[[0.5,1,0,1,0,0],[0.8,0,0,-1,0,0]]},{"source":"59640f04-e099-4394-989e-d35757168f6b","target":"196cd98d-05df-4ae4-bffd-2d9d9cbc5b47","anchors":[[0.8,1,0,1,0,0],[0.2,0,0,-1,0,0]]},{"source":"196cd98d-05df-4ae4-bffd-2d9d9cbc5b47","target":"fd89674a-1287-4007-a3e6-50a66a0cbdc7","anchors":[[0.5,1,0,1,0,0],[0.5,0,0,-1,0,0]]}]}
+              </pre>
             </div>
           </div>
         </div>
