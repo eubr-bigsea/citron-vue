@@ -45,13 +45,13 @@ const anchors = {
 const connectorType = ['Flowchart', 'Bezier', 'StateMachine'][2];
 const connectorPaintStyle = {
     lineWidth: 1,
-    radius: 1,
+    radius: 8,
     strokeStyle: "#111",
     connector: [connectorType, { curviness: 150 }],
 };
 
 const endPointPaintStyle = {
-    fillStyle: 'rgba(41, 51, 92, 1)',
+    fillStyle: 'rgba(102, 155, 188, 1)',
     lineWidth: 0,
     radius: 8,
     height: 15,
@@ -137,9 +137,9 @@ const DiagramComponent = Vue.extend({
             const self = this;
             jsPlumb.bind('ready', function () {
                 self.instance = jsPlumb.getInstance({
-                    Connector: ['Bezier', { curviness: 50 }],
+                    xConnector: ['Bezier', { curviness: 50 }],
                     //Anchors: anchors,
-                    Endpoints: [["Dot", { radius: 20 }], ["Dot", { radius: 11 }]],
+                    Endpoints: [["Dot", { radius: 2 }], ["Dot", { radius: 1 }]],
                     EndpointHoverStyle: { fillStyle: "orange" },
                     HoverPaintStyle: { strokeStyle: "blue" },
                 });
@@ -280,9 +280,15 @@ const DiagramComponent = Vue.extend({
                 lbls[0][1]['cssClass'] = "endpoint-label input";
                 anchors['input'][inputs.length - 1].forEach((anchor, inx) => {
                     lbls[0][1]['label'] = inputs[inx].name;
+                    let options = Object.assign({}, endPointOptionsInput);
+                    if (inputs[inx].multiplicity !== 'ONE') {
+                        options['maxConnections'] = 10;
+                        xoptions['paintStyle']['fillStyle'] = 'rgba(102, 155, 188, 1)';
+                    }
+                    //console.debug('multiplicity', inputs[inx].multiplicity, options['maxConnections'])
                     let endpoint = self.instance.addEndpoint(elem, {
                         anchors: anchor, overlays: lbls
-                    }, endPointOptionsInput);
+                    }, options);
                     endpoint.bind('mouseover', self.endPointMouseOver);
                 });
             }
@@ -291,8 +297,11 @@ const DiagramComponent = Vue.extend({
                 anchors['output'][outputs.length - 1].forEach((anchor, inx) => {
                     lbls[0][1]['label'] = outputs[inx].name;
                     let options = Object.assign({}, endPointOptionsOutput);
-                    options['maxConnections'] =
-                        outputs[inx].multiplicity === 'ONE' ? 1 : 10;
+                    if (outputs[inx].multiplicity !== 'ONE') {
+                        options['maxConnections'] = 10;
+                        options['paintStyle']['fillStyle'] = 'rgba(102, 155, 188, 1)';
+                    }
+                   // console.debug(outputs[inx].multiplicity, options)
                     let endpoint = self.instance.addEndpoint(elem, {
                         anchors: anchor, overlays: lbls
                     }, options);
@@ -388,15 +397,14 @@ const DiagramComponent = Vue.extend({
                         edge[opt] = connectionOptions[opt];
                     }
                 });
-                edge['xanchors'] = [
-                    edge['source-anchor'], edge['target-anchor']
-                ];
                 edge['anchor'] = edge.anchors;
-                //edge['endpointStyle']['fillStyle'] = "yellow";
+                delete edge['anchors']
+                edge['detachable'] = true;
                 //console.debug(edge.source, edge.target)
+                console.debug(edge.endpoint)
                 self.instance.connect(edge);
             });
-            self.instance.repaintEverything();
+            //self.instance.repaintEverything();
         },
         save() {
             let self = this;
