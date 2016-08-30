@@ -281,14 +281,16 @@ const DiagramComponent = Vue.extend({
                 anchors['input'][inputs.length - 1].forEach((anchor, inx) => {
                     lbls[0][1]['label'] = inputs[inx].name;
                     let options = Object.assign({}, endPointOptionsInput);
+
+                    options['anchors'] = anchor;
+                    options['overlays'] = lbls;
+                    options['uuid'] = `${nodeId}/${inputs[inx].id}`;
                     if (inputs[inx].multiplicity !== 'ONE') {
                         options['maxConnections'] = 10;
-                        xoptions['paintStyle']['fillStyle'] = 'rgba(102, 155, 188, 1)';
+                        options['paintStyle']['fillStyle'] = 'rgba(228, 87, 46, 1)';
                     }
                     //console.debug('multiplicity', inputs[inx].multiplicity, options['maxConnections'])
-                    let endpoint = self.instance.addEndpoint(elem, {
-                        anchors: anchor, overlays: lbls
-                    }, options);
+                    let endpoint = self.instance.addEndpoint(elem, options);
                     endpoint.bind('mouseover', self.endPointMouseOver);
                 });
             }
@@ -296,15 +298,16 @@ const DiagramComponent = Vue.extend({
                 lbls[0][1]['cssClass'] = "endpoint-label output";
                 anchors['output'][outputs.length - 1].forEach((anchor, inx) => {
                     lbls[0][1]['label'] = outputs[inx].name;
-                    let options = Object.assign({}, endPointOptionsOutput);
+                    let options = JSON.parse(JSON.stringify(endPointOptionsOutput)); //Object.assign({}, endPointOptionsOutput);
+
+                    options['anchors'] = anchor;
+                    options['overlays'] = lbls;
+                    options['uuid'] = `${nodeId}/${outputs[inx].id}`;
                     if (outputs[inx].multiplicity !== 'ONE') {
                         options['maxConnections'] = 10;
-                        options['paintStyle']['fillStyle'] = 'rgba(102, 155, 188, 1)';
+                        options['paintStyle']['fillStyle'] = 'rgba(228, 87, 46, 1)';
                     }
-                   // console.debug(outputs[inx].multiplicity, options)
-                    let endpoint = self.instance.addEndpoint(elem, {
-                        anchors: anchor, overlays: lbls
-                    }, options);
+                    let endpoint = self.instance.addEndpoint(elem, options);
                     endpoint.bind('mouseover', self.endPointMouseOver);
                 });
             }
@@ -389,7 +392,6 @@ const DiagramComponent = Vue.extend({
                 let elem = self.createNode(node.id, operation,
                     document.querySelectorAll(".lemonade .diagram")[0],
                     node.left, node.top, [0, 0], node.type);
-                //console.debug(elem.id);
             });
             graph.edges.forEach((edge) => {
                 Object.keys(connectionOptions).forEach(opt => {
@@ -401,8 +403,15 @@ const DiagramComponent = Vue.extend({
                 delete edge['anchors']
                 edge['detachable'] = true;
                 //console.debug(edge.source, edge.target)
-                console.debug(edge.endpoint)
-                self.instance.connect(edge);
+                //console.debug(edge)
+                /*self.instance.connect({target: edge.target, source: edge.source, anchor: edge.anchor,
+                    overlays: edge.overlays, connector: edge.connector, endpoint: edge.endpoint,
+                    maxConnections: 1,  
+                    xpaintStyle: edge.paintStyle });
+                    */
+                //self.instance.connect(edge);
+                //let uuidSource = `$(edge.source)/`
+                self.instance.connect({uuids: [edge['source-uuid'], edge['target-uuid']]});
             });
             //self.instance.repaintEverything();
         },
@@ -425,19 +434,30 @@ const DiagramComponent = Vue.extend({
                 })
             });
             self.instance.getConnections().forEach(e => {
-                //console.debug(e.endpoints[0].anchor, e.endpoints[1].anchor)
-                edges.push({
-                    source: e.sourceId,
-                    target: e.targetId,
-                    "source-anchor": e.endpoints[0].anchor.type,
-                    "target-anchor": e.endpoints[1].anchor.type,
-                    anchors: e.endpoints.map((endpoint) => {
+                let sourceEndpoint = e.endpoints[0];
+                let targetEndpoint = e.endpoints[1];
+                if (sourceEndpoint.isTarget) {
+                    let tmp = sourceEndpoint;
+                    sourceEndpoint = targetEndpoint;
+                    targetEndpoint = tmp;
+                }
+
+                let finalEdge = {
+                    //source: e.sourceId,
+                    //target: e.targetId,
+                    'source-uuid': sourceEndpoint.getUuid(),
+                    'target-uuid': targetEndpoint.getUuid(),
+                    //"source-anchor": sourceEndpoint.anchor.type,
+                    //"target-anchor": targetEndpoint.anchor.type,
+                    /*anchors: e.endpoints.map((endpoint) => {
                         let anchor = endpoint.anchor;
                         let orientation = anchor.getOrientation();
                         return [anchor.x, anchor.y, orientation[0], orientation[1],
                             anchor.offsets[0], anchor.offsets[1]]
-                    })
-                })
+                    })*/
+                };
+                edges.push(finalEdge);
+                console.debug(finalEdge)
             });
             let result = { nodes, edges };
 
