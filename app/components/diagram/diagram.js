@@ -513,12 +513,12 @@ const DiagramComponent = Vue.extend({
             let info = this.save();
             info.edges.forEach((edge) => {
                 let sourceNode = info.nodes.filter((node)=> {
-                    return node.id === edge.source;
+                    return node.id === edge['source-uuid'].split('/')[0];
                 })[0];
                 if (! sourceNode.afters) {
                     sourceNode.afters = [];
                 }
-                sourceNode.afters.push(edge.target);
+                sourceNode.afters.push(edge['target-uuid'].split('/')[0]);
             });
             let nodes = {}, // hash: stringified id of the node => { id: id, afters: lisf of ids }
                 sorted = [], // sorted list of IDs ( returned value )
