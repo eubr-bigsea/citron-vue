@@ -7,6 +7,7 @@ import ToolboxComponent from './components/toolbox/toolbox';
 import jsPlumb from 'jsplumb';
 //import $http from "./customAjax";
 import css from './components/diagram/diagram.scss';
+import cssApp from './components/app/app.scss';
 
 Vue.use(VueResource);
 

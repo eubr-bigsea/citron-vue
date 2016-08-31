@@ -1,12 +1,24 @@
-<div class="card card-primary card-inverse operation">
-    <div class="card-header">
-        {{title}}
-    </div>
-    <ul class="list-group list-group-flush">
-        <div class="channel" v-for="op in operations">
-          <toolbox-component :operation="op"/>
+<div class="card operation">
+  <div class="card-header card-primary card-inverse">
+    {{title}}
+  </div>
+  <ul class="nav nav-list">
+    <li class="drop-menu-item">
+      <a href="#" v-on:click="toggle"><span class="fa-caret-right fa"></span> Data sources</a>
+      <ul class="nav nav-list tree slide-down">
+        <div v-for="op in operations">
+          <toolbox-component :operation="op" />
         </div>
-    </ul>
+      </ul>
+    </li>
+  </ul>
+  <!--
+  <ul class="list-group list-group-flush">
+    <div class="channel" v-for="op in operations">
+      <toolbox-component :operation="op" />
+    </div>
+  </ul>
+  -->
 </div>
 <!--
 <div>

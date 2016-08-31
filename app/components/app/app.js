@@ -36,6 +36,16 @@ const AppComponent = Vue.extend({
         init() {
             this.loadOperations();
         },
+        toggle(ev){
+            let ul = ev.target.parentElement.querySelector('ul.tree');
+            if (ul.classList.contains('slide-up')){
+                ul.classList.remove('slide-up');
+                ul.classList.add('slide-down');
+            } else {
+                ul.classList.add('slide-up');
+                ul.classList.remove('slide-down');
+            }
+        }
     },
     store
 });
