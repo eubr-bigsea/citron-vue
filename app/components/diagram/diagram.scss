@@ -258,3 +258,9 @@ body {
     border-width: 2px !important;
     border-color: $color5 !important;
 }
+.jsplumb-endpoint {
+  background: transparent;
+}
+.jsplumb-connector {
+  z-index: 9999;
+}

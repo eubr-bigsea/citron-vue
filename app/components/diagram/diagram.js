@@ -47,7 +47,7 @@ const connectorPaintStyle = {
     lineWidth: 1,
     radius: 8,
     strokeStyle: "#111",
-    connector: [connectorType, { curviness: 150 }],
+    connector: [connectorType, { curviness: 10 }],
 };
 
 const endPointPaintStyle = {
@@ -130,6 +130,7 @@ const DiagramComponent = Vue.extend({
     },
     ready() {
         this.zoom = 1.0;
+        this.currentZIndex = 10;
         this.init();
     },
     methods: {
@@ -137,7 +138,6 @@ const DiagramComponent = Vue.extend({
             const self = this;
             jsPlumb.bind('ready', function () {
                 self.instance = jsPlumb.getInstance({
-                    xConnector: ['Bezier', { curviness: 50 }],
                     //Anchors: anchors,
                     Endpoints: [["Dot", { radius: 2 }], ["Dot", { radius: 1 }]],
                     EndpointHoverStyle: { fillStyle: "orange" },
@@ -211,7 +211,7 @@ const DiagramComponent = Vue.extend({
         endPointMouseOver(endpoint, event) {
             //console.debug(endpoint)
         },
-        createNode(nodeId, operation, target, x, y, adjust, type) {
+        createNode(nodeId, operation, target, x, y, adjust, type, zIndex) {
             let self = this;
 
             type = 'operation'
@@ -222,6 +222,10 @@ const DiagramComponent = Vue.extend({
             elem.id = nodeId;
             elem.classList.add(type);
             elem.classList.add("node");
+            
+            elem.style.zIndex = zIndex;
+            self.currentZIndex = Math.max(zIndex, self.currentZIndex); 
+
             operation.categories.forEach((c) => {
                 elem.classList.add(c.type.replace(' ', '-'));
             });
@@ -291,6 +295,10 @@ const DiagramComponent = Vue.extend({
                     }
                     //console.debug('multiplicity', inputs[inx].multiplicity, options['maxConnections'])
                     let endpoint = self.instance.addEndpoint(elem, options);
+                    endpoint.canvas.style.zIndex = zIndex - 1;
+                    endpoint._jsPlumb.overlays.lbl.canvas.style.zIndex = zIndex - 1;
+                    
+                    //console.debug(endpoint.zIndex)
                     endpoint.bind('mouseover', self.endPointMouseOver);
                 });
             }
@@ -308,6 +316,9 @@ const DiagramComponent = Vue.extend({
                         options['paintStyle']['fillStyle'] = 'rgba(228, 87, 46, 1)';
                     }
                     let endpoint = self.instance.addEndpoint(elem, options);
+                    endpoint.canvas.style.zIndex = zIndex - 1;
+                    endpoint._jsPlumb.overlays.lbl.canvas.style.zIndex = zIndex - 1;
+
                     endpoint.bind('mouseover', self.endPointMouseOver);
                 });
             }
@@ -325,7 +336,8 @@ const DiagramComponent = Vue.extend({
             let operation = this.getOperationFromId(ev.dataTransfer.getData('id'))[0];
             //console.debug(operation.icon)
             let elem = self.createNode(self.generateId(),
-                operation, ev.target, ev.offsetX, ev.offsetY, [0, 0], 'operation');
+                operation, ev.target, ev.offsetX, ev.offsetY, [0, 0], 
+                'operation', ++ self.currentZIndex);
 
             //console.debug('Vai', ev.dataTransfer.getData('id'))
 
@@ -391,7 +403,7 @@ const DiagramComponent = Vue.extend({
                 let operation = self.getOperationFromId(node.operationId)[0];
                 let elem = self.createNode(node.id, operation,
                     document.querySelectorAll(".lemonade .diagram")[0],
-                    node.left, node.top, [0, 0], node.type);
+                    node.left, node.top, [0, 0], node.type, node.zIndex);
             });
             graph.edges.forEach((edge) => {
                 Object.keys(connectionOptions).forEach(opt => {
@@ -420,17 +432,20 @@ const DiagramComponent = Vue.extend({
             let elems = Array.prototype.slice.call(document.querySelectorAll(".diagram .node"));
             let edges = [];
             let nodes = [];
+            let seqZIndex = 10;
 
-            elems.forEach(e => {
+            elems.forEach((e) => {
                 let pos = e.getBoundingClientRect();
                 let title = e.querySelectorAll('strong');
+                e.zIndex = e.zIndex || seqZIndex ++;
                 nodes.push({
                     left: parseInt(e.style.left.replace('px')), //Math.round(pos.left),
                     top: parseInt(e.style.top.replace('px')), //Math.round(pos.top),
                     id: e.id,
                     operationId: e.dataset.operationId,
                     title: e.title || (title.length ? title[0].innerHTML : ''),
-                    type: e.classList.contains('data-source') ? 'data-source' : 'operation'
+                    type: e.classList.contains('data-source') ? 'data-source' : 'operation',
+                    zIndex: e.zIndex
                 })
             });
             self.instance.getConnections().forEach(e => {
@@ -457,7 +472,7 @@ const DiagramComponent = Vue.extend({
                     })*/
                 };
                 edges.push(finalEdge);
-                console.debug(finalEdge)
+                //console.debug(finalEdge)
             });
             let result = { nodes, edges };
 

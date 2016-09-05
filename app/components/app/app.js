@@ -4,7 +4,7 @@ import DiagramComponent from '../diagram/diagram';
 import ToolbarComponent from '../toolbox/toolbox';
 import store from '../vuex/store';
 import { loadOperations } from '../vuex/actions';
-import { getOperations } from '../vuex/getters';
+import { getOperations, getGroupedOperations } from '../vuex/getters';
 
 const AppComponent = Vue.extend({
     template,
@@ -13,7 +13,8 @@ const AppComponent = Vue.extend({
             loadOperations
         },
         getters: {
-            operations: getOperations
+            operations: getOperations,
+            groupedOperations: getGroupedOperations,
         },
     },
     components: {

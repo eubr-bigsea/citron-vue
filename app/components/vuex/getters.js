@@ -4,3 +4,6 @@ export function getCount(state) {
 export function getOperations(state) {
     return state.operations;
 }
+export function getGroupedOperations(state) {
+    return state.groupedOperations;
+}

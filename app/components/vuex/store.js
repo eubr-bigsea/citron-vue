@@ -6,6 +6,7 @@ Vue.use(Vuex);
 const state = {
   count: 0,
   operations: [],
+  groupedOperations: {},
   errors: []
 }
 const mutations = {
@@ -18,6 +19,21 @@ const mutations = {
     Vue.http.get(url).then(function (response) {
       return response.data;
     }).then(function (data) {
+      let groupedOps = {};
+      console.debug('1')
+      data.forEach((op) => {
+        op.categories.forEach((cat) => {
+          if (cat.type === 'parent'){
+            if (! (cat.name in groupedOps)){
+              groupedOps[cat.name] = [op];
+            } else {
+              groupedOps[cat.name].push(op);
+            }
+          }
+        });
+      });
+      //console.debug(groupedOps);
+      state.groupedOperations = groupedOps;
       state.operations = data;
     }).catch(function (error) {
       state.errors.push(error);
