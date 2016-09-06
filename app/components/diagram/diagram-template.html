@@ -1,6 +1,6 @@
 <div>
     <div class="buttons-toolbar btn-group pull-right">
-        
+
         <button class="btn btn-default btn-sm" v-on:click="load"><span class="fa fa-folder-open-o"></span></button>
         <button class="btn btn-success btn-sm" v-on:click="save"><span class="fa fa-save"></span></button>
         <button class="btn btn-default btn-sm" v-on:click="deleteSelected"><span class="fa fa-remove"></span></button>
@@ -17,7 +17,7 @@
             Example 3
         </button>
 
-        <button class="btn btn-default pull-right btn-sm" v-on:click="tsort" >
+        <button class="btn btn-default pull-right btn-sm" v-on:click="tsort">
             Translate
         </button>
 
@@ -27,7 +27,8 @@
         <div class="lemonade" v-on:drop="drop" v-on:dragover="allowDrop" id="lemonade-diagram">
             <!-- 46 is delete key and tabindex is required to handle div keyup -->
             <div class="diagram" v-on:click="diagramClick" v-on:keyup.46="deleteSelected">
-              
+                <operation-component v-for="node of nodes" :node="node" :instance="instance"></operation-component>
+                <edge-component v-for="edge of edges" :edge="edge" :instance="instance"></edge-component>
             </div>
         </div>
     </div>

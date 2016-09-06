@@ -1,15 +1,23 @@
 import Vue from 'vue';
 import template from './diagram-template.html';
-import { getOperationFromId } from '../vuex/actions'
+import { getOperationFromId, addNode, removeNode, clearNodes, addEdge, removeEdge, clearEdges } from '../vuex/actions';
+import { getNodes, getEdges } from '../vuex/getters';
+import OperationComponent from '../operation/operation';
+import EdgeComponent from '../operation/edge';
 import store from '../vuex/store';
 import highlight from 'highlight.js';
 import highlightCass from 'highlight.js/styles/default.css';
 import solarizedDark from 'highlight.js/styles/solarized-dark.css';
+import {DataReaderComponent, SplitComponent} from './forms/form-components.js';
 /*
 var anchors = [ "TopCenter", "RightMiddle", "BottomCenter",
                 "LeftMiddle", "TopLeft", "TopRight", "BottomLeft",
                 "BottomRight" ]
                 */
+const slug2Component = {
+    'data-reader': DataReaderComponent,
+    'split': SplitComponent,
+};
 const xanchors = ["TopCenter", "RightMiddle", "BottomCenter", "LeftMiddle"];
 const anchors = {
     input: [
@@ -99,28 +107,40 @@ const connectionOptions = {
 }
 
 const DiagramComponent = Vue.extend({
-    template,
-    props: {
-        title: {},
-        operation: {
-            'default': function () { return { name: '', icon: '' }; }
-        },
-        selectedNode: null,
-        selectedEdge: null,
-        zoom: 1
-    },
     computed: {
         zoomPercent: function () {
             return `${Math.round(100 * this.zoom, 0)}%`;
         }
     },
+    components: {
+        'operation-component': OperationComponent,
+        'edge-component': EdgeComponent
+    },
+    props: {
+        formContainer: null,
+        instance: null,
+        title: {},
+        operation: {
+            'default': function () { return { name: '', icon: '' }; }
+        },
+        zoom: 1
+    },
     store,
     vuex: {
         actions: {
-            getOperationFromId
+            getOperationFromId,
+            addNode,
+            removeNode,
+            clearNodes,
+            addEdge,
+            removeEdge,
+            clearEdges,
+
+        },
+        getters: {
+            nodes: getNodes,
+            edges: getEdges
         }
-    },
-    components: {
     },
     data() {
         return {
@@ -128,6 +148,27 @@ const DiagramComponent = Vue.extend({
             zoomOutEnabled: true
         }
     },
+    events: {
+        'onclick-operation': function (operationComponent) {
+            this.selectedNode = operationComponent.node; 
+            console.debug(operationComponent.node.operation.slug, this.formContainer);
+            let elem = document.getElementById(this.formContainer);
+            elem.innerHTML = '<form-component></form-component>';
+            if (self.currentForm){
+                self.currentForm.$destroy();
+            }
+            self.currentForm = new Vue({
+                el: `#${this.formContainer}`,
+                components: {
+                    'form-component': slug2Component[operationComponent.node.operation.slug],
+                },
+                destroyed(){
+                    console.debug('form destroyed')
+                }
+            });
+        }
+    },
+    template,
     ready() {
         this.zoom = 1.0;
         this.currentZIndex = 10;
@@ -155,17 +196,20 @@ const DiagramComponent = Vue.extend({
                 });
                 self.instance.bind("click", self.edgeClick);
 
-                self.instance.bind('connection', function (info) {
-                    var con = info.connection;
+                self.instance.bind('connection', function (info, originalEvent) {
+                    let con = info.connection;
                     var arr = self.instance.select({ source: con.sourceId, target: con.targetId });
                     if (arr.length > 1) {
-                        jsPlumb.detach(con);
+                        self.instance.detach(con);
+                    } else if (originalEvent) {
+                        self.instance.detach(con);
+                        self.addEdge({ uuids: [info.sourceEndpoint.getUuid(), info.targetEndpoint.getUuid()] });
                     }
                 });
             })
         },
         clearSelection(ev) {
-            if (ev.target.nodeName === 'path'){
+            if (ev.target.nodeName === 'path') {
                 // click on edge
                 return;
             }
@@ -222,9 +266,9 @@ const DiagramComponent = Vue.extend({
             elem.id = nodeId;
             elem.classList.add(type);
             elem.classList.add("node");
-            
+
             elem.style.zIndex = zIndex;
-            self.currentZIndex = Math.max(zIndex, self.currentZIndex); 
+            self.currentZIndex = Math.max(zIndex, self.currentZIndex);
 
             operation.categories.forEach((c) => {
                 elem.classList.add(c.type.replace(' ', '-'));
@@ -242,9 +286,8 @@ const DiagramComponent = Vue.extend({
                 elem.innerHTML = `<strong><span class="fa ${operation.icon}"></span> ${operation.name}</strong><em>${operation.description}</em>`;
             }
 
-            let rect = target.getBoundingClientRect();
-            elem.style.top = y + 'px' //(y - rect.top + adjust[1]) + 'px';
-            elem.style.left = x + 'px'//(x - rect.left + adjust[0]) + 'px';
+            elem.style.top = y + 'px';
+            elem.style.left = x + 'px';
 
             target.appendChild(elem);
             // @FIXME: See nodeSelect function
@@ -263,6 +306,7 @@ const DiagramComponent = Vue.extend({
                     self.selectedNode = this;
                 }
                 self.instance.repaintEverything()
+                self.$dispatch('onclick-operation', this, 'ok')
                 ev.stopPropagation();
             });
             let outputs = operation.ports.filter((p) => {
@@ -297,7 +341,7 @@ const DiagramComponent = Vue.extend({
                     let endpoint = self.instance.addEndpoint(elem, options);
                     endpoint.canvas.style.zIndex = zIndex - 1;
                     endpoint._jsPlumb.overlays.lbl.canvas.style.zIndex = zIndex - 1;
-                    
+
                     //console.debug(endpoint.zIndex)
                     endpoint.bind('mouseover', self.endPointMouseOver);
                 });
@@ -326,7 +370,10 @@ const DiagramComponent = Vue.extend({
                 containment: "parent",
                 grid: [1, 1],
             });
-            return elem;
+
+            let node = { id: nodeId, operation };
+
+            return { elem, node };
         },
         drop(ev) {
             const self = this;
@@ -335,9 +382,21 @@ const DiagramComponent = Vue.extend({
 
             let operation = this.getOperationFromId(ev.dataTransfer.getData('id'))[0];
             //console.debug(operation.icon)
-            let elem = self.createNode(self.generateId(),
+            /* TEST 
+            let {elem, node} = self.createNode(self.generateId(),
                 operation, ev.target, ev.offsetX, ev.offsetY, [0, 0], 
                 'operation', ++ self.currentZIndex);
+            // All nodes are stored in global store
+            console.debug(node);
+            self.addNode(node);
+            */
+            let classes = operation.categories.map((c) => {
+                return c.type.replace(' ', '-');
+            }).join(' ');
+            self.addNode({
+                id: self.generateId(), operation,
+                x: ev.offsetX, y: ev.offsetY, zIndex: ++self.currentZIndex, classes
+            })
 
             //console.debug('Vai', ev.dataTransfer.getData('id'))
 
@@ -348,7 +407,7 @@ const DiagramComponent = Vue.extend({
 
         clear() {
             let self = this;
-            /* Clear */
+            /*
             self.instance.getConnections().forEach(conn => {
                 self.instance.detach(conn);
             });
@@ -356,11 +415,16 @@ const DiagramComponent = Vue.extend({
             nodes.forEach(node => {
                 self.instance.remove(node);
             });
+            */
+            self.clearEdges();
+            self.clearNodes();
         },
         deleteSelected(ev) {
             let self = this;
             if (self.selectedNode) {
-                self.instance.remove(self.selectedNode);
+                /*self.instance.remove(self.selectedNode);
+                self.removeNode({ id: self.selectedNode.id });*/
+                self.removeNode(self.selectedNode);
                 self.selectedNode = null;
             } else if (self.selectedEdge) {
                 self.instance.detach(self.selectedEdge);
@@ -391,7 +455,7 @@ const DiagramComponent = Vue.extend({
                 document.getElementById('sample-' + ev.target.dataset.sampleId).innerText.replace('\n', ''));
             this.innerLoad(graph);
         },
-        load(ev){
+        load(ev) {
             let graph = JSON.parse(document.getElementsByTagName('textarea')[0].value);
             this.innerLoad(graph);
         },
@@ -399,11 +463,19 @@ const DiagramComponent = Vue.extend({
             let self = this;
             self.clear();
             graph.nodes.forEach((node) => {
-                //console.debug(node)
-                let operation = self.getOperationFromId(node.operationId)[0];
-                let elem = self.createNode(node.id, operation,
+                let operation = self.getOperationFromId(node.operation || node.operationId)[0];
+                /*
+                let {elem, n} = self.createNode(node.id, operation,
                     document.querySelectorAll(".lemonade .diagram")[0],
                     node.left, node.top, [0, 0], node.type, node.zIndex);
+                    */
+                let classes = operation.categories.map((c) => {
+                    return c.type.replace(' ', '-');
+                }).join(' ');
+                self.addNode({
+                    id: node.id, operation,
+                    x: node.left || node.x, y: node.top || node.y, zIndex: ++self.currentZIndex, classes
+                })
             });
             graph.edges.forEach((edge) => {
                 Object.keys(connectionOptions).forEach(opt => {
@@ -414,20 +486,16 @@ const DiagramComponent = Vue.extend({
                 edge['anchor'] = edge.anchors;
                 delete edge['anchors']
                 edge['detachable'] = true;
-                //console.debug(edge.source, edge.target)
-                //console.debug(edge)
-                /*self.instance.connect({target: edge.target, source: edge.source, anchor: edge.anchor,
-                    overlays: edge.overlays, connector: edge.connector, endpoint: edge.endpoint,
-                    maxConnections: 1,  
-                    xpaintStyle: edge.paintStyle });
-                    */
-                //self.instance.connect(edge);
-                //let uuidSource = `$(edge.source)/`
-                self.instance.connect({uuids: [edge['source-uuid'], edge['target-uuid']]});
+
+                //self.instance.connect({ uuids: [edge['source-uuid'], edge['target-uuid']] });
+                self.addEdge({ uuids: [edge['source-uuid'], edge['target-uuid']] });
             });
             //self.instance.repaintEverything();
         },
         save() {
+            let result = { nodes: this.nodes, edges: this.edges };
+
+            /*
             let self = this;
             let elems = Array.prototype.slice.call(document.querySelectorAll(".diagram .node"));
             let edges = [];
@@ -437,7 +505,7 @@ const DiagramComponent = Vue.extend({
             elems.forEach((e) => {
                 let pos = e.getBoundingClientRect();
                 let title = e.querySelectorAll('strong');
-                e.zIndex = e.zIndex || seqZIndex ++;
+                e.zIndex = e.zIndex || seqZIndex++;
                 nodes.push({
                     left: parseInt(e.style.left.replace('px')), //Math.round(pos.left),
                     top: parseInt(e.style.top.replace('px')), //Math.round(pos.top),
@@ -458,18 +526,8 @@ const DiagramComponent = Vue.extend({
                 }
 
                 let finalEdge = {
-                    //source: e.sourceId,
-                    //target: e.targetId,
                     'source-uuid': sourceEndpoint.getUuid(),
                     'target-uuid': targetEndpoint.getUuid(),
-                    //"source-anchor": sourceEndpoint.anchor.type,
-                    //"target-anchor": targetEndpoint.anchor.type,
-                    /*anchors: e.endpoints.map((endpoint) => {
-                        let anchor = endpoint.anchor;
-                        let orientation = anchor.getOrientation();
-                        return [anchor.x, anchor.y, orientation[0], orientation[1],
-                            anchor.offsets[0], anchor.offsets[1]]
-                    })*/
                 };
                 edges.push(finalEdge);
                 //console.debug(finalEdge)
@@ -479,7 +537,20 @@ const DiagramComponent = Vue.extend({
             let tmp = document.getElementsByTagName('textarea');
             if (tmp.length)
                 tmp[0].value = JSON.stringify(result);
-
+            */
+            let tmp = document.getElementsByTagName('textarea');
+            if (tmp.length) {
+                tmp[0].value = JSON.stringify(result,
+                    (key, value) => {
+                        if (key === 'operation'){
+                            return value.id;
+                        } else if (key === 'classes') {
+                            return undefined;
+                        } else {
+                            return value;
+                        }
+                    });
+            }
             return result;
         },
         setZoom(zoom, instance, transformOrigin, el) {
@@ -527,18 +598,18 @@ const DiagramComponent = Vue.extend({
         tsort(edges) {
             let info = this.save();
             info.edges.forEach((edge) => {
-                let sourceNode = info.nodes.filter((node)=> {
-                    return node.id === edge['source-uuid'].split('/')[0];
+                let sourceNode = info.nodes.filter((node) => {
+                    return node.id === edge.uuids[0].split('/')[0];
                 })[0];
-                if (! sourceNode.afters) {
+                if (!sourceNode.afters) {
                     sourceNode.afters = [];
                 }
-                sourceNode.afters.push(edge['target-uuid'].split('/')[0]);
+                sourceNode.afters.push(edge.uuids[1].split('/')[0]);
             });
             let nodes = {}, // hash: stringified id of the node => { id: id, afters: lisf of ids }
                 sorted = [], // sorted list of IDs ( returned value )
                 visited = {}; // hash: id of already visited node => true
-            info.nodes.forEach((n)=> { nodes[n.id] = n ; });
+            info.nodes.forEach((n) => { nodes[n.id] = n; });
             //console.debug(nodes);
             /*
             var Node = function (id) {
@@ -578,23 +649,23 @@ const DiagramComponent = Vue.extend({
 
                 sorted.unshift(id);
             });
-            console.debug(sorted);
+            //console.debug(sorted);
             let saveIntermediate = (rdd, name) => {
                 let randId = 'FIXME';
                 return `${rdd}.saveAsNewAPIHadoopFile('workflow_id/${name}${randId}', \n\    'org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat')\n`;
             };
             let op2Cmd = {
                 1: "# Creates a model, e.g., NaiveBayes \nmodel = custom_classifier_factory(params['classifier']).train(training, 1.0)\n"
-                    + "model.save(sc, 'workflow_id/model_123')\n",
+                + "model.save(sc, 'workflow_id/model_123')\n",
                 2: "",
                 3: "",
-                4: "from pyspark.mllib.classification import NaiveBayes, NaiveBayesModel\n" ,
+                4: "from pyspark.mllib.classification import NaiveBayes, NaiveBayesModel\n",
                 5: "# Filter data \nwork_rdd = work_rdd.filter(lambda x: custom_filter_function(x))\n" + saveIntermediate('work_rdd', 'filter_'),
                 6: "# Projection of data \n work_rdd = work_rdd.map(lambda x: custom_projection_function(x)) \n",
                 7: "# Transform data \nwork_rdd = work_rdd.map(lambda x: custom_transformation_function(x))\n" + saveIntermediate('work_rdd', 'transform_'),
-                8: "lr = LinearRegression(maxIter=10, regParam=0.3, elasticNetParam=0.8)\n" + 
-                    '# Fit the model \nlrModel = lr.fit(training)' + 
-                    'lrModel.save("path")',
+                8: "lr = LinearRegression(maxIter=10, regParam=0.3, elasticNetParam=0.8)\n" +
+                '# Fit the model \nlrModel = lr.fit(training)' +
+                'lrModel.save("path")',
                 9: "",
                 10: "",
                 11: "",
@@ -603,26 +674,26 @@ const DiagramComponent = Vue.extend({
                 14: "",
                 15: "",
                 16: "",
-                17: "# Split data \ntraining, test = work_rdd.randomSplit([params['split_perc_1'], params['split_perc_2']], params['seed'])\n" + 
-                    saveIntermediate('training', 'training_') + saveIntermediate('test', 'test_'),
+                17: "# Split data \ntraining, test = work_rdd.randomSplit([params['split_perc_1'], params['split_perc_2']], params['seed'])\n" +
+                saveIntermediate('training', 'training_') + saveIntermediate('test', 'test_'),
                 18: "work_rdd = spark.read.text(params['data-source-path']).rdd\n",
-                19: "# Evaluates the model \nprediction_and_label = test.map(lambda p: (model.predict(custom_select_features(p), custom_select_label(p))))\n" + 
-                    'accuracy = 1.0 * prediction_and_label.filter(lambda (x, v): x == v).count() / test.count()\n' +
-                    saveIntermediate('prediction_and_label') + '\n', 
+                19: "# Evaluates the model \nprediction_and_label = test.map(lambda p: (model.predict(custom_select_features(p), custom_select_label(p))))\n" +
+                'accuracy = 1.0 * prediction_and_label.filter(lambda (x, v): x == v).count() / test.count()\n' +
+                saveIntermediate('prediction_and_label') + '\n',
                 20: "# Workflow will be converted to a web service\n",
                 21: "# Filter or transform missing data \nif params['action'] == 'filter': \n    work_rdd = work_rdd.filter(lambda x: custom_filter_function(x))\nelse: # transform missing\n    work_rdd = work_rdd.map(lamda x: custom_map_function(x))\n" + saveIntermediate('work_rdd', 'filter_'),
             };
-            let code = [, 
+            let code = [,
                 'import sys', 'from pyspark.sql import SparkSession',
                 'from pyspark.ml.regression import LinearRegression',
                 'spark = SparkSession.builder.appName("Lemonade").getOrCreate()\n']
-            
+
             sorted.forEach((item) => {
-                if (!op2Cmd[nodes[item].operationId])
-                    console.debug(nodes[item].operationId)
+                if (!op2Cmd[nodes[item].operation.id])
+                    console.debug(nodes[item].operation.id)
                 else
-                    code.push(op2Cmd[nodes[item].operationId].replace('FIXME', 
-                        nodes[item].operationId))
+                    code.push(op2Cmd[nodes[item].operation.id].replace('FIXME',
+                        nodes[item].operation.id))
             });
             let codeNode = document.getElementsByTagName('code')[0];
             codeNode.innerText = code.join('\n');
@@ -631,6 +702,13 @@ const DiagramComponent = Vue.extend({
         }
 
     },
+    watch: {
+        /*
+        theNodes: (e) => {
+            console.debug('changed', e)
+        }
+        */
+    }
 });
 
 export default DiagramComponent;

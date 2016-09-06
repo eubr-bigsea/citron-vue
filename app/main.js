@@ -12,18 +12,23 @@ import cssApp from './components/app/app.scss';
 Vue.use(VueResource);
 
 new Vue({
-  el: '#app',
-  data: {
-    title: 'Toolbox',
-    newSearchTerm: "OK",
-    operations: []
-  },
-  components: {
-    'app-component': AppComponent,
-    'toolbox-component': ToolboxComponent,
-    'diagram-component': DiagramComponent,
-  },
-  ready(){
-    
-  }
+    el: '#app',
+    data: {
+        title: 'Toolbox',
+        newSearchTerm: "OK",
+        operations: []
+    },
+    components: {
+        'app-component': AppComponent,
+        'toolbox-component': ToolboxComponent,
+        'diagram-component': DiagramComponent,
+    },
+    ready() {
+
+    },
+    events: {
+        'onclick-operation': function (x, y) {
+            console.debug('Operation clicked', x, y)
+        }
+    }
 });

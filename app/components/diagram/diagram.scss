@@ -67,7 +67,10 @@ body {
 .labelClass {
   background: white;
 }
-.dragging {
+li.dragging {
+  color: $color2;
+  padding-top: 15px;
+  list-style-type: none;
   width: $elementWidth;
   height: $elementHeight;
   border: 1px solid $color2;
@@ -75,7 +78,6 @@ body {
   font-size: 8pt;
   text-align: center;
   font-weight: bold;
-  color: $color2;
 }
 
 .lemonade-container {
@@ -233,9 +235,11 @@ body {
 }
 .operation {
   li {
+    list-style-type: none;
     font-size: 9pt;
     padding:5px 5px;
     font-weight: bold;
+
   }
 }
 /**/
@@ -252,7 +256,7 @@ body {
   content: "\2229";
 }
 .icon-projection:before {
-  content: '\2A21';
+  content: '\03C3';
 }
 .jsplumb-drag-selected {
     border-width: 2px !important;

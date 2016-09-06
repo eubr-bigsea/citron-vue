@@ -54,3 +54,23 @@ Atributos são chamados de features
     - Apply Math Operation (1x1): Categorias de operações: trigonométrica, basica, comparação, operações, arredondamento, especial (?). Pode criar uma nova coluna ou substituir antiga 
 - Text analytics
 - Web Services
+
+--------------------------
+Data set
+
+{
+    "fields": [
+       {
+           "name": "data_set",
+           "description": "Input data set",
+           "required": true,
+           "type": "integer",
+           "choices": {
+               "service": "http://xpto.com/data-sets?display=choice&user="
+           }
+       }
+    ]
+}
+
+
+

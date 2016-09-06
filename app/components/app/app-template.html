@@ -1,55 +1,15 @@
 <div class="card operation">
-  <div class="card-header card-primary card-inverse">
-    {{title}}
-  </div>
-  <ul class="nav nav-list">
-    <li class="drop-menu-item" v-for="operations in groupedOperations">
-      <a href="#" v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ $key }} </a>
-      <ul class="nav nav-list tree slide-down">
-        <div v-for="op in operations">
-          <toolbox-component :operation="op" />
-        </div>
-      </ul>
-    </li>
-  </div>
-  <!--
-  <ul class="nav nav-list">
-    <li class="drop-menu-item">
-      <a href="#" v-on:click="toggle"><span class="fa-caret-right fa"></span> Data sources</a>
-      <ul class="nav nav-list tree slide-down">
-        <div v-for="op in operations">
-          <toolbox-component :operation="op" />
-        </div>
-      </ul>
-    </li>
-  </ul>
-  -->
-  <!--
-  <ul class="list-group list-group-flush">
-    <div class="channel" v-for="op in operations">
-      <toolbox-component :operation="op" />
+    <div class="card-header card-primary card-inverse">
+        {{title}}
     </div>
-  </ul>
-  -->
+    <ul class="nav nav-list">
+        <li class="drop-menu-item" v-for="operations in groupedOperations">
+            <a href="#" v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ $key }} </a>
+            <ul class="nav nav-list tree slide-down">
+                <div v-for="op in operations">
+                    <toolbox-component :operation="op" />
+                </div>
+            </ul>
+        </li>
+    </ul>
 </div>
-<!--
-<div>
-  <div id="search-form">
-    <form>
-      <input class="swish-input" v-model="title" placeholder="JavaScript" />
-      <button class="bright-blue-hover btn-white">Search</button>
-    </form>
-  </div>
-</div>
-
-<div class="container tweets-container">
-  <div id="channels-list">
-    <div class="channel" v-for="op in operations">
-      {{op.name}}
-      <subscription-component
-        :channel="channel"
-        :pusher="pusher"></subscription-component>
-    </div>
-  </div>
-</div>
--->

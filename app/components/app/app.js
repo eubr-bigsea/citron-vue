@@ -32,6 +32,9 @@ const AppComponent = Vue.extend({
     events: {
         'update-operations': function (operations) {
         },
+        'onclick-operation': function(x){
+            console.debug('Operation clicked', x, y)
+        }
     },
     methods: {
         init() {
