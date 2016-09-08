@@ -23,7 +23,7 @@
 
         <div class="pull-right">{{zoomPercent}}</div>
     </div>
-    <div class="lemonade-container">
+    <div class="lemonade-container" id="lemonade-container" style="height: calc(100vh - 170px); width:100%; position: relative; overflow:hidden">
         <div class="lemonade" v-on:drop="drop" v-on:dragover="allowDrop" id="lemonade-diagram">
             <!-- 46 is delete key and tabindex is required to handle div keyup -->
             <div class="diagram" v-on:click="diagramClick" v-on:keyup.46="deleteSelected">

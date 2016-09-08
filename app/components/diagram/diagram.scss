@@ -47,7 +47,7 @@ body {
   color: #333;
   height: 480px;
   overflow: auto;
-  zoom: 0.75;
+  xzoom: 0.75;
 
   .btn-xs {
     padding: .1rem .3rem !important;
@@ -83,17 +83,17 @@ li.dragging {
 .lemonade-container {
   background: $color6;
   background-image: url(grid1.png);
-  overflow: auto;
-  height: 75vh;
-  width: 100%;
+  xoverflow: auto;
+  xheight: 75vh;
+  xwidth: 100%;
 }
 #lemonade, .lemonade {
   position: relative;
   margin-top: 0px;
-  width: 1000px;
+  width: 5000px;
   z-index: 90;
   min-height: calc(690px * (90/150));
-  height: 80vh;
+  height: 5000px;
   -webkit-touch-callout: none; /* iOS Safari */
   -webkit-user-select: none;   /* Chrome/Safari/Opera */
   -khtml-user-select: none;    /* Konqueror */

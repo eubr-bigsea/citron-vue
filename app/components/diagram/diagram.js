@@ -1,14 +1,20 @@
 import Vue from 'vue';
+import store from '../vuex/store';
+import PerfectScrollbar from 'perfect-scrollbar';
+import PerfectScrollbarCss from 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
+
 import template from './diagram-template.html';
+
 import { getOperationFromId, addNode, removeNode, clearNodes, addEdge, removeEdge, clearEdges } from '../vuex/actions';
 import { getNodes, getEdges } from '../vuex/getters';
+import {CleanMissingComponent, DataReaderComponent, SplitComponent} 
+    from './forms/form-components.js';
 import OperationComponent from '../operation/operation';
+
 import EdgeComponent from '../operation/edge';
-import store from '../vuex/store';
 import highlight from 'highlight.js';
 import highlightCass from 'highlight.js/styles/default.css';
 import solarizedDark from 'highlight.js/styles/solarized-dark.css';
-import {DataReaderComponent, SplitComponent} from './forms/form-components.js';
 /*
 var anchors = [ "TopCenter", "RightMiddle", "BottomCenter",
                 "LeftMiddle", "TopLeft", "TopRight", "BottomLeft",
@@ -17,6 +23,7 @@ var anchors = [ "TopCenter", "RightMiddle", "BottomCenter",
 const slug2Component = {
     'data-reader': DataReaderComponent,
     'split': SplitComponent,
+    'clean-missing': CleanMissingComponent
 };
 const xanchors = ["TopCenter", "RightMiddle", "BottomCenter", "LeftMiddle"];
 const anchors = {
@@ -157,6 +164,7 @@ const DiagramComponent = Vue.extend({
             if (self.currentForm){
                 self.currentForm.$destroy();
             }
+            console.debug( slug2Component[operationComponent.node.operation.slug]);
             self.currentForm = new Vue({
                 el: `#${this.formContainer}`,
                 components: {
@@ -176,6 +184,10 @@ const DiagramComponent = Vue.extend({
     },
     methods: {
         init() {
+            
+            /* scroll bars */
+            //PerfectScrollbar.initialize(this.$el);
+            PerfectScrollbar.initialize(document.getElementById('lemonade-container'))
             const self = this;
             jsPlumb.bind('ready', function () {
                 self.instance = jsPlumb.getInstance({

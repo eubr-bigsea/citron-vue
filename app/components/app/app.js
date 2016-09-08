@@ -5,6 +5,7 @@ import ToolbarComponent from '../toolbox/toolbox';
 import store from '../vuex/store';
 import { loadOperations } from '../vuex/actions';
 import { getOperations, getGroupedOperations } from '../vuex/getters';
+import PerfectScrollbar from 'perfect-scrollbar';
 
 const AppComponent = Vue.extend({
     template,
@@ -32,17 +33,23 @@ const AppComponent = Vue.extend({
     events: {
         'update-operations': function (operations) {
         },
-        'onclick-operation': function(x){
+        'onclick-operation': function (x) {
             console.debug('Operation clicked', x, y)
         }
     },
     methods: {
         init() {
             this.loadOperations();
+            let elem = document.getElementById('menu-operations');
+            PerfectScrollbar.initialize(elem, {
+                wheelSpeed: 2,
+                wheelPropagation: true,
+                minScrollbarLength: 20
+            });
         },
-        toggle(ev){
+        toggle(ev) {
             let ul = ev.target.parentElement.querySelector('ul.tree');
-            if (ul.classList.contains('slide-up')){
+            if (ul.classList.contains('slide-up')) {
                 ul.classList.remove('slide-up');
                 ul.classList.add('slide-down');
             } else {

@@ -1,15 +1,19 @@
-<div class="card operation">
-    <div class="card-header card-primary card-inverse">
+<div class="card operation card-primary card-inverse">
+    <div class="card-header">
         {{title}}
     </div>
-    <ul class="nav nav-list">
-        <li class="drop-menu-item" v-for="operations in groupedOperations">
-            <a href="#" v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ $key }} </a>
-            <ul class="nav nav-list tree slide-down">
-                <div v-for="op in operations">
-                    <toolbox-component :operation="op" />
-                </div>
+    <div class="card-content">
+        <div id="menu-operations" style="height: calc(100vh - 134px); position: relative; overflow:hidden">
+            <ul class="nav nav-list">
+                <li class="drop-menu-item" v-for="operations in groupedOperations">
+                    <a href="#" v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ $key }} </a>
+                    <ul class="nav nav-list tree slide-down">
+                        <div v-for="op in operations">
+                            <toolbox-component :operation="op" />
+                        </div>
+                    </ul>
+                </li>
             </ul>
-        </li>
-    </ul>
+        </div>
+    </div>
 </div>
