@@ -1,4 +1,4 @@
-$defaultFontSize: .75rem;
+$defaultFontSize: 1rem;
 
 .lemonade-properties {
     #properties-form {
@@ -13,7 +13,7 @@ $defaultFontSize: .75rem;
         background: #eee;
         border: 1px solid #222;
         bottom: 10px;
-        font-size: 0.75rem;
+        font-size: $defaultFontSize;
         height: 100px;
         padding: 2px; 
         position: absolute;
@@ -29,6 +29,49 @@ $defaultFontSize: .75rem;
         }
         td, th {
             padding: 5px;
+        }
+    }
+    .v-select {
+        $baseBackground: #d9edf7;
+        .selected-tag {
+            background: $baseBackground;
+            color: darken($baseBackground, 80%);;
+        }
+        .dropdown-toggle {
+            -webkit-appearance: none;
+            -moz-appearance:    none;
+            appearance:         none;
+            min-height: 40px;
+            input {
+                min-height: 40px;
+            }
+        }
+        .dropdown-toggle::after {
+            border: none;
+        }
+        ul {
+            border-top: 1px solid #aaa;
+            li {
+                border-bottom: 1px solid #fff;
+                border-top: none;
+            }
+        }
+        a { 
+            display: block;
+            padding:5px;
+            width: 100%;
+        }
+        .highlight {
+            a { 
+                background: darken($baseBackground, 20%);
+                color: darken($baseBackground, 80%);
+            }
+        }
+        .active {
+            a {    
+                background: $baseBackground;
+                color: darken($baseBackground, 80%);
+            }
         }
     }
 }

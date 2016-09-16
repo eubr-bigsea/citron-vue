@@ -14,6 +14,7 @@
     "babel-core": "^6.13.2",
     "babel-loader": "^6.2.4",
     "babel-preset-es2015": "^6.13.2",
+    "bootstrap-sass-loader": "^1.0.10",
     "css-loader": "^0.23.1",
     "extract-text-webpack-plugin": "^1.0.1",
     "font-awesome": "^4.6.3",
@@ -28,9 +29,13 @@
     "webpack": "^1.13.1"
   },
   "dependencies": {
+    "awesome-bootstrap-checkbox": "^0.3.7",
+    "bootstrap": "^3.3.7",
+    "bootstrap-sass": "^3.3.7",
     "brutusin-json-forms": "git+https://github.com/brutusin/json-forms.git",
     "file-loader": "^0.9.0",
     "highlight.js": "^9.6.0",
+    "jsep": "^0.3.0",
     "jsplumb": "^2.1.4",
     "mathjs": "^3.4.1",
     "perfect-scrollbar": "^0.6.12",

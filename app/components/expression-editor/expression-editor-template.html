@@ -1,0 +1,9 @@
+<div class="expression-editor">
+    <textarea type="text" v-model="expression" class="form-control" debounce="1000"></textarea>
+    <div class="label label-info">
+        {{error}}
+    </div>
+    <ul>
+        {{{ tree }}}
+    </ul>
+</div>

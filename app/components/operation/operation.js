@@ -96,17 +96,19 @@ const OperationComponent = Vue.extend({
     methods: {
         click(ev) {
             let self = this;
+            let elem = ev.target.classList.contains('node') ? ev.target : ev.target.parentElement;
+
             document.querySelectorAll(".node.selected").forEach((e) => {
                 e.classList.remove('selected');
             });
             if (ev.ctrlKey) {
                 //this.classList.add('many-selected');
                 self.instance.addToDragSelection(this);
-            } else if (ev.target.classList.contains('jsplumb-drag-selected')) {
+            } else if (elem.classList.contains('jsplumb-drag-selected')) {
                 //nothing
             } else {
                 self.instance.clearDragSelection();
-                ev.target.classList.add('selected');
+                elem.classList.add('selected');
                 self.selectedNode = this;
             }
             self.instance.repaintEverything()
@@ -175,4 +177,4 @@ const OperationComponent = Vue.extend({
     template,
 
 });
-export default OperationComponent;
+export {OperationComponent, connectionOptions};

@@ -1,8 +1,12 @@
 <div>
+    <label>Field selection</label>
+
+
     <v-select multiple :value.sync="selected" :options="options"></v-select>
-    {{selected}}
-    <label class="checkbox-inline"><input type="radio" name="clean-option"/> Remove entire row </label> 
-    <label class="checkbox-inline"><input type="radio" name="clean-option"/> Replace with media </label>
-    <label class="checkbox-inline"><input type="radio" name="clean-option"/> Replace with zero </label>
-    <label class="checkbox-inline"><input type="radio" name="clean-option"/> Replace with empty string </label>
+
+    <div class="radio radio-primary">
+        <input type="radio" name="clean-option" id="clean-missing-entire" /> <label for="clean-missing-entire">Remove entire row </label><br/>
+        <input type="radio" name="clean-option" id="replace-with-media"/> <label for="replace-with-media">Replace with media </label><br/>
+        <input type="radio" name="clean-option" id="replace-with-default"/> <label for="replace-with-default">Replace with default zero (zero for numeric, empty for string) </label>
+    </div>
 </div>

@@ -1,11 +1,29 @@
 import Vue from 'vue';
+import PerfectScrollbar from 'perfect-scrollbar';
+
 import template from './app-template.html';
+import store from '../vuex/store';
+
 import DiagramComponent from '../diagram/diagram';
 import ToolbarComponent from '../toolbox/toolbox';
-import store from '../vuex/store';
+
 import { loadOperations } from '../vuex/actions';
 import { getOperations, getGroupedOperations } from '../vuex/getters';
-import PerfectScrollbar from 'perfect-scrollbar';
+import {CleanMissingComponent, DataReaderComponent, 
+    EmptyPropertiesComponent, ProjectionComponent, 
+    PropertyDescriptionComponent, PublishAsVisualizationComponent, 
+    SplitComponent,
+    TransformationComponent } 
+    from '../properties/properties-components.js';
+
+const slug2Component = {
+    'data-reader': DataReaderComponent,
+    'split': SplitComponent,
+    'clean-missing': CleanMissingComponent,
+    'projection': ProjectionComponent,
+    'publish-as-visualization': PublishAsVisualizationComponent,
+    'transformation': TransformationComponent
+};
 
 const AppComponent = Vue.extend({
     template,
@@ -21,10 +39,17 @@ const AppComponent = Vue.extend({
     components: {
         'toolbox-component': ToolbarComponent,
         'diagram-component': DiagramComponent,
+        'property-description-component': PropertyDescriptionComponent,
+        'empty-properties-component': EmptyPropertiesComponent,
+        'no-properties-component': {template: '', props: {node: null},},
+        'publish-as-visualization-component': PublishAsVisualizationComponent,
+        'transformation-component': TransformationComponent
     },
     data() {
         return {
             title: 'Operations',
+            node: {operation: ''},
+            currentComponent: 'no-properties-component'
         }
     },
     ready() {
@@ -33,9 +58,12 @@ const AppComponent = Vue.extend({
     events: {
         'update-operations': function (operations) {
         },
-        'onclick-operation': function (x) {
-            console.debug('Operation clicked', x, y)
-        }
+        'onclick-operation': function (operationComponent) {
+            this.node = operationComponent.node;
+            console.debug('Slug:', operationComponent.node.operation.slug, 
+                slug2Component[operationComponent.node.operation.slug])
+            this.currentComponent = slug2Component[operationComponent.node.operation.slug];
+        },
     },
     methods: {
         init() {

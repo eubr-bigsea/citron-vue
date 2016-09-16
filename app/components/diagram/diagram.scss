@@ -1,4 +1,11 @@
 //@import "./node_modules/font-awesome/scss/font-awesome.scss";
+
+@import "../../..//node_modules/bootstrap-sass/assets/stylesheets/bootstrap/variables";
+@import "../../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/mixins";
+@import "../../../node_modules/font-awesome/scss/variables";
+@import "../../../node_modules/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.scss";
+
+
 $fa-font-path: "~font-awesome/fonts";
 @import "~font-awesome/scss/font-awesome";
 /* Colors */
@@ -42,24 +49,6 @@ body {
 .card-content {
   background: white;
 }
-#properties-form {
-  background: white;
-  color: #333;
-  height: 480px;
-  overflow: auto;
-  xzoom: 0.75;
-
-  .btn-xs {
-    padding: .1rem .3rem !important;
-  }
-  .form-control {
-    padding: .15rem .50rem;
-  }
-  select {
-    height: 1.6em !important;
-    padding: 0 5px;
-  }
-}
 
 .jsplumb-overlay.labelClass {
   cursor: pointer;
@@ -79,7 +68,11 @@ li.dragging {
   text-align: center;
   font-weight: bold;
 }
-
+.diagram-toolbar {
+    .add-margin {
+        margin-right: 5px !important;
+    }
+}
 .lemonade-container {
   background: $color6;
   background-image: url(grid1.png);
@@ -101,7 +94,6 @@ li.dragging {
   -ms-user-select: none;       /* Internet Explorer/Edge */
   user-select: none;           /* Non-prefixed version, currently
                                 not supported by any browser */
-
   .diagram {
     background-repeat:repeat;
     display: inline-block;

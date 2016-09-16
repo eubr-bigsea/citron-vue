@@ -7,111 +7,15 @@ import template from './diagram-template.html';
 
 import { getOperationFromId, addNode, removeNode, clearNodes, addEdge, removeEdge, clearEdges } from '../vuex/actions';
 import { getNodes, getEdges } from '../vuex/getters';
-import {CleanMissingComponent, DataReaderComponent, SplitComponent} 
-    from './forms/form-components.js';
-import OperationComponent from '../operation/operation';
+import {CleanMissingComponent, DataReaderComponent, EmptyPropertiesComponent, 
+    SplitComponent, PropertyDescriptionComponent} 
+    from '../properties/properties-components.js';
+import {OperationComponent, connectionOptions} from '../operation/operation';
 
 import EdgeComponent from '../operation/edge';
 import highlight from 'highlight.js';
 import highlightCass from 'highlight.js/styles/default.css';
 import solarizedDark from 'highlight.js/styles/solarized-dark.css';
-/*
-var anchors = [ "TopCenter", "RightMiddle", "BottomCenter",
-                "LeftMiddle", "TopLeft", "TopRight", "BottomLeft",
-                "BottomRight" ]
-                */
-const slug2Component = {
-    'data-reader': DataReaderComponent,
-    'split': SplitComponent,
-    'clean-missing': CleanMissingComponent
-};
-const xanchors = ["TopCenter", "RightMiddle", "BottomCenter", "LeftMiddle"];
-const anchors = {
-    input: [
-        [
-            [0.5, 0, 0, -1],
-        ],
-        [
-            [0.2, 0, 0, -1],
-            [0.8, 0, 0, -1]
-        ],
-        [
-            [0.2, 0, 0, -1],
-            [0.5, 0, 0, -1],
-            [0.8, 0, 0, -1]
-        ]
-    ],
-    output: [
-        [
-            [0.5, 1, 0, 1],
-        ],
-        [
-            [0.2, 1, 0, 1],
-            [0.8, 1, 0, 1]
-        ],
-        [
-            [0.2, 1, 0, 1],
-            [0.5, 1, 0, 1],
-            [0.8, 1, 0, 1]
-        ]
-    ]
-}
-
-const connectorType = ['Flowchart', 'Bezier', 'StateMachine'][2];
-const connectorPaintStyle = {
-    lineWidth: 1,
-    radius: 8,
-    strokeStyle: "#111",
-    connector: [connectorType, { curviness: 10 }],
-};
-
-const endPointPaintStyle = {
-    fillStyle: 'rgba(102, 155, 188, 1)',
-    lineWidth: 0,
-    radius: 8,
-    height: 15,
-    width: 15,
-    strokeStyle: "transparent",
-    zIndex: 99
-}
-const overlays = [
-    ["Arrow", { location: .90, width: 12, length: 15 }],
-    //["Label", { padding: 10, location: .5, label: '[ <span class="fa fa-dot-circle-o"></span> ]', cssClass: "labelClass" }]
-];
-
-
-const endPointOptionsInput = {
-    connector: connectorType,
-    isSource: false,
-    isTarget: true,
-    cssClass: 'endpoint',
-    paintStyle: endPointPaintStyle,
-    connectorOverlays: overlays,
-    endpoint: "Dot",
-    maxConnections: 1,
-    connectorStyle: connectorPaintStyle,
-};
-
-const endPointOptionsOutput = {
-    connector: connectorType,
-    isSource: true,
-    isTarget: false,
-    cssClass: 'endpoint',
-    paintStyle: endPointPaintStyle,
-    connectorOverlays: overlays,
-    endpoint: "Rectangle",
-    maxConnections: 1,
-    connectorStyle: connectorPaintStyle,
-};
-
-const connectionOptions = {
-    connector: connectorType,
-    //endpointStyle: endPointOptions,
-    maxConnections: 1,
-    endpoint: ['Dot', connectorPaintStyle],
-    paintStyle: connectorPaintStyle,
-    overlays: overlays,
-}
 
 const DiagramComponent = Vue.extend({
     computed: {
@@ -121,7 +25,10 @@ const DiagramComponent = Vue.extend({
     },
     components: {
         'operation-component': OperationComponent,
-        'edge-component': EdgeComponent
+        'edge-component': EdgeComponent,
+        'property-description-component': PropertyDescriptionComponent,
+        'empty-properties-component': EmptyPropertiesComponent,
+
     },
     props: {
         formContainer: null,
@@ -152,26 +59,45 @@ const DiagramComponent = Vue.extend({
     data() {
         return {
             zoomInEnabled: true,
-            zoomOutEnabled: true
+            zoomOutEnabled: true,
+            selectedNode: null,
         }
     },
     events: {
-        'onclick-operation': function (operationComponent) {
+        'onclick-operationx': function (operationComponent) {
+            let self = this;
             this.selectedNode = operationComponent.node; 
-            console.debug(operationComponent.node.operation.slug, this.formContainer);
+            debugger
+            if (self.currentComponent == 'property-description-component'){
+                self.currentComponent = 'empty-properties-component';
+            }else {
+                self.currentComponent = 'property-description-component';
+            }
+            if (self.currentForm){
+                //self.currentForm.$destroy(); FIXME
+            }
+        },
+        'onclick-operation2': function (operationComponent) {
+            this.selectedNode = operationComponent.node; 
             let elem = document.getElementById(this.formContainer);
-            elem.innerHTML = '<form-component></form-component>';
+            elem.innerHTML = '<div><h5>{{node.operation.name}}</h5><form-component :node="node"></form-component><property-description-component :node="node"/></div>';
             if (self.currentForm){
                 self.currentForm.$destroy();
             }
-            console.debug( slug2Component[operationComponent.node.operation.slug]);
             self.currentForm = new Vue({
                 el: `#${this.formContainer}`,
                 components: {
-                    'form-component': slug2Component[operationComponent.node.operation.slug],
+                    'form-component': slug2Component[operationComponent.node.operation.slug] 
+                        || EmptyPropertiesComponent,
+                    'property-description-component': PropertyDescriptionComponent
                 },
                 destroyed(){
                     console.debug('form destroyed')
+                },
+                data(){
+                    return {
+                        node: operationComponent.node,
+                    }
                 }
             });
         }
@@ -268,6 +194,7 @@ const DiagramComponent = Vue.extend({
             //console.debug(endpoint)
         },
         createNode(nodeId, operation, target, x, y, adjust, type, zIndex) {
+            return
             let self = this;
 
             type = 'operation'
@@ -476,11 +403,6 @@ const DiagramComponent = Vue.extend({
             self.clear();
             graph.nodes.forEach((node) => {
                 let operation = self.getOperationFromId(node.operation || node.operationId)[0];
-                /*
-                let {elem, n} = self.createNode(node.id, operation,
-                    document.querySelectorAll(".lemonade .diagram")[0],
-                    node.left, node.top, [0, 0], node.type, node.zIndex);
-                    */
                 let classes = operation.categories.map((c) => {
                     return c.type.replace(' ', '-');
                 }).join(' ');

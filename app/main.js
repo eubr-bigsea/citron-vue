@@ -6,8 +6,10 @@ import ToolboxComponent from './components/toolbox/toolbox';
 
 import jsPlumb from 'jsplumb';
 //import $http from "./customAjax";
-import css from './components/diagram/diagram.scss';
-import cssApp from './components/app/app.scss';
+import './components/diagram/diagram.scss';
+import "bootstrap-sass/assets/stylesheets/_bootstrap.scss";
+//import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.scss'
+import './components/app/app.scss';
 
 Vue.use(VueResource);
 
@@ -15,8 +17,8 @@ new Vue({
     el: '#app',
     data: {
         title: 'Toolbox',
-        newSearchTerm: "OK",
-        operations: []
+        operations: [],
+        currentComponent: null,
     },
     components: {
         'app-component': AppComponent,
@@ -27,8 +29,6 @@ new Vue({
 
     },
     events: {
-        'onclick-operation': function (x, y) {
-            console.debug('Operation clicked', x, y)
-        }
+    
     }
 });
