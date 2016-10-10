@@ -14,12 +14,10 @@ const state = {
     }
 }
 const mutations = {
-    INCREMENT(state, amount) {
-        state.count += amount;
-    },
     LOAD_OPERATIONS(state) {
         console.debug('Getting operations')
-        let url = 'http://beta.ctweb.inweb.org.br/tahiti/operations?token=123456';
+        //let url = 'http://beta.ctweb.inweb.org.br/tahiti/operations?token=123456';
+        let url = 'http://localhost:5000/operations?token=123456&lang=pt';
         Vue.http.get(url).then(function (response) {
             return response.data;
         }).then(function (data) {
@@ -36,13 +34,28 @@ const mutations = {
                 });
             });
             //console.debug(groupedOps);
-            state.groupedOperations = groupedOps;
             state.operations = data;
+            state.groupedOperations = groupedOps;
         }).catch(function (error) {
             state.errors.push(error);
         });
     },
+    UPDATE_NODE_FORM_FIELD(state, node, value){
+        console.debug(node, value);
+    },
     ADD_NODE(state, node){
+        console.debug(node);
+        /* creates the form for each node */
+        let a = [];
+        node.forms = {};
+        node.operation.forms.forEach((form) => {
+            form.fields.forEach((field) => {
+                node.forms[field.name] = {
+                    "value": null,
+                    "category": form.name 
+                }
+            });
+        });
         state.workflow.nodes.push(node);
     },
     REMOVE_NODE(state, node){
@@ -65,6 +78,7 @@ const mutations = {
 }
 window.store = state; 
 export default new Vuex.Store({
+    mutations,
     state,
-    mutations
+    strict: false,
 })

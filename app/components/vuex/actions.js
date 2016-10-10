@@ -30,3 +30,7 @@ export const removeEdge = function ({ dispatch, state }, edge) {
 export const clearEdges = function ({ dispatch, state }) {
     return dispatch('CLEAR_EDGES');
 }
+
+export const updateNodeFormField = function ({ dispatch, state }, node, value) {
+    return dispatch('UPDATE_NODE_FORM_FIELD');
+}

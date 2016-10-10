@@ -14,6 +14,22 @@ ML Studio
 Atributos são chamados de features
 - Parece que cada passo é tido como um experimento. Você pode desabilitar atualizações.
 
+- Data transformation
+    - Filter
+       Apply Filter: Applies a filter to specified columns of a dataset
+    - Manipulation
+        - Missing values scrubber (1x1) (pode ser valor personalizado, usar a média, mediana, moda, remover toda a linha). Pode escolher remover toda a coluna se todos os valores forem ausentes.
+        - Project columns (1x1) (especificar quais colunas usar/excluir)
+        - Metadata editor (1x1) Seleciona as colunas, pode mudar o tipo (??) e se é categórico ou não (ou deixar como estava)
+        - Join (2x1) Tem o tipo de join (inner, outer)
+    - Scale and reduce
+        - Apply Quantization Function(?)
+        - Normalize data (1x2) - Tem método de normalização (Z-score é um deles)
+    - Sample and Split
+        - Partition and Sample
+        - Split (percentual e seed para random selection)   
+
+
 - Saved data set
     - List of data sets
 - Data format conversion
@@ -29,20 +45,6 @@ Atributos são chamados de features
         - Azure SQL
         - Azure Table
         - Data feed?
-- Data transformation
-    - Manipulation
-        - Missing values scrubber (1x1) (pode ser valor personalizado, usar a média, mediana, moda, remover toda a linha). Pode escolher remover toda a coluna se todos os valores forem ausentes.
-        - Project columns (1x1) (especificar quais colunas usar/excluir)
-        - Metadata editor (1x1) Seleciona as colunas, pode mudar o tipo (??) e se é categórico ou não (ou deixar como estava)
-        - Join (2x1) Tem o tipo de join (inner, outer)
-    - Filter
-        - Apply Filter
-    - Scale and reduce
-        - Apply Quantization Function(?)
-        - Normalize data (1x2) - Tem método de normalização (Z-score é um deles)
-    - Sample and Split
-        - Partition and Sample
-        - Split (percentual e seed para random selection)   
 - Feature selection
 - Machine learning
 - OpenCV !

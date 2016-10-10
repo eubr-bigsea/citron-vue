@@ -163,7 +163,8 @@ const DiagramComponent = Vue.extend({
         nodeSelect(ev) {
             console.debug('xxx', ev)
             if (ev.currentTarget.classList.contains("node")) {
-                document.querySelectorAll(".node.selected").forEach(e => {
+                var nodes = document.querySelectorAll(".node.selected");
+                Array.prototype.slice.call(nodes, 0).forEach(e => {
                     e.classList.remove('selected');
                 });
                 ev.currentTarget.classList.add('selected');
@@ -184,7 +185,8 @@ const DiagramComponent = Vue.extend({
                 radius: 1,
                 strokeStyle: "rgba(242, 141, 0, 1)"
             })
-            document.querySelectorAll(".node.selected").forEach(e => {
+            let nodes = document.querySelectorAll(".node.selected");
+            Array.prototype.slice.call(nodes, 0).forEach(e => {
                 e.classList.remove('selected');
             });
             e.stopPropagation();
@@ -193,142 +195,13 @@ const DiagramComponent = Vue.extend({
         endPointMouseOver(endpoint, event) {
             //console.debug(endpoint)
         },
-        createNode(nodeId, operation, target, x, y, adjust, type, zIndex) {
-            return
-            let self = this;
-
-            type = 'operation'
-            let elem = document.createElement("div");
-            elem.title = operation.description || '';
-            elem.dataset.operationId = operation.id;
-            elem.tabIndex = 0;
-            elem.id = nodeId;
-            elem.classList.add(type);
-            elem.classList.add("node");
-
-            elem.style.zIndex = zIndex;
-            self.currentZIndex = Math.max(zIndex, self.currentZIndex);
-
-            operation.categories.forEach((c) => {
-                elem.classList.add(c.type.replace(' ', '-'));
-            });
-            if (type === 'data-source' && false) {
-                ['bottom', 'middle', 'top'].forEach(c => {
-                    let child = document.createElement('div');
-                    if (c === 'middle') {
-                        child.innerHTML = '<strong>' + operation.name + ' </strong>';
-                    }
-                    child.classList.add(c);
-                    elem.appendChild(child);
-                });
-            } else {
-                elem.innerHTML = `<strong><span class="fa ${operation.icon}"></span> ${operation.name}</strong><em>${operation.description}</em>`;
-            }
-
-            elem.style.top = y + 'px';
-            elem.style.left = x + 'px';
-
-            target.appendChild(elem);
-            // @FIXME: See nodeSelect function
-            elem.addEventListener('click', function (ev) {
-                document.querySelectorAll(".node.selected").forEach(e => {
-                    e.classList.remove('selected');
-                });
-                if (ev.ctrlKey) {
-                    //this.classList.add('many-selected');
-                    self.instance.addToDragSelection(this);
-                } else if (this.classList.contains('jsplumb-drag-selected')) {
-                    //nothing
-                } else {
-                    self.instance.clearDragSelection();
-                    this.classList.add('selected');
-                    self.selectedNode = this;
-                }
-                self.instance.repaintEverything()
-                self.$dispatch('onclick-operation', this, 'ok')
-                ev.stopPropagation();
-            });
-            let outputs = operation.ports.filter((p) => {
-                return p.type === 'OUTPUT';
-            }).sort((a, b) => {
-                return a.order - b.order;
-            });
-            let inputs = operation.ports.filter((p) => {
-                return p.type === 'INPUT';
-            }).sort((a, b) => {
-                return a.order - b.order;
-            });
-            var lbls = [
-                // note the cssClass and id parameters here
-                ["Label", { cssClass: "endpoint-label", label: "", id: "lbl", padding: 20 }]
-            ];
-
-            if (inputs.length > 0) {
-                lbls[0][1]['cssClass'] = "endpoint-label input";
-                anchors['input'][inputs.length - 1].forEach((anchor, inx) => {
-                    lbls[0][1]['label'] = inputs[inx].name;
-                    let options = Object.assign({}, endPointOptionsInput);
-
-                    options['anchors'] = anchor;
-                    options['overlays'] = lbls;
-                    options['uuid'] = `${nodeId}/${inputs[inx].id}`;
-                    if (inputs[inx].multiplicity !== 'ONE') {
-                        options['maxConnections'] = 10;
-                        options['paintStyle']['fillStyle'] = 'rgba(228, 87, 46, 1)';
-                    }
-                    //console.debug('multiplicity', inputs[inx].multiplicity, options['maxConnections'])
-                    let endpoint = self.instance.addEndpoint(elem, options);
-                    endpoint.canvas.style.zIndex = zIndex - 1;
-                    endpoint._jsPlumb.overlays.lbl.canvas.style.zIndex = zIndex - 1;
-
-                    //console.debug(endpoint.zIndex)
-                    endpoint.bind('mouseover', self.endPointMouseOver);
-                });
-            }
-            if (outputs.length > 0) {
-                lbls[0][1]['cssClass'] = "endpoint-label output";
-                anchors['output'][outputs.length - 1].forEach((anchor, inx) => {
-                    lbls[0][1]['label'] = outputs[inx].name;
-                    let options = JSON.parse(JSON.stringify(endPointOptionsOutput)); //Object.assign({}, endPointOptionsOutput);
-
-                    options['anchors'] = anchor;
-                    options['overlays'] = lbls;
-                    options['uuid'] = `${nodeId}/${outputs[inx].id}`;
-                    if (outputs[inx].multiplicity !== 'ONE') {
-                        options['maxConnections'] = 10;
-                        options['paintStyle']['fillStyle'] = 'rgba(228, 87, 46, 1)';
-                    }
-                    let endpoint = self.instance.addEndpoint(elem, options);
-                    endpoint.canvas.style.zIndex = zIndex - 1;
-                    endpoint._jsPlumb.overlays.lbl.canvas.style.zIndex = zIndex - 1;
-
-                    endpoint.bind('mouseover', self.endPointMouseOver);
-                });
-            }
-            self.instance.draggable(elem, {
-                containment: "parent",
-                grid: [1, 1],
-            });
-
-            let node = { id: nodeId, operation };
-
-            return { elem, node };
-        },
         drop(ev) {
             const self = this;
             ev.preventDefault();
             //console.debug(ev.dataTransfer)
 
             let operation = this.getOperationFromId(ev.dataTransfer.getData('id'))[0];
-            //console.debug(operation.icon)
-            /* TEST 
-            let {elem, node} = self.createNode(self.generateId(),
-                operation, ev.target, ev.offsetX, ev.offsetY, [0, 0], 
-                'operation', ++ self.currentZIndex);
-            // All nodes are stored in global store
-            console.debug(node);
-            self.addNode(node);
-            */
+
             let classes = operation.categories.map((c) => {
                 return c.type.replace(' ', '-');
             }).join(' ');
@@ -336,9 +209,6 @@ const DiagramComponent = Vue.extend({
                 id: self.generateId(), operation,
                 x: ev.offsetX, y: ev.offsetY, zIndex: ++self.currentZIndex, classes
             })
-
-            //console.debug('Vai', ev.dataTransfer.getData('id'))
-
         },
         allowDrop(ev) {
             ev.preventDefault();
@@ -428,50 +298,6 @@ const DiagramComponent = Vue.extend({
         },
         save() {
             let result = { nodes: this.nodes, edges: this.edges };
-
-            /*
-            let self = this;
-            let elems = Array.prototype.slice.call(document.querySelectorAll(".diagram .node"));
-            let edges = [];
-            let nodes = [];
-            let seqZIndex = 10;
-
-            elems.forEach((e) => {
-                let pos = e.getBoundingClientRect();
-                let title = e.querySelectorAll('strong');
-                e.zIndex = e.zIndex || seqZIndex++;
-                nodes.push({
-                    left: parseInt(e.style.left.replace('px')), //Math.round(pos.left),
-                    top: parseInt(e.style.top.replace('px')), //Math.round(pos.top),
-                    id: e.id,
-                    operationId: e.dataset.operationId,
-                    title: e.title || (title.length ? title[0].innerHTML : ''),
-                    type: e.classList.contains('data-source') ? 'data-source' : 'operation',
-                    zIndex: e.zIndex
-                })
-            });
-            self.instance.getConnections().forEach(e => {
-                let sourceEndpoint = e.endpoints[0];
-                let targetEndpoint = e.endpoints[1];
-                if (sourceEndpoint.isTarget) {
-                    let tmp = sourceEndpoint;
-                    sourceEndpoint = targetEndpoint;
-                    targetEndpoint = tmp;
-                }
-
-                let finalEdge = {
-                    'source-uuid': sourceEndpoint.getUuid(),
-                    'target-uuid': targetEndpoint.getUuid(),
-                };
-                edges.push(finalEdge);
-                //console.debug(finalEdge)
-            });
-            let result = { nodes, edges };
-
-            let tmp = document.getElementsByTagName('textarea');
-            if (tmp.length)
-                tmp[0].value = JSON.stringify(result);
-            */
             let tmp = document.getElementsByTagName('textarea');
             if (tmp.length) {
                 tmp[0].value = JSON.stringify(result,

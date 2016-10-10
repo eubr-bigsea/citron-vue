@@ -4,6 +4,21 @@ $defaultFontSize: 1rem;
     #properties-form {
         height: calc(100vh - 331px); width: 100%;
         padding: 2px;
+
+        fieldset {
+            padding: 5px;
+            border: 1px solid #ccc;
+            legend {
+                font-size: 12pt;
+                margin: 5px 0 0 0;
+                width: inherit;
+                border: 0;
+            }
+            p {
+                padding: 0;
+                margin: 5px 0 0 0;
+            }
+        }
     }
 
     .card-block {

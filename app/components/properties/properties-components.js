@@ -21,13 +21,16 @@ const CleanMissingComponent = Vue.extend({
 });
 
 const ProjectionComponent = Vue.extend({
+    components: {
+        'v-select': vSelect
+    },
     data() {
       return {
         selected: null,
         options: ['line','vehicle', 'date_time', 'latitude', 'longitude', 'card_id', 'travel', 'bus_origin', 'bus_destination']
       }
     },
-    props: {node: null},
+    props: {value: 0, field: null},
     template: require('./projection-template.html')
 });
 
@@ -84,10 +87,108 @@ const TransformationComponent = Vue.extend({
     template: require('./transformation-template.html')
 });
 
+const fieldIsRequiredSymbol = '<span class="fa fa-asterisk" v-show="field.required"></span>'
+const baseLabel = '<p>{{field.label}} ' + fieldIsRequiredSymbol 
+    + '<span class="fa fa-question-circle-o pull-right" title="{{field.help}}"></span></p>';
+
+const DecimalComponent = Vue.extend({
+    methods:{
+        updated(e){
+            this.$dispatch('update-form-field-value', this.field, e.target.value);
+        }
+    },
+    props: {value: 0, field: null},
+    template: '<div>' + baseLabel + 
+        '<input type="number" maxlenght="10" step="0.01" class="form-control" :value="value" @input="updated" pattern="\\d*\\.\\d{2}"/></div>',
+});
+const IntegerComponent = Vue.extend({
+    methods:{
+        updated(e){
+            this.$dispatch('update-form-field-value', this.field, e.target.value);
+        }
+    },
+    props: {value: 0, field: null},
+    template: '<div>' + baseLabel + 
+        '<input type="number" maxlenght="10" class="form-control" :value="value" pattern="\\d*" @input="updated"/></div>',
+});
+
+const TextComponent = Vue.extend({
+    methods:{
+        updated(e){
+            this.$dispatch('update-form-field-value', this.field, e.target.value);
+        }
+    },
+    props: {value: 0, field: null},
+    template: '<div>' + baseLabel + 
+        '<input type="text" maxlenght="100" class="form-control" :value="value" @input="updated"/></div>',
+});
+
+
+const TextAreaComponent = Vue.extend({
+    methods:{
+        updated(e){
+            this.$dispatch('update-form-field-value', this.field, e.target.value);
+        }
+    },
+    props: {value: 0, field: null},
+    template: '<div>' + baseLabel + 
+        '<textarea class="form-control" @keyUp="updated | debounce 500">{{value}}</textarea></div>',
+
+});
+
+const CheckboxComponent = Vue.extend({
+    methods:{
+        updated(e){
+            console.debug(e.target.value, e.target.checked);
+        }
+    },
+    props: {value: 0, field: null},
+    template: '<div class="checkbox"><input type="checkbox" :value="value" @input="updated" value="Y" id="checkboxComponentInput"/> '+
+        '<label for="checkboxComponentInput">{{field.label}}</label> <span class="fa fa-question-circle-o pull-right" title="{{field.help}}"></span></div>'
+});
+
+const DropDownComponent = Vue.extend({
+    computed: {
+        pairOptionValueList(){
+            return JSON.parse(this.field.values);
+        }
+    },
+    methods:{
+        updated(e){
+            console.debug(e.target.value, e.target.checked);
+        }
+    },
+    props: {value: 0, field: null},
+     template: '<div>' + baseLabel +
+        '<select class="form-control"><option v-for="opt in pairOptionValueList" :value="opt.key">{{opt.value}}</option></select>' +  
+        '</div>',
+});
+
+const RangeComponent = Vue.extend({
+    data(){
+        return {
+            split: 50,
+        };
+    },
+    methods:{
+        updated(e){
+            this.split = parseInt(e.target.value);
+            this.$dispatch('update-form-field-value', this.field, e.target.value);
+        }
+    },
+    props: {value: 50, field: null},
+     template: '<div>' + baseLabel +
+        '<input type="range" class="form-control" :value="value" @input="updated" min="1" max="99"/>' +
+        '<span class="tag tag-pill tag-info">{{value}}% - {{100-value}}%</span>' +  
+        '</div>',
+});
 
 export {DataReaderComponent, EmptyPropertiesComponent, 
         SplitComponent, CleanMissingComponent, 
         ProjectionComponent, PropertyDescriptionComponent,
         PublishAsVisualizationComponent,
         TransformationComponent,
+
+        DecimalComponent, IntegerComponent, CheckboxComponent, DropDownComponent, RangeComponent, TextComponent,
+        TextAreaComponent,
 };

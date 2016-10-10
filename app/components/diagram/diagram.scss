@@ -18,7 +18,7 @@ $color5: rgba(102, 155, 188, 1);
 $color6: #fafafa;
 
 $elementWidth: 180px;
-$elementHeight: 50px;
+$elementHeight: 60px;
 
 .sample {
   display: none;
@@ -108,6 +108,41 @@ li.dragging {
     &.service {
       background-color: lighten($color5, 30%) !important;
     }
+    &.comment {
+      strong {
+          display: none;
+      }
+      em {
+          vertical-align: top !important;
+          bottom: inherit;
+          margin-top: 3px;
+          font-size: 8pt !important;
+      }
+      em:before {
+          font: normal normal normal 14px/1 FontAwesome;
+          content: "\f08d";
+      }
+      background:#fefabc !important;
+      overflow-y: auto;
+      border: none !important; 
+      border-radius: 0 !important;
+      padding:15px; 
+      font-family: 'Gloria Hallelujah', cursive; 
+      font-size:15px; 
+      color: #000; 
+      width: 200px !important;
+      height: 80px !important;
+
+      -moz-transform: rotate(2deg);
+      -webkit-transform: rotate(2deg);
+      -o-transform: rotate(2deg);
+      -ms-transform: rotate(2deg);
+      transform: rotate(2deg);
+
+      box-shadow: 0px 4px 6px #333;
+      -moz-box-shadow: 0px 4px 6px #333;
+      -webkit-box-shadow: 0px 4px 6px #333;
+    }
     &.data-source {
       background-color: lighten($color1, 30%) !important;
     }
@@ -129,7 +164,10 @@ li.dragging {
       font-size: 6pt !important;
     }
     &.data-source {
-      cursor: move;
+      cursor: move; /* fallback if grab cursor is unsupported */
+      cursor: grab;
+      cursor: -moz-grab;
+      cursor: -webkit-grab;
       height: $elementHeight;
       overflow: hidden;
       position: absolute;
@@ -181,7 +219,11 @@ li.dragging {
       border: $color2 1px solid;
       border-radius: 5px;
       color: $color2;
-      cursor: move;
+      cursor: move; /* fallback if grab cursor is unsupported */
+      cursor: grab;
+      cursor: -moz-grab;
+      cursor: -webkit-grab;
+      
       height: $elementHeight;
       padding: 0px;
       position: absolute;

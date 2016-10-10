@@ -52,7 +52,15 @@
                         <div id="properties-form" class="container">
                             <div>
                                 <h4>{{node.operation.name}}</h4>
-                                <component :is="currentComponent" :node="node" keep-alive></component>
+                                <!--
+                                <component :is="currentComponent" :node="node" keep-alive :forms="forms"></component>
+                                -->
+                                <fieldset v-for="form in forms">
+                                    <legend>{{form.name}}</legend>
+                                    <div v-for="field in form.fields">
+                                        <component :is="field.suggested_widget + '-component'" :node="node" keep-alive :field="field" :value="filled[field.name].value"></component>
+                                    </div>
+                                </fieldset>
                                 <property-description-component :node="node" />
                             </div>
                         </div>

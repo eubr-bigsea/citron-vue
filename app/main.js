@@ -8,6 +8,7 @@ import jsPlumb from 'jsplumb';
 //import $http from "./customAjax";
 import './components/diagram/diagram.scss';
 import "bootstrap-sass/assets/stylesheets/_bootstrap.scss";
+//import "bootstrap-sass/assets/javascripts/bootstrap";
 //import 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.scss'
 import './components/app/app.scss';
 
