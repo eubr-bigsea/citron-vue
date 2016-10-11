@@ -97,8 +97,8 @@ const OperationComponent = Vue.extend({
         click(ev) {
             let self = this;
             let elem = ev.target.classList.contains('node') ? ev.target : ev.target.parentElement;
-
-            document.querySelectorAll(".node.selected").forEach((e) => {
+            
+            Array.prototype.slice.call(document.querySelectorAll(".node.selected"), 0).forEach((e) => {
                 e.classList.remove('selected');
             });
             if (ev.ctrlKey) {
@@ -112,7 +112,9 @@ const OperationComponent = Vue.extend({
                 self.selectedNode = this;
             }
             self.instance.repaintEverything()
-            self.$dispatch('onclick-operation', self);
+            
+            // Raise the click event to upper components
+            self.$dispatch('onclick-task', self);
             ev.stopPropagation();
         }
     },

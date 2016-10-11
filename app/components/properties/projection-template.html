@@ -1,5 +1,6 @@
 <div>
-    <label>Field selection</label>
+    <p>{{field.label}} <span class="fa fa-asterisk" v-show="field.required"></span> 
+        <span class="fa fa-question-circle-o pull-right" title="{{field.help}}"></span></p>
     <v-select multiple :value.sync="selected" :options="options"></v-select>
     {{selected}}
 </div>

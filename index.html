@@ -6,151 +6,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-
-    <!--
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.3/css/bootstrap.min.css">
-    -->
     <link rel="stylesheet" href="public/style.css">
-    <!--
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/brutusin.json-forms/1.4.0/css/brutusin-json-forms.min.css">
-  -->
+
 </head>
 
 <body>
     <div id="app">
-        <app-component>
-        </app-component>
+        <app-component></app-component>
     </div>
-
     <script src="bundle.js"></script>
 </body>
+<!--
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.3/js/bootstrap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/brutusin.json-forms/1.4.0/js/brutusin-json-forms.min.js"></script>
-<script src="https://cdn.jsdelivr.net/brutusin.json-forms/1.4.0/js/brutusin-json-forms-bootstrap.min.js"></script>
-<script>
-
-xschema = {
-  "$schema": "http://json-schema.org/draft-03/schema#",
-  "type": "object",
-  "properties": {
-    "pageNum": {
-      "type": "integer",
-      "title": "Page number",
-      "description": "Page number to be queried, `1-based`. See [Pagination](https://en.wikipedia.org/wiki/Pagination) for more details",
-      "default": 1,
-      "required": true
-    },
-    "pageSize": {
-      "type": "integer",
-      "title": "Page size",
-      "description": "Number of records per page",
-      "required": true,
-      "default": 50,
-      "enum": [
-        10,
-        25,
-        50,
-        100
-      ]
-    },
-    "selectedFacetValues": {
-      "type": "array",
-      "title": "Query terms",
-      "minItems": 2,
-      "items": {
-        "description": "Query item",
-        "type": "object",
-        "properties": {
-          "facetName": {
-            "type": "string",
-            "title": "Field name",
-            "description": "Indexed field name",
-            "required": true
-          },
-          "matchAllNull": {
-            "type": "boolean",
-            "title": "Match nulls"
-          },
-          "matchAllNotNull": {
-            "type": "boolean",
-            "title": "Match not nulls"
-          },
-          "facetValues": {
-            "type": "array",
-            "title": "Field values",
-            "items": {
-              "type": "object",
-              "properties": {
-                "value": {
-                  "type": "string",
-                  "title": "Value"
-                }
-              }
-            }
-          },
-          "included": {
-            "type": "boolean",
-            "title": "Included"
-          }
-        }
-      }
-    },
-    "sorts": {
-      "type": "array",
-      "title": "Sorting",
-      "items": {
-        "type": "object",
-        "properties": {
-          "fieldName": {
-            "type": "string",
-            "title": "Field name"
-          },
-          "ascending": {
-            "type": "boolean",
-            "title": "Ascending"
-          }
-        }
-      }
-    }
-  }
-}
-var schema = {
-  "$schema": "http://json-schema.org/draft-03/schema#",
-  "type": "object",
-  "properties": {
-    "selectedFacetValues": {
-      "type": "array",
-      "title": "Aggregate by",
-      "minItems": 2,
-      "items": {
-        "description": "Query item",
-        "type": "object",
-        "properties": {
-          "facetName": {
-            "type": "string",
-            "title": "Field name",
-            "description": "Indexed field name",
-            "required": true
-          },
-        }
-      }
-    },
-    "aggregations": {
-      "type": "string",
-      "title": "Aggregation",
-      "enum": ["MIN", "MAX", "COUNT", "SUM", "AVG"]
-      }
-    }
-};
-/*
-var BrutusinForms = brutusin["json-forms"];
-var bf = BrutusinForms.create(schema);
-var container = document.getElementById('properties-form');
-bf.render(container, {});
-*/
-</script>
-
+-->
 </html>

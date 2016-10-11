@@ -13,4 +13,7 @@ function getNodes(state) {
 function getEdges(state) {
     return state.workflow.edges;
 }
-export {getCount, getOperations, getGroupedOperations, getNodes, getEdges}
+function getLanguage(state){
+    return state.language;
+}
+export {getCount, getOperations, getGroupedOperations, getNodes, getEdges, getLanguage}

@@ -6,6 +6,14 @@
                 <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
             </li>
         </ul>
+        <ul class="nav navbar-nav  pull-right">
+            <li class="nav-item" :class="{hide: language === 'en'}">
+                <a class="nav-link" href="#" @click="changeLanguage('en')">English version</a>
+            </li>
+            <li class="nav-item" :class="{hide: language === 'pt'}">
+                <a class="nav-link" href="#" @click="changeLanguage('pt')">Versão em português</a>
+            </li>
+        </ul>
     </nav>
     <div class="container-fluid">
         <div class="row small-padding">
@@ -52,7 +60,15 @@
                         <div id="properties-form" class="container">
                             <div>
                                 <h4>{{node.operation.name}}</h4>
-                                <component :is="currentComponent" :node="node" keep-alive></component>
+                                <!--
+                                <component :is="currentComponent" :node="node" keep-alive :forms="forms"></component>
+                                -->
+                                <fieldset v-for="form in forms">
+                                    <legend>{{form.name}}</legend>
+                                    <div v-for="field in form.fields">
+                                        <component :is="field.suggested_widget + '-component'" :node="node" keep-alive :field="field" :value="filled[field.name].value"></component>
+                                    </div>
+                                </fieldset>
                                 <property-description-component :node="node" />
                             </div>
                         </div>
@@ -73,7 +89,7 @@
                         <div style="text-align: left">
                             <small><pre><code class="python"></code></pre></small>
                         </div>
-                        <textarea class="form-control" style="font-size:8pt" rows="10"></textarea>
+                        <textarea class="form-control" style="font-size:8pt" rows="10" id="save-area"></textarea>
                     </div>
                 </div>
             </div>

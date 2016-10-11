@@ -2,6 +2,7 @@ import Vue from 'vue';
 import template from './toolbox-template.html';
 import { getCount } from '../vuex/getters';
 import { getOperations } from '../vuex/getters';
+import './toolbox.scss';
 
 const ToolboxComponent = Vue.extend({
     template,
@@ -25,7 +26,8 @@ const ToolboxComponent = Vue.extend({
             crt.style.left = '-1000px';
             ev.dataTransfer.setData("text", ev.target.innerHTML);
             ev.dataTransfer.setData("id", ev.target.dataset.operationId);
-            crt.classList.add('dragging')
+            crt.classList.add('dragging');
+            console.debug(crt.innerHTML)
             ev.dataTransfer.setDragImage(crt, 0, 0);
         },
     }

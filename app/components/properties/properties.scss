@@ -1,9 +1,25 @@
 $defaultFontSize: 1rem;
 
 .lemonade-properties {
+    zoom: .8;
     #properties-form {
         height: calc(100vh - 331px); width: 100%;
         padding: 2px;
+
+        fieldset {
+            padding: 5px;
+            border: 1px solid #ccc;
+            legend {
+                font-size: 12pt;
+                margin: 5px 0 0 0;
+                width: inherit;
+                border: 0;
+            }
+            p {
+                padding: 0;
+                margin: 5px 0 0 0;
+            }
+        }
     }
 
     .card-block {
@@ -72,6 +88,16 @@ $defaultFontSize: 1rem;
                 background: $baseBackground;
                 color: darken($baseBackground, 80%);
             }
+        }
+    }
+    .color-item {
+        float: left;
+        height: 20px;
+        margin-right: 1px;
+        width: 20px;
+        border: 1px solid #CCC;
+        &.active {
+            border-color: #555;
         }
     }
 }

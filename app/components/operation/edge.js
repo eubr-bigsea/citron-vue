@@ -4,7 +4,7 @@ import { getOperations } from '../vuex/getters';
 
 const EdgeComponent = Vue.extend({
     beforeDestroy() {
-        try{
+        try {
             if (this.connection) {
                 this.instance.detach(this.connection);
             }
@@ -17,7 +17,7 @@ const EdgeComponent = Vue.extend({
         instance: null
     },
     ready() {
-            this.connection = this.instance.connect(this.edge);
+        this.connection = this.instance.connect(this.edge);
     },
 
 });

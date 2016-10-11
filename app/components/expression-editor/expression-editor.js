@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import jsep from 'jsep';
 import template from './expression-editor-template.html';
+import ModalComponent from '../modal/modal-component.js';
 
 function get_html_obj(obj) {
     var rv = $("<ul />");
@@ -36,28 +37,66 @@ function htmlize(obj) {
 };
 
 const ExpressionEditorComponent = Vue.extend({
+    components: {
+        'modal-component': ModalComponent
+    },
+    data(){
+        return {
+            currentTab: 'math',
+            dateFunctions: [
+                'current_date', 'current_timestamp',
+                'date_add', 'date_format', 'date_sub', 
+                'datediff', 'dayofmonth', 'dayofyear',
+
+            ],
+            mathFunctions: [
+                'abs', 'ceil', 
+            ],
+            generalFunctions: [
+                'coalesce', 
+            ],
+            stringFunctions:[
+                'concat', 'date_format'
+            ]
+        }
+    },
     computed: {
         tree() {
-            try{
+            try {
+                jsep.addBinaryOp("=>", 1);
+                jsep.removeBinaryOp('^');
                 let tree = jsep(this.expression);
                 this.error = null;
-                return htmlize(tree);
-            } catch(e){
+                //return htmlize(tree);
+                return JSON.stringify(tree, null, 4).replace('\n', '<br/>');
+            } catch (e) {
                 this.error = e;
             }
             return '';
         }
     },
+    methods: {
+        selectTab(tab){
+            console.debug(tab, '<= selected')
+            this.currentTab = tab;
+        },
+        updatePos(ev) {
+            let ctl = ev.target;
+            console.debug(ctl.selectionStart)
+        },
+    },
     props: {
+        addOperators: [],
         error: null,
-        expression: "Funcionará",
+        expression: "",
         removeOperators: [],
-        addOperators: []
+        showModal: true
     },
     ready() {
 
     },
     template,
+
 
 });
 

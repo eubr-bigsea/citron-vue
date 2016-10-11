@@ -7,13 +7,17 @@ import store from '../vuex/store';
 import DiagramComponent from '../diagram/diagram';
 import ToolbarComponent from '../toolbox/toolbox';
 
-import { loadOperations } from '../vuex/actions';
-import { getOperations, getGroupedOperations } from '../vuex/getters';
+import { loadOperations, updateNodeFormField, changeLanguage } from '../vuex/actions';
+import { getOperations, getGroupedOperations, getLanguage } from '../vuex/getters';
 import {CleanMissingComponent, DataReaderComponent, 
     EmptyPropertiesComponent, ProjectionComponent, 
     PropertyDescriptionComponent, PublishAsVisualizationComponent, 
     SplitComponent,
-    TransformationComponent } 
+    TransformationComponent,
+
+    IntegerComponent, DecimalComponent, CheckboxComponent, DropDownComponent, RangeComponent,
+    TextComponent, TextAreaComponent, ColorComponent
+ } 
     from '../properties/properties-components.js';
 
 const slug2Component = {
@@ -29,27 +33,46 @@ const AppComponent = Vue.extend({
     template,
     vuex: {
         actions: {
-            loadOperations
+            loadOperations,
+            updateNodeFormField,
+            changeLanguage,
         },
         getters: {
             operations: getOperations,
             groupedOperations: getGroupedOperations,
+            language: getLanguage
         },
     },
     components: {
         'toolbox-component': ToolbarComponent,
         'diagram-component': DiagramComponent,
         'property-description-component': PropertyDescriptionComponent,
+        
+        'attribute-selector-component': ProjectionComponent,
+        'integer-component': IntegerComponent,
+        'decimal-component': DecimalComponent,
+        'checkbox-component': CheckboxComponent,
+        'dropdown-component': DropDownComponent,
+        'range-component': RangeComponent, 
+        'text-component': TextComponent,
+        'textarea-component': TextAreaComponent,
+        'color-component': ColorComponent,
+
+        /*
         'empty-properties-component': EmptyPropertiesComponent,
         'no-properties-component': {template: '', props: {node: null},},
         'publish-as-visualization-component': PublishAsVisualizationComponent,
         'transformation-component': TransformationComponent
+        */
+
     },
     data() {
         return {
-            title: 'Operations',
+            currentComponent: 'no-properties-component',
+            forms: [],
+            filled: {},
             node: {operation: ''},
-            currentComponent: 'no-properties-component'
+            title: 'Operations',
         }
     },
     ready() {
@@ -58,11 +81,22 @@ const AppComponent = Vue.extend({
     events: {
         'update-operations': function (operations) {
         },
-        'onclick-operation': function (operationComponent) {
-            this.node = operationComponent.node;
-            console.debug('Slug:', operationComponent.node.operation.slug, 
-                slug2Component[operationComponent.node.operation.slug])
-            this.currentComponent = slug2Component[operationComponent.node.operation.slug];
+        'update-form-field-value': function (field, value) {
+            //console.debug(value, this.node);
+            //console.debug(this.node.forms[field.name])
+            let filled = this.node.forms[field.name];
+            if (filled) {
+                filled.value = value;
+            }
+        },
+        'onclick-task': function (task) {
+            /* An task (operation instance) was clicked in the diagram */ 
+            this.node = task.node;
+            //console.debug('Slug:', task.node.operation.slug, 
+            //    slug2Component[task.node.operation.slug])
+            // this.currentComponent = slug2Component[task.node.operation.slug];
+            this.filled = task.node.forms;
+            this.forms = task.node.operation.forms;
         },
     },
     methods: {
