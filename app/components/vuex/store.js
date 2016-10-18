@@ -5,17 +5,18 @@ Vue.use(Vuex);
 
 const state = {
     count: 0,
+    errors: [],
+    groupedOperations: {},
     language: 'en',
     operations: [],
-    groupedOperations: {},
-    errors: [],
+    user: {state: 'null'},
     workflow: {
-        nodes: [],
-        edges: []
+        tasks: [],
+        flows: []
     }
 }
 function getOperations(){
-    console.debug('Getting operations')
+    console.debug('Getting tasks')
     //let url = 'http://beta.ctweb.inweb.org.br/tahiti/operations?token=123456';
     let url = `http://artemis.speed.dcc.ufmg.br:5000/operations?token=123456&lang=${state.language}`;
     return Vue.http.get(url).then(function (response) {
@@ -44,40 +45,40 @@ const mutations = {
             state.errors.push(error);
         });
     },
-    UPDATE_NODE_FORM_FIELD(state, node, value){
-        console.debug(node, value);
+    UPDATE_TASK_FORM_FIELD(state, task, value){
+        console.debug(task, value);
     },
-    ADD_NODE(state, node){
-        console.debug(node);
-        /* creates the form for each node */
+    ADD_TASK(state, task){
+        //console.debug(task);
+        /* creates the form for each task */
         let a = [];
-        node.forms = {};
-        node.operation.forms.forEach((form) => {
+        task.forms = {};
+        task.operation.forms.forEach((form) => {
             form.fields.forEach((field) => {
-                node.forms[field.name] = {
+                task.forms[field.name] = {
                     "value": null,
                     "category": form.name 
                 }
             });
         });
-        state.workflow.nodes.push(node);
+        state.workflow.tasks.push(task);
     },
-    REMOVE_NODE(state, node){
-        let inx = state.workflow.nodes.findIndex((n, inx, arr) => n.id === node.id);
+    REMOVE_TASK(state, task){
+        let inx = state.workflow.tasks.findIndex((n, inx, arr) => n.id === task.id);
         console.debug('removing', inx)
-        state.workflow.nodes.splice(inx, 1);
+        state.workflow.tasks.splice(inx, 1);
     },
-    CLEAR_NODES(state){
-        state.workflow.nodes.length = 0;
+    CLEAR_TASKS(state){
+        state.workflow.tasks.length = 0;
     },
-    ADD_EDGE(state, edge){
-        state.workflow.edges.push(edge);
+    ADD_FLOW(state, flow){
+        state.workflow.flows.push(flow);
     },
-    REMOVE_EDGE(state, edge){
-        console.debug('remove edge')
+    REMOVE_FLOW(state, flow){
+        console.debug('remove flow')
     },
-    CLEAR_EDGES(state){
-        state.workflow.edges.length = 0;
+    CLEAR_FLOWS(state){
+        state.workflow.flows.length = 0;
     },
     CHANGE_LANGUAGE(state, lang){
         state.language = lang;
@@ -97,17 +98,25 @@ const mutations = {
                     }
                 });
             });
-            // Updates nodes with new operation metadata
-            state.workflow.nodes.forEach((item) => {
-                item.operation = ops[item.operation.id];
+            // Updates tasks with new task metadata
+            state.workflow.tasks.forEach((item) => {
+                item.task = ops[item.task.id];
             });
-            //console.debug(state.workflow.edges)
+            //console.debug(state.workflow.flows)
             state.operations = data;
             state.groupedOperations = groupedOps;
         }).catch(function (error) {
             state.errors.push(error);
         });
     },
+    LOGIN(state, login, passwd) {
+        state.user = {
+            login, 
+            name: 'Walter dos Santos Filho',
+            id: 1343,
+            state: 'LOGGED'
+        };
+    }
 
 }
 window.store = state; 

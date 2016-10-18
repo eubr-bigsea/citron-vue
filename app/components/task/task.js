@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import template from './operation-template.html';
+import template from './task-template.html';
 
 const anchors = {
     input: [
@@ -87,18 +87,18 @@ const connectionOptions = {
     overlays: overlays,
 }
 
-const OperationComponent = Vue.extend({
+const TaskComponent = Vue.extend({
     beforeDestroy() {
-        if (this.node) {
-            this.instance.remove(document.getElementById(this.node.id));
+        if (this.task) {
+            this.instance.remove(document.getElementById(this.task.id));
         }
     },
     methods: {
         click(ev) {
             let self = this;
-            let elem = ev.target.classList.contains('node') ? ev.target : ev.target.parentElement;
+            let elem = ev.target.classList.contains('task') ? ev.target : ev.target.parentElement;
             
-            Array.prototype.slice.call(document.querySelectorAll(".node.selected"), 0).forEach((e) => {
+            Array.prototype.slice.call(document.querySelectorAll(".task.selected"), 0).forEach((e) => {
                 e.classList.remove('selected');
             });
             if (ev.ctrlKey) {
@@ -109,27 +109,40 @@ const OperationComponent = Vue.extend({
             } else {
                 self.instance.clearDragSelection();
                 elem.classList.add('selected');
-                self.selectedNode = this;
+                self.selectedTask = this;
             }
             self.instance.repaintEverything()
             
             // Raise the click event to upper components
             self.$dispatch('onclick-task', self);
             ev.stopPropagation();
-        }
+        },
     },
     props: {
-        node: {
+        task: {
             'default': function () { return { name: '', icon: '' }; }
         },
         instance: null
     },
+    xwatch: {
+        'task.operation.name': function(){
+            let self = this;
+            console.debug(this.task.operation);
+            this.instance.selectEndpoints(this.elem).each(function(endpoint){
+                let labelOverlay = endpoint.getOverlay("lbl");
+                let port = self.task.operation.ports.filter((port) => port.id === endpoint._portId);
+                if (port){
+                    labelOverlay.setLabel(port[0].name)
+                }
+            });
+        }
+    },
     ready() {
         let self = this;
-        let operation = this.node.operation;
-        let nodeId = this.node.id;
-        let elem = document.getElementById(nodeId);
-        let zIndex = this.node.zIndex;
+        let operation = this.task.operation;
+        let taskId = this.task.id;
+        let elem = document.getElementById(taskId);
+        let zIndex = this.task.zIndex;
 
         let outputs = operation.ports.filter((p) => {
             return p.type === 'OUTPUT';
@@ -159,14 +172,15 @@ const OperationComponent = Vue.extend({
 
                     options['anchors'] = anchor;
                     options['overlays'] = lbls;
-                    options['uuid'] = `${nodeId}/${ports[inx].id}`;
+                    options['uuid'] = `${taskId}/${ports[inx].id}`;
                     if (ports[inx].multiplicity !== 'ONE') {
                         options['maxConnections'] = 10;
                         options['paintStyle']['fillStyle'] = 'rgba(228, 87, 46, 1)';
                     }
                     let endpoint = self.instance.addEndpoint(elem, options);
                     endpoint.canvas.style.zIndex = zIndex - 1;
-                    endpoint._jsPlumb.overlays.lbl.canvas.style.zIndex = zIndex - 1;
+                    endpoint.getOverlay('lbl').canvas.style.zIndex = zIndex - 1;
+                    endpoint._portId = ports[inx].id;
                 });
             }
         });
@@ -179,4 +193,4 @@ const OperationComponent = Vue.extend({
     template,
 
 });
-export {OperationComponent, connectionOptions};
+export {TaskComponent, connectionOptions};

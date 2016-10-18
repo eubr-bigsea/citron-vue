@@ -7,13 +7,25 @@ function getOperations(state) {
 function getGroupedOperations(state) {
     return state.groupedOperations;
 }
-function getNodes(state) {
-    return state.workflow.nodes;
+function getTasks(state) {
+    return state.workflow.tasks;
 }
-function getEdges(state) {
-    return state.workflow.edges;
+function getFlows(state) {
+    return state.workflow.flows;
 }
-function getLanguage(state){
+function getLanguage(state) {
     return state.language;
 }
-export {getCount, getOperations, getGroupedOperations, getNodes, getEdges, getLanguage}
+function getUser(state) {
+    return state.user;
+}
+function getOperationFromId({ dispatch, state }, id) {
+    return state.operations.filter(v => {
+        return v.id === parseInt(id);
+    });
+}
+export {
+    getCount, getOperations, getGroupedOperations, getTasks, getFlows, getLanguage,
+    getOperationFromId,
+    getUser
+}

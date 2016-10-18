@@ -1,38 +1,41 @@
-export const incrementCounter = function ({ dispatch, state }) {
-    dispatch('INCREMENT', 1)
-}
-export const addAmount = function ({ dispatch, state }, amount) {
-    dispatch('INCREMENT', amount);
-}
-export const loadOperations = function ({ dispatch, state }) {
+const loadOperations = function ({ dispatch, state }) {
     return dispatch('LOAD_OPERATIONS');
 }
-export const getOperationFromId = function({ dispatch, state }, id) {
-    return state.operations.filter(v => {
-        return v.id === parseInt(id);
-    });
+const addTask = function ({ dispatch, state }, task) {
+    return dispatch('ADD_TASK', task);
 }
-export const addNode = function ({ dispatch, state }, node) {
-    return dispatch('ADD_NODE', node);
+const removeTask = function ({ dispatch, state }, task) {
+    return dispatch('REMOVE_TASK', task);
 }
-export const removeNode = function ({ dispatch, state }, node) {
-    return dispatch('REMOVE_NODE', node);
+const clearTasks = function ({ dispatch, state }) {
+    return dispatch('CLEAR_TASKS');
 }
-export const clearNodes = function ({ dispatch, state }) {
-    return dispatch('CLEAR_NODES');
+const addFlow = function ({ dispatch, state }, flow) {
+    return dispatch('ADD_FLOW', flow);
 }
-export const addEdge = function ({ dispatch, state }, edge) {
-    return dispatch('ADD_EDGE', edge);
+const removeFlow = function ({ dispatch, state }, flow) {
+    return dispatch('REMOVE_FLOW', flow);
 }
-export const removeEdge = function ({ dispatch, state }, edge) {
-    return dispatch('REMOVE_EDGE', edge);
+const clearFlows = function ({ dispatch, state }) {
+    return dispatch('CLEAR_FLOWS');
 }
-export const clearEdges = function ({ dispatch, state }) {
-    return dispatch('CLEAR_EDGES');
+const updateTaskFormField = function ({ dispatch, state }, task, value) {
+    return dispatch('UPDATE_TASK_FORM_FIELD');
 }
-export const updateNodeFormField = function ({ dispatch, state }, node, value) {
-    return dispatch('UPDATE_NODE_FORM_FIELD');
-}
-export const changeLanguage = function ({ dispatch, state }, lang) {
+const changeLanguage = function ({ dispatch, state }, lang) {
     return dispatch('CHANGE_LANGUAGE', lang);
 }
+/* Auth */
+const login = function({dispatch, state}, login, passwd){
+    return dispatch('LOGIN', login, passwd);
+}
+
+export {
+    loadOperations, 
+    addTask, removeTask, clearTasks, 
+    updateTaskFormField, changeLanguage,
+
+    addFlow, removeFlow, clearFlows,
+
+    login,
+};

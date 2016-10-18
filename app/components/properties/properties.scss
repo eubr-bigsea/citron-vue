@@ -1,19 +1,24 @@
 $defaultFontSize: 1rem;
 
 .lemonade-properties {
-    zoom: .8;
+    height: calc(100vh - 100px); 
     #properties-form {
+        background: white;
+        z-index: 100;
+        zoom: .8;
         height: calc(100vh - 331px); width: 100%;
-        padding: 2px;
+        padding: 5px;
 
         fieldset {
-            padding: 5px;
+            padding: 10px 5px 20px 5px;
             border: 1px solid #ccc;
+            margin: 5px 0;
             legend {
+                border: 0;
                 font-size: 12pt;
+                font-weight: bold;
                 margin: 5px 0 0 0;
                 width: inherit;
-                border: 0;
             }
             p {
                 padding: 0;

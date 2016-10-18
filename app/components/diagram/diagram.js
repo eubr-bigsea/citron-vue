@@ -5,14 +5,14 @@ import PerfectScrollbarCss from 'perfect-scrollbar/dist/css/perfect-scrollbar.cs
 
 import template from './diagram-template.html';
 
-import { getOperationFromId, addNode, removeNode, clearNodes, addEdge, removeEdge, clearEdges } from '../vuex/actions';
-import { getNodes, getEdges } from '../vuex/getters';
+import {addTask, removeTask, clearTasks, addFlow, removeFlow, clearFlows } from '../vuex/actions';
+import { getOperationFromId, getFlows, getTasks } from '../vuex/getters';
 import {CleanMissingComponent, DataReaderComponent, EmptyPropertiesComponent, 
     SplitComponent, PropertyDescriptionComponent} 
     from '../properties/properties-components.js';
-import {OperationComponent, connectionOptions} from '../operation/operation';
+import {TaskComponent, connectionOptions} from '../task/task';
+import FlowComponent from '../task/flow';
 
-import EdgeComponent from '../operation/edge';
 import highlight from 'highlight.js';
 import highlightCass from 'highlight.js/styles/default.css';
 import solarizedDark from 'highlight.js/styles/solarized-dark.css';
@@ -21,11 +21,12 @@ const DiagramComponent = Vue.extend({
     computed: {
         zoomPercent: function () {
             return `${Math.round(100 * this.zoom, 0)}%`;
+
         }
     },
     components: {
-        'operation-component': OperationComponent,
-        'edge-component': EdgeComponent,
+        'task-component': TaskComponent,
+        'flow-component': FlowComponent,
         'property-description-component': PropertyDescriptionComponent,
         'empty-properties-component': EmptyPropertiesComponent,
 
@@ -43,30 +44,30 @@ const DiagramComponent = Vue.extend({
     vuex: {
         actions: {
             getOperationFromId,
-            addNode,
-            removeNode,
-            clearNodes,
-            addEdge,
-            removeEdge,
-            clearEdges,
+            addTask,
+            removeTask,
+            clearTasks,
+            addFlow,
+            removeFlow,
+            clearFlows,
 
         },
         getters: {
-            nodes: getNodes,
-            edges: getEdges
+            flows: getFlows,
+            tasks: getTasks
         }
     },
     data() {
         return {
             zoomInEnabled: true,
             zoomOutEnabled: true,
-            selectedNode: null,
+            selectedTask: null,
         }
     },
     events: {
         'onclick-operationx': function (operationComponent) {
             let self = this;
-            this.selectedNode = operationComponent.node; 
+            this.selectedTask = operationComponent.task; 
             debugger
             if (self.currentComponent == 'property-description-component'){
                 self.currentComponent = 'empty-properties-component';
@@ -78,16 +79,16 @@ const DiagramComponent = Vue.extend({
             }
         },
         'onclick-operation2': function (operationComponent) {
-            this.selectedNode = operationComponent.node; 
+            this.selectedTask = operationComponent.task; 
             let elem = document.getElementById(this.formContainer);
-            elem.innerHTML = '<div><h5>{{node.operation.name}}</h5><form-component :node="node"></form-component><property-description-component :node="node"/></div>';
+            elem.innerHTML = '<div><h5>{{task.operation.name}}</h5><form-component :task="task"></form-component><property-description-component :task="task"/></div>';
             if (self.currentForm){
                 self.currentForm.$destroy();
             }
             self.currentForm = new Vue({
                 el: `#${this.formContainer}`,
                 components: {
-                    'form-component': slug2Component[operationComponent.node.operation.slug] 
+                    'form-component': slug2Component[operationComponent.task.operation.slug] 
                         || EmptyPropertiesComponent,
                     'property-description-component': PropertyDescriptionComponent
                 },
@@ -96,7 +97,7 @@ const DiagramComponent = Vue.extend({
                 },
                 data(){
                     return {
-                        node: operationComponent.node,
+                        task: operationComponent.task,
                     }
                 }
             });
@@ -132,7 +133,7 @@ const DiagramComponent = Vue.extend({
                 self.instance.getContainer().addEventListener('click', function (ev) {
                     self.clearSelection(ev);
                 });
-                self.instance.bind("click", self.edgeClick);
+                self.instance.bind("click", self.flowClick);
 
                 self.instance.bind('connection', function (info, originalEvent) {
                     let con = info.connection;
@@ -141,52 +142,52 @@ const DiagramComponent = Vue.extend({
                         self.instance.detach(con);
                     } else if (originalEvent) {
                         self.instance.detach(con);
-                        self.addEdge({ uuids: [info.sourceEndpoint.getUuid(), info.targetEndpoint.getUuid()] });
+                        self.addFlow({ uuids: [info.sourceEndpoint.getUuid(), info.targetEndpoint.getUuid()] });
                     }
                 });
             })
         },
         clearSelection(ev) {
-            if (ev.target.nodeName === 'path') {
-                // click on edge
+            if (ev.target.taskName === 'path') {
+                // click on flow
                 return;
             }
             let self = this;
-            let nodes = document.querySelectorAll(".node");
-            Array.prototype.slice.call(nodes, 0).forEach((e) => {
+            let tasks = document.querySelectorAll(".task");
+            Array.prototype.slice.call(tasks, 0).forEach((e) => {
                 e.classList.remove('selected');
                 self.instance.clearDragSelection();
-                self.selectedNode = null;
-                self.selectedEdge = null;
+                self.selectedTask = null;
+                self.selectedFlow = null;
             });
         },
-        nodeSelect(ev) {
+        taskSelect(ev) {
             console.debug('xxx', ev)
-            if (ev.currentTarget.classList.contains("node")) {
-                var nodes = document.querySelectorAll(".node.selected");
-                Array.prototype.slice.call(nodes, 0).forEach(e => {
+            if (ev.currentTarget.classList.contains("task")) {
+                var tasks = document.querySelectorAll(".task.selected");
+                Array.prototype.slice.call(tasks, 0).forEach(e => {
                     e.classList.remove('selected');
                 });
                 ev.currentTarget.classList.add('selected');
                 var self = this;
-                self.selectedNode = ev.currentTarget;
+                self.selectedTask = ev.currentTarget;
             }
-            if (this.selectedEdge) {
-                this.selectedEdge.setPaintStyle(connectorPaintStyle);
-                this.selectedEdge = null;
+            if (this.selectedFlow) {
+                this.selectedFlow.setPaintStyle(connectorPaintStyle);
+                this.selectedFlow = null;
             }
         },
-        edgeClick(connection, e) {
+        flowClick(connection, e) {
             var self = this;
-            self.selectedEdge = connection;
+            self.selectedFlow = connection;
             self.instance.select().setPaintStyle(connectorPaintStyle)
             connection.setPaintStyle({
                 lineWidth: 2,
                 radius: 1,
                 strokeStyle: "rgba(242, 141, 0, 1)"
             })
-            let nodes = document.querySelectorAll(".node.selected");
-            Array.prototype.slice.call(nodes, 0).forEach(e => {
+            let tasks = document.querySelectorAll(".task.selected");
+            Array.prototype.slice.call(tasks, 0).forEach(e => {
                 e.classList.remove('selected');
             });
             e.stopPropagation();
@@ -207,7 +208,7 @@ const DiagramComponent = Vue.extend({
             let classes = operation.categories.map((c) => {
                 return c.type.replace(' ', '-');
             }).join(' ');
-            self.addNode({
+            self.addTask({
                 id: self.generateId(), operation,
                 x: ev.offsetX, y: ev.offsetY, zIndex: ++self.currentZIndex, classes
             });
@@ -222,36 +223,36 @@ const DiagramComponent = Vue.extend({
             self.instance.getConnections().forEach(conn => {
                 self.instance.detach(conn);
             });
-            let nodes = Array.prototype.slice.call(document.querySelectorAll(".diagram .node"), 0);
-            nodes.forEach(node => {
-                self.instance.remove(node);
+            let tasks = Array.prototype.slice.call(document.querySelectorAll(".diagram .task"), 0);
+            tasks.forEach(task => {
+                self.instance.remove(task);
             });
             */
-            self.clearEdges();
-            self.clearNodes();
+            self.clearFlows();
+            self.clearTasks();
         },
         deleteSelected(ev) {
             let self = this;
-            if (self.selectedNode) {
-                /*self.instance.remove(self.selectedNode);
-                self.removeNode({ id: self.selectedNode.id });*/
-                self.removeNode(self.selectedNode);
-                self.selectedNode = null;
-            } else if (self.selectedEdge) {
-                self.instance.detach(self.selectedEdge);
-                self.selectedEdge = null;
+            if (self.selectedTask) {
+                /*self.instance.remove(self.selectedTask);
+                self.removeTask({ id: self.selectedTask.id });*/
+                self.removeTask(self.selectedTask);
+                self.selectedTask = null;
+            } else if (self.selectedFlow) {
+                self.instance.detach(self.selectedFlow);
+                self.selectedFlow = null;
             }
         },
         diagramClick(ev) {
             if (ev.target.classList.contains("diagram")) {
                 ev.preventDefault();
-                if (this.selectedNode) {
-                    this.selectedNode.classList.remove('selected');
-                    this.selectedNode = null;
+                if (this.selectedTask) {
+                    this.selectedTask.classList.remove('selected');
+                    this.selectedTask = null;
                 }
-                if (this.selectedEdge) {
-                    this.selectedEdge.setPaintStyle(connectorPaintStyle);
-                    this.selectedEdge = null;
+                if (this.selectedFlow) {
+                    this.selectedFlow.setPaintStyle(connectorPaintStyle);
+                    this.selectedFlow = null;
                 }
             }
         },
@@ -273,39 +274,39 @@ const DiagramComponent = Vue.extend({
         innerLoad(graph) {
             let self = this;
             self.clear();
-            graph.nodes.forEach((node) => {
-                let operation = self.getOperationFromId(node.operation || node.operationId)[0];
+            graph.tasks.forEach((task) => {
+                let operation = self.getOperationFromId(task.operation || task.operationId)[0];
                 let classes = operation.categories.map((c) => {
                     return c.type.replace(' ', '-');
                 }).join(' ');
-                self.addNode({
-                    id: node.id, operation,
-                    x: node.left || node.x, y: node.top || node.y, zIndex: ++self.currentZIndex, classes
+                self.addTask({
+                    id: task.id, operation,
+                    x: task.left || task.x, y: task.top || task.y, zIndex: ++self.currentZIndex, classes
                 })
             });
-            graph.edges.forEach((edge) => {
+            graph.flows.forEach((flow) => {
                 Object.keys(connectionOptions).forEach(opt => {
                     if (connectionOptions.hasOwnProperty(opt)) {
-                        edge[opt] = connectionOptions[opt];
+                        flow[opt] = connectionOptions[opt];
                     }
                 });
-                edge['anchor'] = edge.anchors;
-                delete edge['anchors']
-                edge['detachable'] = true;
+                flow['anchor'] = flow.anchors;
+                delete flow['anchors']
+                flow['detachable'] = true;
 
-                //self.instance.connect({ uuids: [edge['source-uuid'], edge['target-uuid']] });
-                if (! edge.uuids) {
-                    edge.uuids = [edge['source-uuid'], edge['target-uuid']];
+                //self.instance.connect({ uuids: [flow['source-uuid'], flow['target-uuid']] });
+                if (! flow.uuids) {
+                    flow.uuids = [flow['source-uuid'], flow['target-uuid']];
                 }
-                self.addEdge({ uuids: edge['uuids']});
+                self.addFlow({ uuids: flow['uuids']});
             });
             //self.instance.repaintEverything();
         },
         save() {
-            let result = { nodes: this.nodes, edges: this.edges };
+            let result = { tasks: this.tasks, flows: this.flows };
             let tmp = document.getElementById('save-area');
-            if (tmp.length) {
-                tmp[0].value = JSON.stringify(result,
+            if (tmp) {
+                tmp.value = JSON.stringify(result,
                     (key, value) => {
                         if (key === 'operation'){
                             return value.id;
@@ -360,41 +361,41 @@ const DiagramComponent = Vue.extend({
             this.setZoom(self.zoom, self.instance, null, diagram);
             return;
         },
-        tsort(edges) {
+        tsort(flows) {
             let info = this.save();
-            info.edges.forEach((edge) => {
-                let sourceNode = info.nodes.filter((node) => {
-                    return node.id === edge.uuids[0].split('/')[0];
+            info.flows.forEach((flow) => {
+                let sourceTask = info.tasks.filter((task) => {
+                    return task.id === flow.uuids[0].split('/')[0];
                 })[0];
-                if (!sourceNode.afters) {
-                    sourceNode.afters = [];
+                if (!sourceTask.afters) {
+                    sourceTask.afters = [];
                 }
-                sourceNode.afters.push(edge.uuids[1].split('/')[0]);
+                sourceTask.afters.push(flow.uuids[1].split('/')[0]);
             });
-            let nodes = {}, // hash: stringified id of the node => { id: id, afters: lisf of ids }
+            let tasks = {}, // hash: stringified id of the task => { id: id, afters: lisf of ids }
                 sorted = [], // sorted list of IDs ( returned value )
-                visited = {}; // hash: id of already visited node => true
-            info.nodes.forEach((n) => { nodes[n.id] = n; });
-            //console.debug(nodes);
+                visited = {}; // hash: id of already visited task => true
+            info.tasks.forEach((n) => { tasks[n.id] = n; });
+            //console.debug(tasks);
             /*
-            var Node = function (id) {
+            var Task = function (id) {
                 this.id = id;
                 this.afters = [];
             }
 
             // 1. build data structures
-            edges.forEach(function (v) {
+            flows.forEach(function (v) {
                 var from = v[0], to = v[1];
-                if (!nodes[from]) nodes[from] = new Node(from);
-                if (!nodes[to]) nodes[to] = new Node(to);
-                nodes[from].afters.push(to);
+                if (!tasks[from]) tasks[from] = new Task(from);
+                if (!tasks[to]) tasks[to] = new Task(to);
+                tasks[from].afters.push(to);
             });
             */
 
             // 2. topological sort
-            Object.keys(nodes).forEach(function visit(idstr, ancestors) {
-                var node = nodes[idstr],
-                    id = node.id;
+            Object.keys(tasks).forEach(function visit(idstr, ancestors) {
+                var task = tasks[idstr],
+                    id = task.id;
 
                 // if already exists, do nothing
                 if (visited[idstr]) return;
@@ -404,8 +405,8 @@ const DiagramComponent = Vue.extend({
                 ancestors.push(id);
 
                 visited[idstr] = true;
-                node.afters = node.afters || [];
-                node.afters.forEach(function (afterID) {
+                task.afters = task.afters || [];
+                task.afters.forEach(function (afterID) {
                     if (ancestors.indexOf(afterID) >= 0)  // if already in ancestors, a closed chain exists.
                         throw new Error('closed chain : ' + afterID + ' is in ' + id);
 
@@ -454,22 +455,22 @@ const DiagramComponent = Vue.extend({
                 'spark = SparkSession.builder.appName("Lemonade").getOrCreate()\n']
 
             sorted.forEach((item) => {
-                if (!op2Cmd[nodes[item].operation.id])
-                    console.debug(nodes[item].operation.id)
+                if (!op2Cmd[tasks[item].operation.id])
+                    console.debug(tasks[item].operation.id)
                 else
-                    code.push(op2Cmd[nodes[item].operation.id].replace('FIXME',
-                        nodes[item].operation.id))
+                    code.push(op2Cmd[tasks[item].operation.id].replace('FIXME',
+                        tasks[item].operation.id))
             });
-            let codeNode = document.getElementsByTagName('code')[0];
-            codeNode.innerText = code.join('\n');
-            highlight.highlightBlock(codeNode);
+            let codeTask = document.getElementsByTagName('code')[0];
+            codeTask.innerText = code.join('\n');
+            highlight.highlightBlock(codeTask);
             return sorted;
         }
 
     },
     watch: {
         /*
-        theNodes: (e) => {
+        theTasks: (e) => {
             console.debug('changed', e)
         }
         */

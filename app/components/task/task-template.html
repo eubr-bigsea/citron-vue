@@ -1,0 +1,8 @@
+<div class="operation task {{task.classes}}" title="{{ task.operation.description }}" data-operation-id="{{ task.operation.id }}"
+    id="{{ task.id }}" v-bind:style="{zIndex: task.zIndex, top: task.y + 'px', left: task.x + 'px'}" v-on:click="click" :style="{backgroundColor: task.forms.color.value}">
+    <strong><span class="fa {{task.operation.icon}}"></span> {{task.operation.name}}</strong>
+    <em>{{task.forms.comment.value}}</em>
+    <span class="decor">
+        <span class="fa fa-check-circle fa-2x"></span>
+    </span>
+</div>

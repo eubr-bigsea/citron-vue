@@ -26,4 +26,19 @@ html {
 .drop-menu-item a {
     background: #eee;
     padding: 2px
-} 
+}
+.logo {
+    img {
+        background: url('minilogo.png');
+        background-size: auto 40px;
+        height: 40px;
+        width: 40px;
+        border: none;
+        outline: none;
+    }
+    strong {
+        font-family: 'Archivo Black', sans-serif;
+        font-size: 40px;
+        margin-top:10px;
+    }
+}

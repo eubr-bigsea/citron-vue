@@ -32,8 +32,8 @@
         <div class="lemonade" v-on:drop="drop" v-on:dragover="allowDrop" id="lemonade-diagram">
             <!-- 46 is delete key and tabindex is required to handle div keyup -->
             <div class="diagram" v-on:click="diagramClick" v-on:keyup.46="deleteSelected">
-                <operation-component v-for="node of nodes" :node="node" :instance="instance"></operation-component>
-                <edge-component v-for="edge of edges" :edge="edge" :instance="instance"></edge-component>
+                <task-component v-for="task of tasks" :task="task" :instance="instance"></task-component>
+                <flow-component v-for="flow of flows" :flow="flow" :instance="instance"></flow-component>
             </div>
         </div>
     </div>

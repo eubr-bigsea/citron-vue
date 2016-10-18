@@ -13,11 +13,11 @@ const EdgeComponent = Vue.extend({
         }
     },
     props: {
-        edge: null,
+        flow: null,
         instance: null
     },
     ready() {
-        this.connection = this.instance.connect(this.edge);
+        this.connection = this.instance.connect(this.flow);
     },
 
 });

@@ -16,7 +16,7 @@ const CleanMissingComponent = Vue.extend({
         options: ['line','vehicle', 'date_time', 'latitude', 'longitude', 'card_id', 'travel', 'bus_origin', 'bus_destination']
       }
     },
-    props: {node: null},
+    props: {task: null},
     template: require('./clean-missing-template.html')
 });
 
@@ -35,15 +35,15 @@ const ProjectionComponent = Vue.extend({
 });
 
 const DataReaderComponent = Vue.extend({
-    props: {node: null},
+    props: {task: null},
     template: require('./data-reader-template.html')
 });
 const EmptyPropertiesComponent = Vue.extend({
-    props: {node: null},
+    props: {task: null},
     template: require('./empty-properties-template.html')
 });
 const PropertyDescriptionComponent = Vue.extend({
-    props: {node: null},
+    props: {task: null},
     template: require('./property-description-template.html')
 });
 
@@ -57,7 +57,7 @@ const PublishAsVisualizationComponent = Vue.extend({
         options: ['line','vehicle', 'date_time', 'latitude', 'longitude', 'card_id', 'travel', 'bus_origin', 'bus_destination']
       }
     },
-    props: {node: null},
+    props: {task: null},
     template: require('./publish-as-visualization-template.html')
 });
 
@@ -69,7 +69,7 @@ const SplitComponent = Vue.extend({
             seed: 0,
         };
     },
-    props: {node: null},
+    props: {task: null},
     template: require('./split-template.html')
 });
 
@@ -83,7 +83,7 @@ const TransformationComponent = Vue.extend({
             seed: 0,
         };
     },
-    props: {node: null},
+    props: {task: null},
     template: require('./transformation-template.html')
 });
 
@@ -139,13 +139,30 @@ const TextAreaComponent = Vue.extend({
 const CheckboxComponent = Vue.extend({
     methods:{
         updated(e){
-            console.debug(e.target.value, e.target.checked);
+            this.$dispatch('update-form-field-value', this.field, e.target.value);
         }
     },
     props: {value: 0, field: null},
     template: '<div class="checkbox"><input type="checkbox" :value="value" @input="updated" value="Y" id="checkboxComponentInput"/> '+
         '<label for="checkboxComponentInput">{{field.label}}</label> <span class="fa fa-question-circle-o pull-right" title="{{field.help}}"></span></div>'
 });
+
+const IndeterminatedCheckboxComponent = Vue.extend({
+    methods:{
+        updated(e){
+            this.$dispatch('update-form-field-value', this.field, e.target.value);
+        }
+    },
+    props: {value: 0, field: null},
+    ready: function(){
+        let checkbox = this.$el.querySelector('input');
+        checkbox.indeterminate = true;
+        console.debug(checkbox);
+    },
+    template: '<div class="checkbox"><input type="checkbox" :value="value" @input="updated" value="Y"/> '+
+        '<label for="checkboxComponentInput">{{field.label}}</label> <span class="fa fa-question-circle-o pull-right" title="{{field.help}}"></span></div>'
+});
+
 
 const DropDownComponent = Vue.extend({
     computed: {
@@ -205,5 +222,5 @@ export {DataReaderComponent, EmptyPropertiesComponent,
         TransformationComponent,
 
         DecimalComponent, IntegerComponent, CheckboxComponent, DropDownComponent, RangeComponent, TextComponent,
-        TextAreaComponent, ColorComponent
+        TextAreaComponent, ColorComponent, IndeterminatedCheckboxComponent
 };

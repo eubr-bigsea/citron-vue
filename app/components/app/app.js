@@ -7,8 +7,8 @@ import store from '../vuex/store';
 import DiagramComponent from '../diagram/diagram';
 import ToolbarComponent from '../toolbox/toolbox';
 
-import { loadOperations, updateNodeFormField, changeLanguage } from '../vuex/actions';
-import { getOperations, getGroupedOperations, getLanguage } from '../vuex/getters';
+import { loadOperations, updateTaskFormField, changeLanguage, login } from '../vuex/actions'; 
+import { getGroupedOperations, getLanguage, getUser } from '../vuex/getters';
 import {CleanMissingComponent, DataReaderComponent, 
     EmptyPropertiesComponent, ProjectionComponent, 
     PropertyDescriptionComponent, PublishAsVisualizationComponent, 
@@ -16,7 +16,7 @@ import {CleanMissingComponent, DataReaderComponent,
     TransformationComponent,
 
     IntegerComponent, DecimalComponent, CheckboxComponent, DropDownComponent, RangeComponent,
-    TextComponent, TextAreaComponent, ColorComponent
+    TextComponent, TextAreaComponent, ColorComponent, IndeterminatedCheckboxComponent
  } 
     from '../properties/properties-components.js';
 
@@ -34,13 +34,14 @@ const AppComponent = Vue.extend({
     vuex: {
         actions: {
             loadOperations,
-            updateNodeFormField,
+            updateTaskFormField,
             changeLanguage,
+            login,
         },
         getters: {
-            operations: getOperations,
             groupedOperations: getGroupedOperations,
-            language: getLanguage
+            language: getLanguage,
+            user: getUser
         },
     },
     components: {
@@ -52,6 +53,7 @@ const AppComponent = Vue.extend({
         'integer-component': IntegerComponent,
         'decimal-component': DecimalComponent,
         'checkbox-component': CheckboxComponent,
+        'indeterminated-checkbox-component': IndeterminatedCheckboxComponent,
         'dropdown-component': DropDownComponent,
         'range-component': RangeComponent, 
         'text-component': TextComponent,
@@ -60,7 +62,7 @@ const AppComponent = Vue.extend({
 
         /*
         'empty-properties-component': EmptyPropertiesComponent,
-        'no-properties-component': {template: '', props: {node: null},},
+        'no-properties-component': {template: '', props: {task: null},},
         'publish-as-visualization-component': PublishAsVisualizationComponent,
         'transformation-component': TransformationComponent
         */
@@ -71,8 +73,9 @@ const AppComponent = Vue.extend({
             currentComponent: 'no-properties-component',
             forms: [],
             filled: {},
-            node: {operation: ''},
+            task: {operation: ''},
             title: 'Operations',
+            username: '', passwd: ''
         }
     },
     ready() {
@@ -82,32 +85,40 @@ const AppComponent = Vue.extend({
         'update-operations': function (operations) {
         },
         'update-form-field-value': function (field, value) {
-            //console.debug(value, this.node);
-            //console.debug(this.node.forms[field.name])
-            let filled = this.node.forms[field.name];
+            //console.debug(value, this.task);
+            //console.debug(this.task.forms[field.name])
+            let filled = this.task.forms[field.name];
             if (filled) {
                 filled.value = value;
             }
         },
-        'onclick-task': function (task) {
-            /* An task (operation instance) was clicked in the diagram */ 
-            this.node = task.node;
-            //console.debug('Slug:', task.node.operation.slug, 
-            //    slug2Component[task.node.operation.slug])
-            // this.currentComponent = slug2Component[task.node.operation.slug];
-            this.filled = task.node.forms;
-            this.forms = task.node.operation.forms;
+        'onclick-task': function (taskComponent) {
+            /* An task (operation instance) was clicked in the diagram */
+            //this.operation = task.operation;
+            //console.debug('Slug:', task.task.operation.slug, 
+            //    slug2Component[task.task.operation.slug])
+            // this.currentComponent = slug2Component[task.task.operation.slug];
+            this.task = taskComponent.task;
+            this.filledForm = taskComponent.task.forms;
+            this.forms = taskComponent.task.operation.forms;
         },
     },
     methods: {
         init() {
-            this.loadOperations();
-            let elem = document.getElementById('menu-operations');
-            PerfectScrollbar.initialize(elem, {
-                wheelSpeed: 2,
-                wheelPropagation: true,
-                minScrollbarLength: 20
-            });
+            if (this.user) {
+                this.loadOperations();
+                let elem = document.getElementById('menu-operations');
+                PerfectScrollbar.initialize(elem, {
+                    wheelSpeed: 2,
+                    wheelPropagation: true,
+                    minScrollbarLength: 20
+                });
+            }
+        },
+        doLogin(ev){
+            console.debug(this.username, this.passwd);
+            this.login(this.username, this.passwd)
+            return false;
         },
         toggle(ev) {
             let ul = ev.target.parentElement.querySelector('ul.tree');
