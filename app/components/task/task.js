@@ -142,7 +142,7 @@ const TaskComponent = Vue.extend({
         let operation = this.task.operation;
         let taskId = this.task.id;
         let elem = document.getElementById(taskId);
-        let zIndex = this.task.zIndex;
+        let zIndex = this.task['z_index'];
 
         let outputs = operation.ports.filter((p) => {
             return p.type === 'OUTPUT';
@@ -188,6 +188,11 @@ const TaskComponent = Vue.extend({
         self.instance.draggable(elem, {
             containment: "parent",
             grid: [1, 1],
+            drag() {
+                let elem = document.getElementById(self.task.id);
+                self.task.left = elem.offsetLeft;
+                self.task.top = elem.offsetTop;
+            }
         });
     },
     template,

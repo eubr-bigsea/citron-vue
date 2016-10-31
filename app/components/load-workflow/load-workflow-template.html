@@ -1,0 +1,36 @@
+<div>
+    <h1>{{show}}</h1>
+    <modal-component :show.sync="show">
+        <div slot="header">
+            <h4>Expression</h4>
+        </div>
+        <div class="body" slot="body">
+            <em>Construct an expression to transform data</em>
+
+            <ul class="nav nav-tabs">
+                <li :class="{'active': currentTab === 'math'}" @click="selectTab('math')"><a href="#">Math</a></li>
+                <li :class="{'active': currentTab === 'string'}" @click="selectTab('string')"><a href="#">String</a></li>
+                <li :class="{'active': currentTab === 'date'}" @click="selectTab('date')"><a href="#">Date</a></li>
+            </ul>
+            <div class="tab-content">
+                {{currentTab === 'math'}}
+                <div class="tab-pane" :class="{'active': currentTab === 'math'}">
+                    <h3>HOME</h3>
+                    <p>Some content.</p>
+                </div>
+                <div class="tab-pane" :class="{'active': currentTab === 'string'}">
+                    <h3>Menu 1</h3>
+                    <p>Some content in menu 1.</p>
+                </div>
+                <div class="tab-pane" :class="{'active': currentTab === 'date'}">
+                    <span v-for="f in dateFunctions"><button class="btn btn-xs">{{ f }}</button>&nbsp;</span>
+                </div>
+            </div>
+            <textarea type="text" v-model="expression" class="form-control" debounce="1000"></textarea>
+            <div class="label label-info">
+                {{error}}
+            </div>
+            <pre style="height: 300px; overflow:auto"><code>{{{ tree }}}</code></pre>
+        </div>
+    </modal-component>
+</div>

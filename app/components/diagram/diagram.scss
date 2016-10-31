@@ -162,8 +162,7 @@ li.dragging {
       background-color: lighten($color3, 30%);
     }
     &.selected {
-      border-width: 2px !important;
-      xborder-color: $color3 !important;
+      box-shadow: -2px 1px 6px 0px  $color3;
     }
     em {
       top: 55%;

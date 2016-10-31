@@ -2,7 +2,7 @@ import Vue from 'vue';
 import { getCount } from '../vuex/getters';
 import { getOperations } from '../vuex/getters';
 
-const EdgeComponent = Vue.extend({
+const FlowComponent = Vue.extend({
     beforeDestroy() {
         try {
             if (this.connection) {
@@ -17,9 +17,14 @@ const EdgeComponent = Vue.extend({
         instance: null
     },
     ready() {
-        this.connection = this.instance.connect(this.flow);
+        let uuids = this.flow.uuids;
+        if (! uuids) {
+            uuids = [`${this.flow['source_id']}/${this.flow['source_port']}`, 
+                `${this.flow['target_id']}/${this.flow['target_port']}`];
+        }
+        this.connection = this.instance.connect({uuids: uuids});
     },
 
 });
 
-export default EdgeComponent;
+export default FlowComponent;

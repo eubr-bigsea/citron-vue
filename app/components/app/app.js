@@ -6,27 +6,37 @@ import store from '../vuex/store';
 
 import DiagramComponent from '../diagram/diagram';
 import ToolbarComponent from '../toolbox/toolbox';
+import LoadWorkflowComponent from '../load-workflow/load-workflow';
 
 import { loadOperations, updateTaskFormField, changeLanguage, login } from '../vuex/actions'; 
 import { getGroupedOperations, getLanguage, getUser } from '../vuex/getters';
-import {CleanMissingComponent, DataReaderComponent, 
-    EmptyPropertiesComponent, ProjectionComponent, 
-    PropertyDescriptionComponent, PublishAsVisualizationComponent, 
-    SplitComponent,
-    TransformationComponent,
 
+
+import {
+    /*CleanMissingComponent, DataReaderComponent,
+    ProjectionComponent, 
+    PublishAsVisualizationComponent, 
+    TransformationComponent,
+    SplitComponent,
+    */ 
+    EmptyPropertiesComponent, 
+    PropertyDescriptionComponent, 
     IntegerComponent, DecimalComponent, CheckboxComponent, DropDownComponent, RangeComponent,
-    TextComponent, TextAreaComponent, ColorComponent, IndeterminatedCheckboxComponent
+    TextComponent, TextAreaComponent, ColorComponent, IndeterminatedCheckboxComponent, LookupComponent,
+    AttributeSelectorComponent
  } 
     from '../properties/properties-components.js';
 
 const slug2Component = {
+    /*
     'data-reader': DataReaderComponent,
     'split': SplitComponent,
     'clean-missing': CleanMissingComponent,
     'projection': ProjectionComponent,
     'publish-as-visualization': PublishAsVisualizationComponent,
-    'transformation': TransformationComponent
+    'transformation': TransformationComponent,
+    'lookup': LookupComponent
+    */
 };
 
 const AppComponent = Vue.extend({
@@ -49,16 +59,18 @@ const AppComponent = Vue.extend({
         'diagram-component': DiagramComponent,
         'property-description-component': PropertyDescriptionComponent,
         
-        'attribute-selector-component': ProjectionComponent,
-        'integer-component': IntegerComponent,
-        'decimal-component': DecimalComponent,
+        'attribute-selector-component': AttributeSelectorComponent,
         'checkbox-component': CheckboxComponent,
-        'indeterminated-checkbox-component': IndeterminatedCheckboxComponent,
+        'color-component': ColorComponent,
+        'decimal-component': DecimalComponent,
         'dropdown-component': DropDownComponent,
+        'indeterminated-checkbox-component': IndeterminatedCheckboxComponent,
+        'integer-component': IntegerComponent,
+        'load-workflow-component': LoadWorkflowComponent,
+        'lookup-component': LookupComponent,
         'range-component': RangeComponent, 
         'text-component': TextComponent,
         'textarea-component': TextAreaComponent,
-        'color-component': ColorComponent,
 
         /*
         'empty-properties-component': EmptyPropertiesComponent,
@@ -75,14 +87,19 @@ const AppComponent = Vue.extend({
             filled: {},
             task: {operation: ''},
             title: 'Operations',
-            username: '', passwd: ''
+            username: '', passwd: '', 
+            showModalLoadWorkflow: false
         }
     },
     ready() {
+        console.debug(LoadWorkflowComponent)
         this.init();
     },
     events: {
         'update-operations': function (operations) {
+        },
+        'load-workflow': function(){
+            this.showModalLoadWorkflow = true;
         },
         'update-form-field-value': function (field, value) {
             //console.debug(value, this.task);
@@ -92,16 +109,21 @@ const AppComponent = Vue.extend({
                 filled.value = value;
             }
         },
-        'onclick-task': function (taskComponent) {
+        'onclick-task-in-diagram': function (task) {
             /* An task (operation instance) was clicked in the diagram */
             //this.operation = task.operation;
             //console.debug('Slug:', task.task.operation.slug, 
             //    slug2Component[task.task.operation.slug])
             // this.currentComponent = slug2Component[task.task.operation.slug];
-            this.task = taskComponent.task;
-            this.filledForm = taskComponent.task.forms;
-            this.forms = taskComponent.task.operation.forms;
+            this.task = task;
+            this.filledForm = task.forms;
+            this.forms = task.operation.forms;
         },
+        'onclear-selection': function(){
+            this.task = null;
+            this.filledForm = null;
+            this.forms = null;
+        }
     },
     methods: {
         init() {
@@ -114,6 +136,9 @@ const AppComponent = Vue.extend({
                     minScrollbarLength: 20
                 });
             }
+        },
+        getValue(name){
+            return this.task && this.task.forms && this.task.forms[name] ? this.task.forms[name].value: null;
         },
         doLogin(ev){
             console.debug(this.username, this.passwd);

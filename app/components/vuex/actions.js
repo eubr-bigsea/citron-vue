@@ -25,11 +25,19 @@ const updateTaskFormField = function ({ dispatch, state }, task, value) {
 const changeLanguage = function ({ dispatch, state }, lang) {
     return dispatch('CHANGE_LANGUAGE', lang);
 }
+const changeWorkflowName = function({dispatch, state}, name){
+    return dispatch('CHANGE_WORKFLOW_NAME', name)
+}
+const changeWorkflowId = function({dispatch, state}, id){
+    return dispatch('CHANGE_WORKFLOW_ID', id)
+}
 /* Auth */
 const login = function({dispatch, state}, login, passwd){
     return dispatch('LOGIN', login, passwd);
 }
-
+const saveWorkflow = function({dispatch, state}) {
+    return dispatch('SAVE_WORKFLOW');
+}
 export {
     loadOperations, 
     addTask, removeTask, clearTasks, 
@@ -38,4 +46,6 @@ export {
     addFlow, removeFlow, clearFlows,
 
     login,
+    changeWorkflowName, changeWorkflowId,
+    saveWorkflow,
 };

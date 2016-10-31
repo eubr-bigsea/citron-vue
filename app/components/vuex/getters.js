@@ -24,8 +24,12 @@ function getOperationFromId({ dispatch, state }, id) {
         return v.id === parseInt(id);
     });
 }
+function getWorkflow(state) {
+    return state.workflow;
+}
 export {
     getCount, getOperations, getGroupedOperations, getTasks, getFlows, getLanguage,
     getOperationFromId,
-    getUser
+    getUser,
+    getWorkflow
 }
