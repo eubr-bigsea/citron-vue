@@ -38,17 +38,17 @@ const login = function({dispatch, state}, login, passwd){
 const saveWorkflow = function({dispatch, state}) {
     return dispatch('SAVE_WORKFLOW');
 }
-const loadWorkflow = function({dispatch, state}) {
-    return dispatch('LOAD_WORKFLOW');
+const loadWorkflow = function({dispatch, state}, graph) {
+    return dispatch('LOAD_WORKFLOW', graph);
 }
-export {
-    loadOperations, 
-    addTask, removeTask, clearTasks, 
-    updateTaskFormField, changeLanguage,
+const clearEdges = function ({ dispatch, state }) {
+    return dispatch('CLEAR_EDGES');
+}
 
-    addFlow, removeFlow, clearFlows,
-
-    login,
-    changeWorkflowName, changeWorkflowId,
-    saveWorkflow, loadWorkflow
-};
+const updateNodeFormField = function ({ dispatch, state }, node, value) {
+    return dispatch('UPDATE_NODE_FORM_FIELD');
+}
+export {loadOperations, addTask, removeTask, 
+    clearTasks, addFlow, removeFlow, clearFlows, updateTaskFormField, changeLanguage, changeWorkflowName,
+    changeWorkflowId, login, saveWorkflow, loadWorkflow, clearEdges, updateNodeFormField
+}

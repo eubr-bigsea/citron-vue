@@ -185,9 +185,9 @@ const DiagramComponent = Vue.extend({
         /*
         taskSelect(ev) {
             console.debug('xxx', ev)
-            if (ev.currentTarget.classList.contains("task")) {
-                var tasks = document.querySelectorAll(".task.selected");
-                Array.prototype.slice.call(tasks, 0).forEach(e => {
+            if (ev.currentTarget.classList.contains("node")) {
+                var nodes = document.querySelectorAll(".node.selected");
+                Array.prototype.slice.call(nodes, 0).forEach(e => {
                     e.classList.remove('selected');
                 });
                 ev.currentTarget.classList.add('selected');
@@ -209,8 +209,8 @@ const DiagramComponent = Vue.extend({
                 radius: 1,
                 strokeStyle: "rgba(242, 141, 0, 1)"
             })
-            let tasks = document.querySelectorAll(".task.selected");
-            Array.prototype.slice.call(tasks, 0).forEach(e => {
+            let nodes = document.querySelectorAll(".node.selected");
+            Array.prototype.slice.call(nodes, 0).forEach(e => {
                 e.classList.remove('selected');
             });
             e.stopPropagation();
@@ -224,18 +224,14 @@ const DiagramComponent = Vue.extend({
             ev.preventDefault();
 
             let operation = this.getOperationFromId(ev.dataTransfer.getData('id'))[0];
-            if (! operation) {
-                return;
-            }
 
             let classes = operation.categories.map((c) => {
                 return c.type.replace(' ', '-');
             }).join(' ');
-            self.addTask({
-                id: self.generateId(), operation, operation_id: operation.id,
-                left: ev.offsetX, top: ev.offsetY, z_index: ++self.currentZIndex, classes
-            });
-            //this.$dispatch('onclick-task-in-diagram', taskComponent);
+            self.addNode({
+                id: self.generateId(), operation,
+                x: ev.offsetX, y: ev.offsetY, zIndex: ++self.currentZIndex, classes
+            })
         },
         allowDrop(ev) {
             ev.preventDefault();
@@ -283,7 +279,7 @@ const DiagramComponent = Vue.extend({
         loadSample(ev) {
             let graph = JSON.parse(
                 document.getElementById('sample-' + ev.target.dataset.sampleId).innerText.replace('\n', ''));
-            this.innerLoad(graph);
+            this.loadWorkflow(graph);
         },
         load(ev) {
             //let graph = JSON.parse(document.getElementById('save-area').value);
@@ -307,7 +303,24 @@ const DiagramComponent = Vue.extend({
                 });
 
             });
-            graph.flows.forEach(self.addFlow);
+            //self.instance.repaintEverything();
+        },
+        save() {
+            let result = { nodes: this.nodes, edges: this.edges };
+            let tmp = document.getElementsByTagName('textarea');
+            if (tmp.length) {
+                tmp[0].value = JSON.stringify(result,
+                    (key, value) => {
+                        if (key === 'operation'){
+                            return value.id;
+                        } else if (key === 'classes') {
+                            return undefined;
+                        } else {
+                            return value;
+                        }
+                    });
+            }
+            return result;
         },
         
         setZoom(zoom, instance, transformOrigin, el) {

@@ -96,9 +96,9 @@ const TaskComponent = Vue.extend({
     methods: {
         click(ev) {
             let self = this;
-            let elem = ev.target.classList.contains('task') ? ev.target : ev.target.parentElement;
+            let elem = ev.target.classList.contains('node') ? ev.target : ev.target.parentElement;
             
-            Array.prototype.slice.call(document.querySelectorAll(".task.selected"), 0).forEach((e) => {
+            Array.prototype.slice.call(document.querySelectorAll(".node.selected"), 0).forEach((e) => {
                 e.classList.remove('selected');
             });
             if (ev.ctrlKey) {

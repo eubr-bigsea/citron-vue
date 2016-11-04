@@ -23,13 +23,13 @@ const state = {
 }
 const baseUrl = 'http://beta.ctweb.inweb.org.br/tahiti';
 //const baseUrl = 'http://artemis:5000'; 
-function getWorkflows(){
+function getWorkflows() {
     let url = `${baseUrl}/workflows?token=123456`;
     return Vue.http.get(url).then(function (response) {
         return response.data;
     })
 }
-function getWorkflow(id){
+function getWorkflow(id) {
     let url = `${baseUrl}/workflows${id}?token=123456`;
     return Vue.http.get(url).then(function (response) {
         return response.data;
@@ -43,9 +43,48 @@ function getOperations() {
         return response.data;
     })
 }
+function loadWorkflow(state, workflow) {
+    workflow.tasks.forEach((t) => {
+        t.operation = state.lookupOperations[t.operation.id];
+    });
+    /* Cannot bind flows before binding tasks */
+    let flows = workflow.flows;
+    workflow.flows = [];
+    let ids = new Set();
+
+    /* If tasks did not load forms, do it */
+    workflow.tasks.forEach((task) => {
+        if (!task.forms) {
+            task.forms = {};
+            task.operation.forms.forEach((form) => {
+                form.fields.forEach((field) => {
+                    task.forms[field.name] = {
+                        "value": null,
+                        "category": form.name
+                    }
+                });
+            });
+        }
+    });
+
+    //console.debug(JSON.stringify(workflow.flows));
+    state.workflow = workflow;
+    flows.forEach((flow) => {
+        flow.id = `${flow.source_id}/${flow.source_port}-${flow.target_id}/${flow.target_port}`;
+        //console.debug(flow.id);
+        if (!ids.has(flow.id)) {
+            workflow.flows.push(flow);
+            ids.add(flow.id)
+        }
+    });
+}
 const mutations = {
     LOAD_OPERATIONS(state) {
-        getOperations().then(function (data) {
+        //let url = 'http://beta.ctweb.inweb.org.br/tahiti/operations?token=123456';
+        let url = 'http://localhost:5000/operations?token=123456&lang=en';
+        Vue.http.get(url).then(function (response) {
+            return response.data;
+        }).then(function (data) {
             let groupedOps = {};
             data.forEach((op) => {
                 op.categories.forEach((cat) => {
@@ -66,11 +105,10 @@ const mutations = {
             state.errors.push(error);
         });
     },
-    UPDATE_TASK_FORM_FIELD(state, task, value) {
+    UPDATE_task_FORM_FIELD(state, task, value) {
         console.debug(task, value);
     },
     ADD_TASK(state, task) {
-        //console.debug(task);
         /* creates the form for each task */
         let a = [];
         task.forms = {};
@@ -83,14 +121,6 @@ const mutations = {
             });
         });
         state.workflow.tasks.push(task);
-    },
-    REMOVE_TASK(state, task) {
-        let inx = state.workflow.tasks.findIndex((n, inx, arr) => n.id === task.id);
-        console.debug('removing', inx)
-        state.workflow.tasks.splice(inx, 1);
-    },
-    CLEAR_TASKS(state) {
-        state.workflow.tasks.length = 0;
     },
     ADD_FLOW(state, flow) {
         flow.id = `${flow.source_id}/${flow.source_port}-${flow.target_id}/${flow.target_port}`;
@@ -105,6 +135,9 @@ const mutations = {
     },
     CLEAR_FLOWS(state) {
         state.workflow.flows.length = 0;
+    },
+    CLEAR_TASKS(state) {
+        state.workflow.tasks.length = 0;
     },
     CHANGE_LANGUAGE(state, lang) {
         state.language = lang;
@@ -152,15 +185,15 @@ const mutations = {
     SAVE_WORKFLOW(state) {
         let cloned = JSON.parse(JSON.stringify(state.workflow));
         let tmp = document.getElementById('save-area');
-    
+
         let url = `${baseUrl}/workflows`;
-        let headers = {'Content-Type': 'application/json', 'X-Auth-Token': '123456'}
+        let headers = { 'Content-Type': 'application/json', 'X-Auth-Token': '123456' }
         let httpMethod = 'post';
-        if (cloned.id !== 0){
+        if (cloned.id !== 0) {
             httpMethod = 'patch';
             url = `${url}/${cloned.id}`;
-        } 
-        Vue.http[httpMethod](url, cloned, {headers}).then((response) => {
+        }
+        Vue.http[httpMethod](url, cloned, { headers }).then((response) => {
             console.debug(response);
             return response.data;
         });
@@ -169,7 +202,7 @@ const mutations = {
                 (key, value) => {
                     if (key === 'operation') {
                         const op = state.lookupOperations[value.id];
-                        if (op){
+                        if (op) {
                             return { name: op.name, slug: op.slug, id: op.id };
                         } else {
                             return {}
@@ -182,34 +215,20 @@ const mutations = {
                 });
         }
     },
-    LOAD_WORKFLOW(state) {
+    LOAD_WORKFLOW(state, graph) {
         let id = 21401;
         let url = `${baseUrl}/workflows/${id}`;
-        let headers = {'X-Auth-Token': '123456'}
+        let headers = { 'X-Auth-Token': '123456' }
 
-        Vue.http.get(url, {headers}).then(response => {
-            // Set the correct operation object
-            let workflow = response.data;
-            workflow.tasks.forEach((t) => {
-                t.operation = state.lookupOperations[t.operation.id];
+        if (!graph) {
+            Vue.http.get(url, { headers }).then(response => {
+                // Set the correct operation object
+                let workflow = response.data;
+                loadWorkflow(state, workflow);
             });
-            /* Cannot bind flows before binding tasks */
-            let flows = workflow.flows;
-            workflow.flows = [];
-            let ids = new Set();
-
-            //console.debug(JSON.stringify(workflow.flows));
-            state.workflow = workflow;
-            flows.forEach((flow) => {
-                flow.id = `${flow.source_id}/${flow.source_port}-${flow.target_id}/${flow.target_port}`;
-                //console.debug(flow.id);
-                if (!ids.has(flow.id)) {
-                    workflow.flows.push(flow);
-                    ids.add(flow.id)
-                }
-            });
-            
-        });
+        } else {
+            loadWorkflow(state, graph);
+        }
     }
 
 }

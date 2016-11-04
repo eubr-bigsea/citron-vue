@@ -88,30 +88,27 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row hide">
-            <div class="col-md-12">
-                  <div style="text-align: left">
-                    <small><pre><code class="python"></code></pre></small>
-                </div>
-                <textarea class="form-control" style="font-size:8pt" rows="10" id="save-area"></textarea>
-            </div>
-        </div>
-        <div class="hide">
-            <load-workflow-component :show.sync="showModalLoadWorkflow"></load-workflow-component>
-        </div>
-    </div>
-    <div v-else>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-4"></div>
-    
-                <div class="col-md-4">
-                    <section class="login-form">
-                        <form method="post" action="#" role="login">
-                            <div class="logo">
-                                <img src=""/>
-                                <strong>Lemonade</strong>
+
+            <div class="col-md-3">
+
+                <div class="panel panel-inverse panel-info lemonade-properties">
+                    <div class="panel-heading">
+                        Properties
+                    </div>
+                    <div class="panel-block">
+                        <div id="properties-form" class="container">
+                            <div>
+                                <h4>{{task.operation.name}}</h4>
+                                <!--
+                                <component :is="currentComponent" :task="task" keep-alive :forms="forms"></component>
+                                -->
+                                <fieldset v-for="form in forms">
+                                    <legend>{{form.name}}</legend>
+                                    <div v-for="field in form.fields">
+                                        <component :is="field.suggested_widget + '-component'" :task="task" keep-alive :field="field" :value="filledForm[field.name].value"></component>
+                                    </div>
+                                </fieldset>
+                                <property-description-component :task="task" />
                             </div>
 
                             <br/>

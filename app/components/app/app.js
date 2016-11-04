@@ -8,22 +8,16 @@ import DiagramComponent from '../diagram/diagram';
 import ToolbarComponent from '../toolbox/toolbox';
 import LoadWorkflowComponent from '../load-workflow/load-workflow';
 
-import { loadOperations, updateTaskFormField, changeLanguage, login } from '../vuex/actions'; 
-import { getGroupedOperations, getLanguage, getUser } from '../vuex/getters';
-
-
-import {
-    /*CleanMissingComponent, DataReaderComponent,
-    ProjectionComponent, 
-    PublishAsVisualizationComponent, 
-    TransformationComponent,
+import { loadOperations, updateNodeFormField } from '../vuex/actions';
+import { getOperations, getGroupedOperations, getLanguage, getUser } from '../vuex/getters';
+import {CleanMissingComponent, DataReaderComponent, 
+    EmptyPropertiesComponent, ProjectionComponent, 
+    PropertyDescriptionComponent, PublishAsVisualizationComponent, 
     SplitComponent,
-    */ 
-    EmptyPropertiesComponent, 
-    PropertyDescriptionComponent, 
+    TransformationComponent,
+
     IntegerComponent, DecimalComponent, CheckboxComponent, DropDownComponent, RangeComponent,
-    TextComponent, TextAreaComponent, ColorComponent, IndeterminatedCheckboxComponent, LookupComponent,
-    AttributeSelectorComponent, PercentageComponent
+    TextComponent, TextAreaComponent, ColorComponent, LookupComponent
  } 
     from '../properties/properties-components.js';
 
@@ -44,9 +38,7 @@ const AppComponent = Vue.extend({
     vuex: {
         actions: {
             loadOperations,
-            updateTaskFormField,
-            changeLanguage,
-            login,
+            updateNodeFormField,
         },
         getters: {
             groupedOperations: getGroupedOperations,
@@ -59,19 +51,16 @@ const AppComponent = Vue.extend({
         'diagram-component': DiagramComponent,
         'property-description-component': PropertyDescriptionComponent,
         
-        'attribute-selector-component': AttributeSelectorComponent,
-        'checkbox-component': CheckboxComponent,
         'color-component': ColorComponent,
-        'decimal-component': DecimalComponent,
-        'dropdown-component': DropDownComponent,
-        'indeterminated-checkbox-component': IndeterminatedCheckboxComponent,
+        'attribute-selector-component': ProjectionComponent,
         'integer-component': IntegerComponent,
-        'load-workflow-component': LoadWorkflowComponent,
-        'lookup-component': LookupComponent,
+        'decimal-component': DecimalComponent,
+        'checkbox-component': CheckboxComponent,
+        'dropdown-component': DropDownComponent,
         'range-component': RangeComponent, 
         'text-component': TextComponent,
         'textarea-component': TextAreaComponent,
-        'percentage-component': PercentageComponent
+        'lookup-component': LookupComponent,
 
         /*
         'empty-properties-component': EmptyPropertiesComponent,
@@ -102,6 +91,22 @@ const AppComponent = Vue.extend({
         'load-workflow': function(){
             this.showModalLoadWorkflow = true;
         },
+        'update-form-field-value': function (field, value) {
+            //console.debug(value, this.node);
+            //console.debug(this.node.forms[field.name])
+            let filled = this.node.forms[field.name];
+            if (filled) {
+                filled.value = value;
+            }
+        },
+        /*
+        'onclick-task': function (task) {
+            debugger
+            this.node = task.node;
+            this.filled = task.node.forms;
+            this.forms = task.node.operation.forms;
+        },
+        */
         'update-form-field-value': function (field, value) {
             //console.debug(value, this.task);
             //console.debug(this.task.forms[field.name])
