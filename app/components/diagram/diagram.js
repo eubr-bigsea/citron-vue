@@ -6,7 +6,7 @@ import PerfectScrollbarCss from 'perfect-scrollbar/dist/css/perfect-scrollbar.cs
 import template from './diagram-template.html';
 
 import {addTask, removeTask, clearTasks, addFlow, removeFlow, 
-    clearFlows, changeWorkflowName, saveWorkflow, changeWorkflowId } from '../vuex/actions';
+    clearFlows, changeWorkflowName, saveWorkflow, loadWorkflow, changeWorkflowId } from '../vuex/actions';
 import { getOperationFromId, getFlows, getTasks, getWorkflow } from '../vuex/getters';
 import {CleanMissingComponent, DataReaderComponent, EmptyPropertiesComponent, 
     SplitComponent, PropertyDescriptionComponent} 
@@ -45,7 +45,8 @@ const DiagramComponent = Vue.extend({
             getOperationFromId,
             addTask, removeTask, clearTasks,
             addFlow, removeFlow, clearFlows,
-            changeWorkflowName, saveWorkflow,
+            changeWorkflowName, 
+            saveWorkflow, loadWorkflow,
             changeWorkflowId,
         },
         getters: {
@@ -137,13 +138,19 @@ const DiagramComponent = Vue.extend({
                 });
                 self.instance.bind("click", self.flowClick);
 
-                self.instance.bind('connection', function (info, originalEvent) {
+                self.instance.bind('connectionDetached', (info, originalEvent) => {
+                    let source = info.sourceEndpoint.getUuid();
+                    let target = info.targetEndpoint.getUuid();
+                    
+                    self.removeFlow(source + '-' + target);
+                });
+                self.instance.bind('connection', (info, originalEvent) => {
                     let con = info.connection;
                     var arr = self.instance.select({ source: con.sourceId, target: con.targetId });
-                    if (arr.length > 1 && false) { // @FIXME Review
-                        self.instance.detach(con);
+                    if (arr.length > 1) { // @FIXME Review
+                        // self.instance.detach(con);
                     } else if (originalEvent) {
-                        self.instance.detach(con);
+                        //self.instance.detach(con);
                         let [source_id, source_port] = info.sourceEndpoint.getUuid().split('/');
                         let [target_id, target_port] = info.targetEndpoint.getUuid().split('/');
                         self.addFlow({
@@ -279,8 +286,9 @@ const DiagramComponent = Vue.extend({
             this.innerLoad(graph);
         },
         load(ev) {
-            let graph = JSON.parse(document.getElementById('save-area').value);
-            this.innerLoad(graph);
+            //let graph = JSON.parse(document.getElementById('save-area').value);
+            this.loadWorkflow();
+            //this.innerLoad(graph);
             //this.$dispatch('load-workflow');
         },
         innerLoad(graph) {

@@ -31,7 +31,7 @@ const anchors = {
         ]
     ]
 }
-const connectorType = ['Flowchart', 'Bezier', 'StateMachine'][2];
+const connectorType = ['Flowchart', 'Bezier', 'StateMachine'][0];
 const connectorPaintStyle = {
     lineWidth: 1,
     radius: 8,

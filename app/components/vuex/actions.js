@@ -13,8 +13,8 @@ const clearTasks = function ({ dispatch, state }) {
 const addFlow = function ({ dispatch, state }, flow) {
     return dispatch('ADD_FLOW', flow);
 }
-const removeFlow = function ({ dispatch, state }, flow) {
-    return dispatch('REMOVE_FLOW', flow);
+const removeFlow = function ({ dispatch, state }, id) {
+    return dispatch('REMOVE_FLOW', id);
 }
 const clearFlows = function ({ dispatch, state }) {
     return dispatch('CLEAR_FLOWS');
@@ -38,6 +38,9 @@ const login = function({dispatch, state}, login, passwd){
 const saveWorkflow = function({dispatch, state}) {
     return dispatch('SAVE_WORKFLOW');
 }
+const loadWorkflow = function({dispatch, state}) {
+    return dispatch('LOAD_WORKFLOW');
+}
 export {
     loadOperations, 
     addTask, removeTask, clearTasks, 
@@ -47,5 +50,5 @@ export {
 
     login,
     changeWorkflowName, changeWorkflowId,
-    saveWorkflow,
+    saveWorkflow, loadWorkflow
 };

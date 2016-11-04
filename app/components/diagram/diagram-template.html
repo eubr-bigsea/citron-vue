@@ -3,7 +3,9 @@
         <div class="row">
             <div class="col-md-5" style="margin-left: 18px;padding-top:5px">
                 <input type="text" placeholder="Unnamed workflow" class="form-control" :value="workflow.name" @keyUp="doChangeWorkflowName | debounce 500"/>
+                <!--
                 <input type="text" placeholder="#Id" class="form-control" :value="workflow.id" @keyUp="doChangeWorkflowId | debounce 500"/>
+                -->
             </div>
             <div class="col-md-6">
                 <div class="buttons-toolbar btn-group pull-right diagram-toolbar">
@@ -36,7 +38,7 @@
         </div>
     </div>
     <div>
-        <div class="lemonade-container" id="lemonade-container" style="height: calc(100vh - 170px); width:100%; position: relative; overflow:hidden">
+        <div class="lemonade-container" id="lemonade-container">
             <div class="lemonade" v-on:drop="drop" v-on:dragover="allowDrop" id="lemonade-diagram">
                 <!-- 46 is delete key and tabindex is required to handle div keyup -->
                 <div class="diagram" v-on:click="diagramClick" v-on:keyup.46="deleteSelected">

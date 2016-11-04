@@ -23,7 +23,7 @@ import {
     PropertyDescriptionComponent, 
     IntegerComponent, DecimalComponent, CheckboxComponent, DropDownComponent, RangeComponent,
     TextComponent, TextAreaComponent, ColorComponent, IndeterminatedCheckboxComponent, LookupComponent,
-    AttributeSelectorComponent
+    AttributeSelectorComponent, PercentageComponent
  } 
     from '../properties/properties-components.js';
 
@@ -71,6 +71,7 @@ const AppComponent = Vue.extend({
         'range-component': RangeComponent, 
         'text-component': TextComponent,
         'textarea-component': TextAreaComponent,
+        'percentage-component': PercentageComponent
 
         /*
         'empty-properties-component': EmptyPropertiesComponent,
@@ -117,7 +118,9 @@ const AppComponent = Vue.extend({
             // this.currentComponent = slug2Component[task.task.operation.slug];
             this.task = task;
             this.filledForm = task.forms;
-            this.forms = task.operation.forms;
+            this.forms = task.operation.forms.sort((a, b) => {
+                return a.order - b.order;
+            });
         },
         'onclear-selection': function(){
             this.task = null;

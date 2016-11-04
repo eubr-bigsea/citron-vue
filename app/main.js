@@ -13,6 +13,7 @@ import "bootstrap-sass/assets/stylesheets/_bootstrap.scss";
 import './components/app/app.scss';
 
 Vue.use(VueResource);
+Vue.config.async = false;
 
 new Vue({
     el: '#app',

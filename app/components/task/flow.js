@@ -6,7 +6,7 @@ const FlowComponent = Vue.extend({
     beforeDestroy() {
         try {
             if (this.connection) {
-                this.instance.detach(this.connection);
+                //this.instance.detach(this.connection);
             }
         } catch (e) {
             //silently
@@ -24,7 +24,7 @@ const FlowComponent = Vue.extend({
         }
         this.connection = this.instance.connect({uuids: uuids});
     },
-
+    template: '<div class="hide" id="{{ flow.id }}""></div>'
 });
 
 export default FlowComponent;

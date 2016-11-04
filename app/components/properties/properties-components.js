@@ -207,6 +207,26 @@ const RangeComponent = Vue.extend({
     '<span class="tag tag-pill tag-info">{{value}}% - {{100-value}}%</span>' +
     '</div>',
 });
+
+const PercentageComponent = Vue.extend({
+    data() {
+        return {
+            //percentage: 1,
+        };
+    },
+    methods: {
+        updated(e) {
+            //this.percentage = parseFloat(e.target.value);
+            this.$dispatch('update-form-field-value', this.field, e.target.value);
+        }
+    },
+    props: { value: 50, field: null },
+    template: '<div>' + baseLabel +
+    '<input type="range" class="form-control" :value="value" @input="updated" min=".1" max="99.9" step="0.1"/>' +
+    '<span class="tag tag-pill tag-info">{{value}}%</span>' +
+    '</div>',
+});
+
 const ColorComponent = Vue.extend({
     computed: {
         pairOptionValueList() {
@@ -281,5 +301,6 @@ export {
     PropertyDescriptionComponent,
 
     DecimalComponent, IntegerComponent, CheckboxComponent, DropDownComponent, RangeComponent, TextComponent,
-    TextAreaComponent, ColorComponent, IndeterminatedCheckboxComponent, LookupComponent, AttributeSelectorComponent
+    TextAreaComponent, ColorComponent, IndeterminatedCheckboxComponent, LookupComponent, AttributeSelectorComponent,
+    PercentageComponent
 };

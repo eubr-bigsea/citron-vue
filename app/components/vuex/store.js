@@ -21,8 +21,8 @@ const state = {
         flows: []
     }
 }
-//const baseUrl = 'http://beta.ctweb.inweb.org.br/tahiti';
-const baseUrl = 'http://artemis:5000'; 
+const baseUrl = 'http://beta.ctweb.inweb.org.br/tahiti';
+//const baseUrl = 'http://artemis:5000'; 
 function getWorkflows(){
     let url = `${baseUrl}/workflows?token=123456`;
     return Vue.http.get(url).then(function (response) {
@@ -93,10 +93,15 @@ const mutations = {
         state.workflow.tasks.length = 0;
     },
     ADD_FLOW(state, flow) {
+        flow.id = `${flow.source_id}/${flow.source_port}-${flow.target_id}/${flow.target_port}`;
         state.workflow.flows.push(flow);
     },
-    REMOVE_FLOW(state, flow) {
-        console.debug('remove flow')
+    REMOVE_FLOW(state, id) {
+        let inx = state.workflow.flows.findIndex((n, inx, arr) => n.id === id);
+        console.debug('removing', inx)
+        if (inx > -1) {
+            state.workflow.flows.splice(inx, 1);
+        }
     },
     CLEAR_FLOWS(state) {
         state.workflow.flows.length = 0;
@@ -155,7 +160,7 @@ const mutations = {
             httpMethod = 'patch';
             url = `${url}/${cloned.id}`;
         } 
-        Vue.http[httpMethod](url, cloned, {headers}).then(function (response) {
+        Vue.http[httpMethod](url, cloned, {headers}).then((response) => {
             console.debug(response);
             return response.data;
         });
@@ -164,7 +169,11 @@ const mutations = {
                 (key, value) => {
                     if (key === 'operation') {
                         const op = state.lookupOperations[value.id];
-                        return { name: op.name, slug: op.slug, id: op.id };
+                        if (op){
+                            return { name: op.name, slug: op.slug, id: op.id };
+                        } else {
+                            return {}
+                        }
                     } else if (key === 'classes') {
                         return undefined;
                     } else {
@@ -172,6 +181,35 @@ const mutations = {
                     }
                 });
         }
+    },
+    LOAD_WORKFLOW(state) {
+        let id = 21401;
+        let url = `${baseUrl}/workflows/${id}`;
+        let headers = {'X-Auth-Token': '123456'}
+
+        Vue.http.get(url, {headers}).then(response => {
+            // Set the correct operation object
+            let workflow = response.data;
+            workflow.tasks.forEach((t) => {
+                t.operation = state.lookupOperations[t.operation.id];
+            });
+            /* Cannot bind flows before binding tasks */
+            let flows = workflow.flows;
+            workflow.flows = [];
+            let ids = new Set();
+
+            //console.debug(JSON.stringify(workflow.flows));
+            state.workflow = workflow;
+            flows.forEach((flow) => {
+                flow.id = `${flow.source_id}/${flow.source_port}-${flow.target_id}/${flow.target_port}`;
+                //console.debug(flow.id);
+                if (!ids.has(flow.id)) {
+                    workflow.flows.push(flow);
+                    ids.add(flow.id)
+                }
+            });
+            
+        });
     }
 
 }

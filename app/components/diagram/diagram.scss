@@ -76,6 +76,10 @@ li.dragging {
 .lemonade-container {
   background: $color6;
   background-image: url(grid1.png);
+  height: calc(100vh - 245px); 
+  overflow:hidden;
+  position: relative; 
+  width:100%; 
 }
 #lemonade, .lemonade {
   position: relative;
@@ -186,7 +190,9 @@ li.dragging {
       width: $elementWidth;
       z-index: 2;
     }
-
+    &.operation:after {
+        mix-blend-mode: difference;
+    }
     strong {
       position: absolute;
       text-align: center;
