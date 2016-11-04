@@ -49,7 +49,7 @@ const endPointPaintStyle = {
     zIndex: 99
 }
 const overlays = [
-    ["Arrow", { location: .90, width: 12, length: 15 }],
+    ["Arrow", { location: .75, width: 12, length: 15 }],
     //["Label", { padding: 10, location: .5, label: '[ <span class="fa fa-dot-circle-o"></span> ]', cssClass: "labelClass" }]
 ];
 
@@ -179,7 +179,7 @@ const TaskComponent = Vue.extend({
                     }
                     let endpoint = self.instance.addEndpoint(elem, options);
                     endpoint.canvas.style.zIndex = zIndex - 1;
-                    endpoint.getOverlay('lbl').canvas.style.zIndex = zIndex - 1;
+                    //endpoint.getOverlay('lbl').canvas.style.zIndex = zIndex - 1;
                     endpoint._portId = ports[inx].id;
                 });
             }

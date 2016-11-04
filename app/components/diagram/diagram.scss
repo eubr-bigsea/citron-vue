@@ -18,7 +18,7 @@ $color5: rgba(102, 155, 188, 1);
 $color6: #fafafa;
 
 $elementWidth: 180px;
-$elementHeight: 60px;
+$elementHeight: 45px;
 
 .sample {
   display: none;
@@ -265,5 +265,5 @@ li.dragging {
   background: transparent;
 }
 .jsplumb-connector {
-  z-index: 9999;
+  z-index: 2;
 }

@@ -1,5 +1,5 @@
 <div class="operation task {{task.classes}}" title="{{ task.operation.description }}" data-operation-id="{{ task.operation.id }}"
-    id="{{ task.id }}" v-bind:style="{zIndex: task.zIndex, top: task.top + 'px', left: task.left + 'px'}" v-on:click="click" :style="{backgroundColor: task.forms.color.value}">
+    id="{{ task.id }}" v-bind:style="{zIndex: task.z_index, top: task.top + 'px', left: task.left + 'px'}" v-on:click="click" :style="{backgroundColor: task.forms.color.value}">
     <strong><span class="fa {{task.operation.icon}}"></span> {{task.operation.name}}</strong>
     <em>{{task.forms.comment.value}}</em>
     <span class="decor">
