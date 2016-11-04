@@ -8,7 +8,7 @@ import DiagramComponent from '../diagram/diagram';
 import ToolbarComponent from '../toolbox/toolbox';
 import LoadWorkflowComponent from '../load-workflow/load-workflow';
 
-import { loadOperations, updateTaskFormField, changeLanguage, login } from '../vuex/actions'; 
+import { loadOperations, updateTaskFormField, changeLanguage, login, connectWebSocket } from '../vuex/actions'; 
 import { getGroupedOperations, getLanguage, getUser } from '../vuex/getters';
 
 
@@ -47,6 +47,7 @@ const AppComponent = Vue.extend({
             updateTaskFormField,
             changeLanguage,
             login,
+            connectWebSocket,
         },
         getters: {
             groupedOperations: getGroupedOperations,
@@ -130,6 +131,7 @@ const AppComponent = Vue.extend({
     },
     methods: {
         init() {
+            this.connectWebSocket();
             if (this.user) {
                 this.loadOperations();
                 let elem = document.getElementById('menu-operations');

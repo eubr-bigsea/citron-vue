@@ -233,7 +233,8 @@ const DiagramComponent = Vue.extend({
             }).join(' ');
             self.addTask({
                 id: self.generateId(), operation, operation_id: operation.id,
-                left: ev.offsetX, top: ev.offsetY, z_index: ++self.currentZIndex, classes
+                left: ev.offsetX, top: ev.offsetY, z_index: ++self.currentZIndex, classes,
+                status: 'WAITING'
             });
             //this.$dispatch('onclick-task-in-diagram', taskComponent);
         },
@@ -303,7 +304,8 @@ const DiagramComponent = Vue.extend({
                 }).join(' ');
                 self.addTask({
                     id: task.id, operation, operation_id: operation.id,
-                    left: task.left || task.x, top: task.top || task.y, z_index: ++self.currentZIndex, classes
+                    left: task.left || task.x, top: task.top || task.y, z_index: ++self.currentZIndex, classes,
+                    status: 'WAITING',
                 });
 
             });

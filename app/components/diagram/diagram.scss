@@ -112,6 +112,29 @@ li.dragging {
         position: absolute;
         right: -10px;
         top: -10px;
+        &.completed {
+            color: blue;
+            font-size: 16pt;
+        }
+        &.running {
+            color: yellow;
+            font-size: 16pt;
+        }
+        &.interrupted {
+            color: black;
+            font-size: 16pt;
+        }
+        &.canceled {
+            color: darkgray;
+            font-size: 16pt;
+        }
+        &.waiting {
+            color: #aaa;
+        }
+        &.error {
+            color: red;
+            font-size: 16pt;
+        }
     }
     &.service {
       background-color: lighten($color5, 30%) !important;

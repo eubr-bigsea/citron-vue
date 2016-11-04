@@ -1,6 +1,6 @@
 import Vuex from 'vuex';
 import Vue from 'vue';
-
+import io from 'socket.io-client'
 Vue.use(Vuex);
 
 const state = {
@@ -192,6 +192,7 @@ const mutations = {
             let workflow = response.data;
             workflow.tasks.forEach((t) => {
                 t.operation = state.lookupOperations[t.operation.id];
+                t.status = 'WAITING';
             });
             /* Cannot bind flows before binding tasks */
             let flows = workflow.flows;
@@ -210,6 +211,30 @@ const mutations = {
             });
             
         });
+    },
+    CONNECT_WEBSOCKET(state) {
+        const standBaseUrl = 'http://artemis:5000';
+        let namespace = '/stand';
+        var counter = 0;
+        var socket = io(standBaseUrl + namespace, {upgrade: true});
+
+        socket.on('disconnect', () => {
+            console.debug('disconnect')
+        });
+        socket.on('connect', () => {
+            socket.emit('join', {room: '21401'});
+        });
+        socket.on('update task', (msg) => {
+            let inx = state.workflow.tasks.findIndex((n, inx, arr) => n.id === msg.id);
+            if (inx > -1){
+                state.workflow.tasks[inx].status = msg.status;
+            }
+            console.debug('update task', msg);
+        });
+        socket.on('update workflow', (msg) => {
+            console.debug('update workflow', msg);
+        });
+        
     }
 
 }

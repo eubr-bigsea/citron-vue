@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import { getCount } from '../vuex/getters';
 import { getOperations } from '../vuex/getters';
 
 const FlowComponent = Vue.extend({

@@ -41,6 +41,9 @@ const saveWorkflow = function({dispatch, state}) {
 const loadWorkflow = function({dispatch, state}) {
     return dispatch('LOAD_WORKFLOW');
 }
+const connectWebSocket = function({dispatch, state}){
+    return dispatch('CONNECT_WEBSOCKET');
+}
 export {
     loadOperations, 
     addTask, removeTask, clearTasks, 
@@ -50,5 +53,7 @@ export {
 
     login,
     changeWorkflowName, changeWorkflowId,
-    saveWorkflow, loadWorkflow
+    saveWorkflow, loadWorkflow,
+
+    connectWebSocket
 };
