@@ -4,9 +4,14 @@ import './modal.scss';
 
 // register modal component
 const ModalComponent = Vue.component('modal', {
+    created(){
+        document.getElementsByTagName('body')[0].style.overflow = 'hidden';
+        console.debug('INICIANDO')
+    },
     methods: {
         close(){
             this.show = false;
+            document.getElementsByTagName('body')[0].style.overflow = 'auto';
         }
     },
     props: {
@@ -14,6 +19,16 @@ const ModalComponent = Vue.component('modal', {
             type: Boolean,
             required: true,
             twoWay: true
+        },
+        cancel: {
+            type: Boolean,
+            required: false,
+            twoWay: false
+        },
+        close: {
+            type: Boolean,
+            required: false,
+            twoWay: false
         }
     },
     ready: function () {

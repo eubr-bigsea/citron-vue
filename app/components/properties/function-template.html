@@ -1,0 +1,66 @@
+<div class="function-editor">
+    <p>
+       {{pairOptionValueList.options.title}}:
+    </p>
+    <p>
+        <button class="btn btn-default flat" @click="showModal = true">
+            <span class="fa fa-gear"></span> Open editor
+        </button>
+    </p>
+
+    <modal-component :show.sync="showModal" :close="true" :cancel="false">
+        <div slot="header">
+            <h4>{{pairOptionValueList.options.title}}</h4>
+            <em>{{pairOptionValueList.options.description}}</em>
+        </div>
+        <div class="body" slot="body">
+            <ul class="nav nav-tabs">
+                <li :class="{'active': currentTab === 'editor'}" @click="selectTab('editor')">
+                    <a href="#">Editor</a>
+                </li>
+                <li :class="{'active': currentTab === 'reference'}" @click="selectTab('reference')">
+                    <a href="#">Reference</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div v-if="currentTab === 'reference'">
+                    <table class="table-striped table-bordered table">
+                        <tr v-for="funct in pairOptionValueList.functions">
+                            <td>{{funct.value}}</td>
+                            <td>{{funct.help}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div v-if="currentTab === 'editor'">
+                    <table class="table table-bordered fixed_headers">
+                        <thead>
+                            <th>Attribute</th>
+                            <th>Function</th>
+                            <th v-if="pairOptionValueList.options.show_alias">Alias</th>
+                            <th v-if="pairOptionValueList.options.show_value">Value (use col('attribute') for attributes)</th>
+                            <th style="width:15%"></th>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(index, row) in value">
+                                <td><input class="form-control" :value="row.attribute" @change="updated($event, row, 'attribute')"></td>
+                                <td>
+                                    <select class="form-control" :value="row.f" @change="updated($event, row, 'f')">
+                                <option v-for="opt in pairOptionValueList.functions" :value="opt.key">{{opt.value}}</option>
+                            </select>
+                                </td>
+                                <td v-if="pairOptionValueList.options.show_alias"><input class="form-control" :value="row.alias" @change="updated($event, row, 'alias')" /></td>
+                                <td v-if="pairOptionValueList.options.show_value"><input class="form-control" :value="row.value" @change="updated($event, row, 'value')" /></td>
+                                <td style="width:15%">
+                                    <a href="#" @click="remove($event, index)"><span class="fa fa-2x fa-minus-circle"></span></a>
+                                    <a href="#" @click="moveUp($event, index)" v-if="index !== 0"><span class="fa fa-2x fa-chevron-circle-up"></span></a>
+                                    <a href="#" @click="moveDown($event, index)" v-if="index !== (value.length-1)"><span class="fa fa-2x fa-chevron-circle-down"></span></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button class="btn btn-success btn-sm" @click="add"><span class="fa fa-plus-circle"></span> Add</button>
+                </div>
+            </div>
+        </div>
+    </modal-component>
+</div>

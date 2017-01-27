@@ -1,35 +1,38 @@
 <div class="expression-editor">
-    <button class="btn btn-default btn-xs" @click="showModal = true"><span class="fa fa-gear"></span> Show configuration</button>
+    <button class="btn btn-default btn-xs" @click="showModal = true">
+        <span class="fa fa-gear"></span> Open editor
+    </button>
 
-    <modal-component :show.sync="showModal">
+    <modal-component :show.sync="showModal" :close="true" cancel="false">
         <div slot="header">
             <h4>Expression</h4>
+            <em>Construct an expression to transform data</em>
         </div>
         <div class="body" slot="body">
-            <em>Construct an expression to transform data</em>
-
+            <h4>Function reference</h4>
             <ul class="nav nav-tabs">
-                <li :class="{'active': currentTab === 'math'}" @click="selectTab('math')"><a href="#">Math</a></li>
-                <li :class="{'active': currentTab === 'string'}" @click="selectTab('string')"><a href="#">String</a></li>
-                <li :class="{'active': currentTab === 'date'}" @click="selectTab('date')"><a href="#">Date</a></li>
+                <li v-for="category in categories" track-by="$index" 
+                    :class="{'active': currentTab === category.category}" @click="selectTab(category.category)">
+                    <a href="#">{{category.category}}</a>
+                </li>
             </ul>
             <div class="tab-content">
-                {{currentTab === 'math'}}
-                <div class="tab-pane" :class="{'active': currentTab === 'math'}">
-                    <h3>HOME</h3>
-                    <p>Some content.</p>
-                </div>
-                <div class="tab-pane" :class="{'active': currentTab === 'string'}">
-                    <h3>Menu 1</h3>
-                    <p>Some content in menu 1.</p>
-                </div>
-                <div class="tab-pane" :class="{'active': currentTab === 'date'}">
-                    <span v-for="f in dateFunctions"><button class="btn btn-xs">{{ f }}</button>&nbsp;</span>
+                <div v-for="category in categories" track-by="$index" class="tab-pane function-list" 
+                    :class="{'active': currentTab === category.category}" @click="selectTab(category.category)">
+                    <table class="table-striped table-bordered table">
+                        <tr v-for="funct in category.functions">
+                            <td>{{funct.name}}</td>
+                            <td>{{funct.help}}</td>
+                            <td>{{funct.syntax}}</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
-            <textarea type="text" v-model="expression" class="form-control" debounce="1000"></textarea>
-            <div class="label label-info">
-                {{error}}
+            <textarea type="text" class="form-control" @keyUp="changed | debounce 500" @paste="changed">{{expression}}</textarea>
+            <div :class="{hide: error === null}">
+                <div class="label label-danger">
+                    {{error}}
+                </div>
             </div>
             <pre style="height: 300px; overflow:auto"><code>{{{ tree }}}</code></pre>
         </div>

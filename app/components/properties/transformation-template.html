@@ -1,5 +1,7 @@
 <div>
     <label>Expression</label>
-    <expression-editor-component expression="(-b + sqrt(pow(b, 2) - 4*a*c))/(2*a)">
+    <!-- ========== {{value}} ==============-->
+    <expression-editor-component :expression="expression"
+        :categories="categories" :current-tab="categories[0].category"> 
     </expression-editor-component>
 </div>

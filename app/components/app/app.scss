@@ -5,10 +5,10 @@ html {
 .slide-up, .slide-down {
     max-height: 0;
     overflow-y: hidden;
-    -webkit-transition: max-height 0.5s ease-in-out;
-    -moz-transition: max-height 0.5s ease-in-out;
-    -o-transition: max-height 0.5s ease-in-out;
-    transition: max-height 0.8s ease-in-out;
+    -webkit-transition: max-height 0.3s ease-in-out;
+    -moz-transition: max-height 0.3s ease-in-out;
+    -o-transition: max-height 0.3s ease-in-out;
+    transition: max-height 0.5s ease-in-out;
 }
 
 .slide-down {
@@ -41,4 +41,13 @@ html {
         font-size: 40px;
         margin-top:10px;
     }
+}
+.minimap {
+    border: 1px solid #222;
+    bottom: 35px;
+    background: #fafafa;
+    height: 200px;
+    position: absolute;
+    right: 0;
+    width: 200px;
 }

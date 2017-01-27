@@ -17,7 +17,8 @@
                 <div class="modal-footer">
                     <slot name="footer">
                         <button class="btn btn-primary" @click="show = false">OK</button>
-                        <button class="btn btn-danger" @click="show = false">Cancel</button>
+                        <button class="btn btn-danger" @click="show = false" v-if="cancel">Cancel</button>
+                        <button class="btn btn-default" @click="show = false" v-if="close">Close</button>
                     </slot>
                 </div>
             </div>

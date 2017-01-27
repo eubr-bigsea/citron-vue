@@ -22,6 +22,11 @@ const FlowComponent = Vue.extend({
                 `${this.flow['target_id']}/${this.flow['target_port']}`];
         }
         this.connection = this.instance.connect({uuids: uuids});
+        if (this.connection){
+            let currentStyle = this.connection.getPaintStyle();
+            currentStyle['strokeStyle'] = this.connection.endpoints[0].getPaintStyle().fillStyle;
+            this.connection.setPaintStyle(currentStyle);
+        }
     },
     template: '<div class="hide" id="{{ flow.id }}""></div>'
 });

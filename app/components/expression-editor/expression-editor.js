@@ -42,26 +42,16 @@ const ExpressionEditorComponent = Vue.extend({
     },
     data(){
         return {
-            currentTab: 'math',
             dateFunctions: [
                 'current_date', 'current_timestamp',
                 'date_add', 'date_format', 'date_sub', 
                 'datediff', 'dayofmonth', 'dayofyear',
 
             ],
-            mathFunctions: [
-                'abs', 'ceil', 
-            ],
-            generalFunctions: [
-                'coalesce', 
-            ],
-            stringFunctions:[
-                'concat', 'date_format'
-            ]
         }
     },
     computed: {
-        tree() {
+        xtree() {
             try {
                 jsep.addBinaryOp("=>", 1);
                 jsep.removeBinaryOp('^');
@@ -76,28 +66,51 @@ const ExpressionEditorComponent = Vue.extend({
         }
     },
     methods: {
-        selectTab(tab){
-            console.debug(tab, '<= selected')
-            this.currentTab = tab;
+        changed(e){
+            try {
+                if (e.target && e.target.value){
+                    let tree = this.process(e.target.value)
+                    this.$dispatch('update-expression', e.target.value, tree);
+                } else {
+                    this.error = null;
+                    this.$dispatch('update-expression', null, null);
+                }
+            } catch (e) {
+                this.error = e;
+            }
         },
-        updatePos(ev) {
-            let ctl = ev.target;
-            console.debug(ctl.selectionStart)
+        process(v){
+            let tree = jsep(v || '');
+            jsep.addBinaryOp("=>", 1);
+            jsep.removeBinaryOp('^');
+            this.error = null;
+            //return htmlize(tree);
+            this.tree = JSON.stringify(tree, null, 4).replace('\n', '<br/>');
+            return tree;
+        },
+        selectTab(tab){
+            this.currentTab = tab;
         },
     },
     props: {
+        categories: [],
+        currentTab: '',
         addOperators: [],
         error: null,
         expression: "",
         removeOperators: [],
-        showModal: true
+        showModal: true,
+        tree: '',
     },
     ready() {
-
+        this.process(this.expression)
     },
     template,
-
-
+    watch: {
+        expression(){
+            this.process(this.expression)
+        }
+    }
 });
 
 export default ExpressionEditorComponent;

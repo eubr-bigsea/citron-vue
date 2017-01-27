@@ -108,7 +108,7 @@ const TaskComponent = Vue.extend({
                 //nothing
             } else {
                 self.instance.clearDragSelection();
-                elem.classList.add('selected');
+                this.$el.classList.add('selected');
                 self.selectedTask = this;
             }
             self.instance.repaintEverything()
@@ -117,6 +117,24 @@ const TaskComponent = Vue.extend({
             self.$dispatch('onclick-task', self);
             ev.stopPropagation();
         },
+        endPointMouseOver(endpoint){
+            console.debug('highlight')
+        },
+        endPointMouseOut(endpoint){
+            console.debug('Out highlight')
+        },
+        getForeColor(backgroundColor){
+            if (backgroundColor){
+                let d = document.createElement("div");
+                d.style.color = backgroundColor.value;
+                //document.body.appendChild(d)
+                //Color in RGB 
+                console.debug(window.getComputedStyle(d).color)
+                //let r, g, b = 
+            } else {
+                return "#222";
+            }
+        }
     },
     props: {
         task: {
@@ -142,6 +160,9 @@ const TaskComponent = Vue.extend({
         let operation = this.task.operation;
         let taskId = this.task.id;
         let elem = document.getElementById(taskId);
+        if (this.task.operation.slug === 'comment'){
+            elem.classList.add('comment');
+        }
         let zIndex = this.task['z_index'];
 
         let outputs = operation.ports.filter((p) => {
@@ -167,17 +188,26 @@ const TaskComponent = Vue.extend({
 
             if (ports.length > 0) {
                 anchors[portType][ports.length - 1].forEach((anchor, inx) => {
-                    lbls[0][1]['label'] = ports[inx].name;
-                    let options = JSON.parse(JSON.stringify(portOptions));;
+                    lbls[0][1]['label'] = `<div class="has-${ports.length}-ports">${ports[inx].name}</div>`;
+                    let options = JSON.parse(JSON.stringify(portOptions)); // clone
+                    options['endpoint'] = ports[inx].multiplicity !== 'ONE' ? 'Rectangle': options['endpoint'];
 
                     options['anchors'] = anchor;
                     options['overlays'] = lbls;
                     options['uuid'] = `${taskId}/${ports[inx].id}`;
                     if (ports[inx].multiplicity !== 'ONE') {
-                        options['maxConnections'] = 10;
-                        options['paintStyle']['fillStyle'] = 'rgba(228, 87, 46, 1)';
+                        options['maxConnections'] = 100;
+                        // options['paintStyle']['fillStyle'] = 'rgba(228, 87, 46, 1)';
                     }
+                    if (ports[inx].interfaces.length && ports[inx].interfaces[0].color){
+                        options['paintStyle']['fillStyle'] = ports[inx].interfaces[0].color;
+                    } else {
+                        console.debug(ports[inx].id, operation.id)
+                    }
+
                     let endpoint = self.instance.addEndpoint(elem, options);
+                    //endpoint.bind('mouseover', this.endPointMouseOver);
+                    //endpoint.bind('mouseout', this.endPointMouseOut);
                     endpoint.canvas.style.zIndex = zIndex - 1;
                     //endpoint.getOverlay('lbl').canvas.style.zIndex = zIndex - 1;
                     endpoint._portId = ports[inx].id;

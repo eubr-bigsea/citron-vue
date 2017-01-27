@@ -13,7 +13,7 @@ const state = {
     user: { state: 'null' },
     workflow: {
         name: "",
-        id: 0,
+        id: 101,
         user_id: 0,
         user_name: "admin",
         user_login: "admin",
@@ -22,7 +22,7 @@ const state = {
     }
 }
 const baseUrl = 'http://beta.ctweb.inweb.org.br/tahiti';
-//const baseUrl = 'http://artemis:5000'; 
+//const baseUrl = 'http://localhost:5000'; 
 function getWorkflows(){
     let url = `${baseUrl}/workflows?token=123456`;
     return Vue.http.get(url).then(function (response) {
@@ -37,11 +37,25 @@ function getWorkflow(id){
 }
 function getOperations() {
     console.debug('Getting tasks')
-    let url = `${baseUrl}/operations?token=123456&lang=${state.language}`;
+    let url = `${baseUrl}/operations?platform=spark&enabled=true&token=123456&lang=${state.language}`;
     //let url = `http://artemis.speed.dcc.ufmg.br:5000/operations?token=123456&lang=${state.language}`;
     return Vue.http.get(url).then(function (response) {
         return response.data;
     })
+}
+function addTask(state, task){
+    //console.debug(task);
+    /* creates the form for each task */
+    let a = [];
+    task.forms = {};
+    task.operation.forms.forEach((form) => {
+        form.fields.forEach((field) => {
+            task.forms[field.name] = {
+                "value": null,
+            }
+        });
+    });
+    state.workflow.tasks.push(task);
 }
 const mutations = {
     LOAD_OPERATIONS(state) {
@@ -70,23 +84,11 @@ const mutations = {
         console.debug(task, value);
     },
     ADD_TASK(state, task) {
-        //console.debug(task);
-        /* creates the form for each task */
-        let a = [];
-        task.forms = {};
-        task.operation.forms.forEach((form) => {
-            form.fields.forEach((field) => {
-                task.forms[field.name] = {
-                    "value": null,
-                    "category": form.name
-                }
-            });
-        });
-        state.workflow.tasks.push(task);
+        addTask(state, task);
+        console.debug('ADD_TASK')
     },
     REMOVE_TASK(state, task) {
         let inx = state.workflow.tasks.findIndex((n, inx, arr) => n.id === task.id);
-        console.debug('removing', inx)
         state.workflow.tasks.splice(inx, 1);
     },
     CLEAR_TASKS(state) {
@@ -98,7 +100,6 @@ const mutations = {
     },
     REMOVE_FLOW(state, id) {
         let inx = state.workflow.flows.findIndex((n, inx, arr) => n.id === id);
-        console.debug('removing', inx)
         if (inx > -1) {
             state.workflow.flows.splice(inx, 1);
         }
@@ -116,7 +117,7 @@ const mutations = {
                 ops[op.id] = op;
                 op.categories.forEach((cat) => {
                     if (cat.type === 'parent') {
-                        if (!(cat.name in groupedOps)) {
+                        if (!(cat.name in groupedOps)) {Acentuação
                             groupedOps[cat.name] = [op];
                         } else {
                             groupedOps[cat.name].push(op);
@@ -160,8 +161,14 @@ const mutations = {
             httpMethod = 'patch';
             url = `${url}/${cloned.id}`;
         } 
+        cloned.platform_id = 1; //FIXME
+        cloned.tasks.forEach((task) => {
+            task.operation = {id: task.operation.id};
+            delete task.version; //
+        });
+        //
         Vue.http[httpMethod](url, cloned, {headers}).then((response) => {
-            console.debug(response);
+            //console.debug(response);
             return response.data;
         });
         if (tmp) {
@@ -183,37 +190,59 @@ const mutations = {
         }
     },
     LOAD_WORKFLOW(state) {
-        let id = 21401;
+        let id = state.workflow.id;
         let url = `${baseUrl}/workflows/${id}`;
         let headers = {'X-Auth-Token': '123456'}
-
+        let validTaskId = new Set([]);
+        let validPorts = new Set([]);
         Vue.http.get(url, {headers}).then(response => {
             // Set the correct operation object
             let workflow = response.data;
             workflow.tasks.forEach((t) => {
+                validTaskId.add(t.id);
                 t.operation = state.lookupOperations[t.operation.id];
                 t.status = 'WAITING';
+                t.operation.ports.forEach(function(v) {validPorts.add(v.id);});
+                
+                t.operation.forms.forEach((form) => {
+                    form.fields.forEach((field) => {
+                        if (! t.forms[field.name]){
+                            t.forms[field.name] = {
+                                "value": null,
+                                "category": form.name
+                            }
+                        }
+                        if (! t.forms[field.name]['category']){
+                            t.forms[field.name]['category'] = form.name;
+                        }
+                    });
+                });
             });
             /* Cannot bind flows before binding tasks */
             let flows = workflow.flows;
             workflow.flows = [];
             let ids = new Set();
 
-            //console.debug(JSON.stringify(workflow.flows));
             state.workflow = workflow;
+            console.debug(validPorts, 'valid')
+            
             flows.forEach((flow) => {
-                flow.id = `${flow.source_id}/${flow.source_port}-${flow.target_id}/${flow.target_port}`;
-                //console.debug(flow.id);
-                if (!ids.has(flow.id)) {
-                    workflow.flows.push(flow);
-                    ids.add(flow.id)
+                if (validTaskId.has(flow.source_id) && validTaskId.has(flow.target_id) 
+                        && validPorts.has(flow.source_port) && validPorts.has(flow.target_port)){
+                    flow.id = `${flow.source_id}/${flow.source_port}-${flow.target_id}/${flow.target_port}`;
+                    //console.debug(flow.id);
+                    if (!ids.has(flow.id)) {
+                        workflow.flows.push(flow);
+                        ids.add(flow.id)
+                    }
                 }
             });
             
         });
     },
     CONNECT_WEBSOCKET(state) {
-        const standBaseUrl = 'http://artemis:5000';
+        return
+        const standBaseUrl = 'http://localhost:3320';
         let namespace = '/stand';
         var counter = 0;
         var socket = io(standBaseUrl + namespace, {upgrade: true});
@@ -224,12 +253,14 @@ const mutations = {
         socket.on('connect', () => {
             socket.emit('join', {room: '21401'});
         });
+        socket.on('connect_error', () => {
+            console.debug('Web socket server offline');
+        });
         socket.on('update task', (msg) => {
             let inx = state.workflow.tasks.findIndex((n, inx, arr) => n.id === msg.id);
             if (inx > -1){
                 state.workflow.tasks[inx].status = msg.status;
             }
-            console.debug('update task', msg);
         });
         socket.on('update workflow', (msg) => {
             console.debug('update workflow', msg);

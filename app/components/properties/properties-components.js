@@ -4,6 +4,7 @@ import vSelect from "vue-select";
 import { getCount } from '../vuex/getters';
 import { getOperations } from '../vuex/getters';
 import ExpressionEditorComponent from '../expression-editor/expression-editor';
+import ModalComponent from '../modal/modal-component.js';
 import Css from './properties.scss';
 
 const CleanMissingComponent = Vue.extend({
@@ -72,7 +73,7 @@ const SplitComponent = Vue.extend({
     props: { task: null },
     template: require('./split-template.html')
 });
-
+/*
 const TransformationComponent = Vue.extend({
     components: {
         'expression-editor-component': ExpressionEditorComponent
@@ -86,7 +87,7 @@ const TransformationComponent = Vue.extend({
     props: { task: null },
     template: require('./transformation-template.html')
 });
-
+*/
 const fieldIsRequiredSymbol = '<span class="fa fa-asterisk" v-show="field.required"></span>'
 const baseLabel = '<p>{{field.label}} ' + fieldIsRequiredSymbol
     + '<span class="fa fa-question-circle-o pull-right" title="{{field.help}}"></span></p>';
@@ -120,7 +121,7 @@ const TextComponent = Vue.extend({
     },
     props: { value: 0, field: null },
     template: '<div>' + baseLabel +
-    '<input type="text" maxlenght="100" class="form-control" :value="value" @input="updated"/></div>',
+    '<input type="text" maxlenght="100" class="form-control" :value="value" @input="updated" v-bind:required="field.required"/></div>',
 });
 
 
@@ -161,12 +162,28 @@ const IndeterminatedCheckboxComponent = Vue.extend({
     ready: function () {
         let checkbox = this.$el.querySelector('input');
         checkbox.indeterminate = true;
-        console.debug(checkbox);
     },
     template: '<div class="checkbox"><input type="checkbox" :value="value" @input="updated" value="Y"/> ' +
     '<label for="checkboxComponentInput">{{field.label}}</label> <span class="fa fa-question-circle-o pull-right" title="{{field.help}}"></span></div>'
 });
 
+const MultiSelectDropDownComponent = Vue.extend({
+    components: {
+        'v-select': vSelect
+    },
+    data() {
+        return {
+            options: JSON.parse(this.field.values).map((x) => x['key'])
+        }
+    },
+    methods: {
+        updated(val) {
+            this.$dispatch('update-form-field-value', this.field, val);
+        }
+    },
+    props: { value: "", field: null },
+    template: require('./projection-template.html')
+});
 
 const DropDownComponent = Vue.extend({
     computed: {
@@ -184,6 +201,12 @@ const DropDownComponent = Vue.extend({
         }
     },
     props: { value: 0, field: null, },
+    ready: function(){
+        //console.debug(this.field, this.field['default'], this.value)
+        if (this.field['default'] && (this.value === null || this.value === '')){
+            this.value = this.field['default'];
+        }
+    },
     template: '<div>' + baseLabel +
     '<select class="form-control" v-model="selected" @change="updated"><option></option><option v-for="opt in pairOptionValueList" :value="opt.key">{{opt.value}}</option></select>' +
     '</div>',
@@ -240,7 +263,7 @@ const ColorComponent = Vue.extend({
     },
     props: { value: 'rgb(255, 255, 165)', field: null },
     template: '<div>' + baseLabel +
-    '<div v-for="opt in pairOptionValueList" @click="doUpdate(opt.value)" class="color-item" :class="{active: opt.value === value}" :style="{background: opt.value}"></div>' +
+    '<div v-for="opt in pairOptionValueList" @click="doUpdate(opt)" class="color-item" :class="{active: value && opt && opt.background === value.background && opt.foreground == value.foreground}" :style="{background: opt.background}"></div>' +
     '</div>',
 });
 const LookupComponent = Vue.extend({
@@ -262,7 +285,7 @@ const LookupComponent = Vue.extend({
         this.selected = this.value;
     },
     template: '<div>' + baseLabel +
-    '<select class="form-control" v-model="selected" @change="updated"><option></option><option v-for="opt in options" :value="opt.key">{{opt.value}}</option></select>' +
+    '<select class="form-control" v-model="selected" @change="updated"><option></option><option v-for="opt in options" :value="opt.key">{{opt.key}} - {{opt.value}}</option></select>' +
     '</div>',
     watch: {
         value() {
@@ -270,25 +293,126 @@ const LookupComponent = Vue.extend({
         }
     },
 });
-const AttributeSelectorComponent  = Vue.extend({
+const AttributeSelectorComponent = Vue.extend({
     components: {
         'v-select': vSelect
     },
     data() {
         return {
-            selected: null,
-            options: ['line', 'vehicle', 'date_time', 'latitude', 'longitude', 'card_id', 'travel', 'bus_origin', 'bus_destination']
+            options: ['line (ASC)', 'line (DESC)', 'vehicle (ASC)', 'vehicle (DESC)', 'date_time (ASC)', 'date_time (DESC)', 'latitude (ASC)', 'latitude (DESC)', 'longitude (ASC)', 'longitude (DESC)', 'card_id (ASC)', 'card_id (DESC)', 'travel (ASC)', 'travel (DESC)', 'bus_origin (ASC)', 'bus_origin (DESC)', 'bus_destination (ASC)', 'bus_destination (DESC)']
         }
     },
     methods: {
-        updated(e) {
-            //debugger
-            this.$dispatch('update-form-field-value', this.field, e.target.value);
+        updated(val) {
+            this.$dispatch('update-form-field-value', this.field, val);
         }
     },
-    props: { value: 0, field: null },
+    props: { value: "", field: null },
     template: require('./projection-template.html')
 });
+
+const AttributeFunctionComponent = Vue.extend({
+    computed: {
+        pairOptionValueList() {
+            return JSON.parse(this.field.values);
+        },
+    },
+    components: {
+        'modal-component': ModalComponent
+    },
+    data(){
+        return {currentTab: 'editor'}
+    },
+    methods: {
+        updated(e, row, attr) {
+            row[attr] = e.target.value;
+            this.$dispatch('update-form-field-value', this.field, this.value);
+        },
+        add(e){
+            if (this.value === null){
+                this.value = [];
+            } 
+            this.value.push({alias: '', attribute: '', f: ''})
+            this.$dispatch('update-form-field-value', this.field, this.value);
+        },
+        remove(e, index){
+            this.value.splice(index, 1);
+            e.stopPropagation();
+            return false;
+        },
+        moveUp(e, index){
+            let tmp = this.value.splice(index, 1)[0];
+            this.value.splice(index - 1, 0, tmp)
+            e.stopPropagation();
+            return false;
+        },
+        moveDown(e, index){
+            let tmp = this.value.splice(index, 1)[0]
+            this.value.splice(index + 1, 0, tmp)
+            e.stopPropagation();
+            return false;
+        },
+        selectTab(tab){
+            this.currentTab = tab;
+        }
+    },
+    props: { value: [{attribute: '', f: '', alias: ''}], field: null, options: [], showModal: false,
+            },
+    ready() {
+    },
+    template: require('./function-template.html')
+
+});
+const SortSelectorComponent  = Vue.extend({
+    components: {
+        'v-select': vSelect
+    },
+    data() {
+        return {
+            options: ['line (ASC)', 'line (DESC)', 'vehicle (ASC)', 'vehicle (DESC)', 'date_time (ASC)', 'date_time (DESC)', 'latitude (ASC)', 'latitude (DESC)', 'longitude (ASC)', 'longitude (DESC)', 'card_id (ASC)', 'card_id (DESC)', 'travel (ASC)', 'travel (DESC)', 'bus_origin (ASC)', 'bus_origin (DESC)', 'bus_destination (ASC)', 'bus_destination (DESC)']
+        }
+    },
+    methods: {
+        updated(val) {
+            this.$dispatch('update-form-field-value', this.field, val);
+        }
+    },
+    props: { value: "", field: null },
+    template: require('./projection-template.html')
+});
+
+const ExpressionComponent = Vue.extend({
+    computed: {
+        categories() {
+            return JSON.parse(this.field.values);
+        },
+        expression() {
+            if (this.value){
+                return JSON.parse(this.value)['expression'];
+            } else {
+                return "";
+            }
+        }
+    },
+    components: {
+        'expression-editor-component': ExpressionEditorComponent
+    },
+    data() {
+        return {
+            split: 50,
+            seed: 0,
+        };
+    },
+    events: {
+        'update-expression': function (expression, tree) {
+            let value = JSON.stringify({expression, tree})
+            this.$dispatch('update-form-field-value', this.field, value);
+        },
+    },
+    props: { value: {expression: ""}, field: null },
+    template: require('./transformation-template.html')
+});
+
 
 export {
     /*
@@ -302,5 +426,5 @@ export {
 
     DecimalComponent, IntegerComponent, CheckboxComponent, DropDownComponent, RangeComponent, TextComponent,
     TextAreaComponent, ColorComponent, IndeterminatedCheckboxComponent, LookupComponent, AttributeSelectorComponent,
-    PercentageComponent
+    PercentageComponent, SortSelectorComponent, ExpressionComponent, AttributeFunctionComponent, MultiSelectDropDownComponent
 };

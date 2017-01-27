@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import store from '../vuex/store';
 import PerfectScrollbar from 'perfect-scrollbar';
 import PerfectScrollbarCss from 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
@@ -39,7 +38,6 @@ const DiagramComponent = Vue.extend({
         },
         zoom: 1
     },
-    store,
     vuex: {
         actions: {
             getOperationFromId,
@@ -114,11 +112,10 @@ const DiagramComponent = Vue.extend({
     },
     methods: {
         init() {
-            
-            /* scroll bars */
-            //PerfectScrollbar.initialize(this.$el);
-            PerfectScrollbar.initialize(document.getElementById('lemonade-container'))
             const self = this;
+            self.diagramElement = document.getElementById('lemonade-diagram');
+            /* scroll bars */
+            PerfectScrollbar.initialize(self.diagramElement.parentElement);
             jsPlumb.bind('ready', function () {
                 self.instance = jsPlumb.getInstance({
                     //Anchors: anchors,
@@ -133,8 +130,9 @@ const DiagramComponent = Vue.extend({
                 });
 
                 self.instance.setContainer("lemonade-diagram");
+                
                 self.instance.getContainer().addEventListener('click', function (ev) {
-                    self.clearSelection(ev);
+                    //self.clearSelection(ev);
                 });
                 self.instance.bind("click", self.flowClick);
 
@@ -147,10 +145,10 @@ const DiagramComponent = Vue.extend({
                 self.instance.bind('connection', (info, originalEvent) => {
                     let con = info.connection;
                     var arr = self.instance.select({ source: con.sourceId, target: con.targetId });
-                    if (arr.length > 1) { // @FIXME Review
+                    if (false && arr.length > 1) { // @FIXME Review
                         // self.instance.detach(con);
                     } else if (originalEvent) {
-                        //self.instance.detach(con);
+                        self.instance.detach(con);
                         let [source_id, source_port] = info.sourceEndpoint.getUuid().split('/');
                         let [target_id, target_port] = info.targetEndpoint.getUuid().split('/');
                         self.addFlow({
@@ -159,7 +157,111 @@ const DiagramComponent = Vue.extend({
                         });
                     }
                 });
-            })
+            });
+            this.$el.addEventListener('keyup', this.keyboardAction, true);
+            /* selection by dragging */
+            
+
+            self.diagramElement.addEventListener("mousedown", (ev) => {
+                self.clearSelection(ev);
+                let ghostSelect = document.getElementsByClassName('ghost-select');
+                if (ghostSelect.length){
+                    Array.prototype.slice.call(ghostSelect, 0).forEach((elem) => {
+                        elem.classList.add("ghost-active");
+                        elem.style.left = ev.offsetY + 'px';
+                        elem.style.top = ev.offsetX + 'px';
+                        elem.style.width = '0px';
+                        elem.style.height = '0px';
+                        console.debug('Initial', ev.offsetX, ev.offsetY)
+                    })
+                } else {
+                    console.error('ghost-select element not found!')
+                }
+                self.initialW = ev.offsetX;
+                self.initialH = ev.offsetY;
+                
+                document.addEventListener("mouseup", self.selectElements);
+                document.addEventListener("mousemove", self.openSelector);
+            });
+        },
+        selectElements(ev){
+            //$("#score>span").text('0');
+            let self = this;
+            document.removeEventListener("mousemove", self.openSelector);
+            document.removeEventListener("mouseup", self.selectElements);
+
+            self.initialW = 0;
+            self.initialH = 0;
+            
+            let ghostSelect = document.getElementsByClassName('ghost-select');
+            if (ghostSelect.length){
+                Array.prototype.slice.call(ghostSelect, 0).forEach((elem) => {
+                    let x1 = parseInt(elem.style.left); 
+                    let y1 = parseInt(elem.style.top);
+                    let x2 = parseInt(elem.style.width) + x1;
+                    let y2 = parseInt(elem.style.height) + y1;
+                    
+                    elem.classList.remove("ghost-active");
+                    elem.style.width = 0;
+                    elem.style.height = 0;
+                    
+                    this.$dispatch('onclear-selection');
+
+                    self.tasks.forEach((task)=>{
+                        let taskElem = document.getElementById(task.id);
+                        let bounds = taskElem.getBoundingClientRect();
+                        
+                        // Uses task left and top because offset calculation 
+                        // was already done
+                        /*console.debug(x1 <= task.left,  x2 >= task.left + bounds.width, 
+                                y1 <= task.top, y2 >= task.top + bounds.height,
+                                bounds.width, bounds.height, x1, x2, y1, y2)
+                                */
+                        if (x1 <= task.left && x2 >= task.left + bounds.width
+                                && y1 <= task.top && y2 >= task.top + bounds.height){
+                            console.debug(`overlap with ${task.operation.name}`)
+                            self.instance.addToDragSelection(task.id);
+                        }
+                        //console.debug (bounds.left, task.left)
+
+                        //console.debug(task)
+                    });
+                });
+            } 
+        },
+        openSelector(ev){
+            if (ev.which == 1){ //left mouse
+                let self = this;
+                let rect = this.diagramElement.getBoundingClientRect();
+                let x = ev.pageX - rect.left;
+                let y = ev.pageY - rect.top;
+                let w = Math.abs(self.initialW - x);
+                let h = Math.abs(self.initialH - y);
+                
+                let ghostSelect = document.getElementsByClassName('ghost-select');
+                if (ghostSelect.length){
+                    Array.prototype.slice.call(ghostSelect, 0).forEach((elem) => {
+                        elem.style.width = w + 'px';
+                        elem.style.height = h + 'px';
+                        
+                        elem.style.left = Math.min(x, self.initialW) + 'px';
+                        elem.style.top = Math.min(y, self.initialH) + 'px';
+                        /*
+                        if (ev.offsetX <= self.initialW && ev.offsetY >= self.initialH) {
+                        elem.style.left = ev.offsetX + 'px';
+                        } else if (ev.offsetY <= self.initialH && ev.offsetX >= self.initialW) {
+                            elem.style.top = ev.offsetY + 'px';
+                        } else if (ev.offsetY < self.initialH && ev.offsetX < self.initialW) {
+                            elem.style.left = ev.offsetX + 'px';
+                            elem.style.top = ev.offsetY + 'px';
+                            //console.debug('3bopenselector (x, y)', ev.offsetX, ev.offsetY, elem.style.left, elem.style.top)
+                        }*/
+                        
+                });
+                } else {
+                    console.error('ghost-select element not found!')
+                }
+            }
         },
         clearSelection(ev) {
             if (ev.target.taskName === 'path') {
@@ -168,6 +270,7 @@ const DiagramComponent = Vue.extend({
             }
             let self = this;
             let tasks = document.querySelectorAll(".task");
+            self.instance.clearDragSelection();
             Array.prototype.slice.call(tasks, 0).forEach((e) => {
                 e.classList.remove('selected');
                 self.instance.clearDragSelection();
@@ -256,6 +359,44 @@ const DiagramComponent = Vue.extend({
             self.clearFlows();
             self.clearTasks();
         },
+        keyboardAction(ev){
+            let self = this;
+            if (self.selectedTask){
+                let elem =  document.getElementById(self.selectedTask.id);
+                let inc = ev.ctrlKey ? 10 : 1;
+                let v = 0;
+                switch(ev.code){
+                    case 'Delete':
+                        this.deleteSelected();
+                        break;
+                    case 'ArrowRight':
+                        v = parseInt(elem.style.left, 10) + inc;
+                        elem.style.left = `${v}px`;
+                        self.selectedTask.left = v;
+                        self.instance.repaintEverything();
+                        break
+                    case 'ArrowLeft':
+                        v = parseInt(elem.style.left, 10) - inc;
+                        elem.style.left = `${v}px`;
+                        self.selectedTask.left = v;
+                        self.instance.repaintEverything();
+                        break
+                    case 'ArrowUp':
+                        v = parseInt(elem.style.top, 10) - inc;
+                        elem.style.top = `${v}px`;
+                        self.selectedTask.top = v;
+                        self.instance.repaintEverything();
+                        break
+                    case 'ArrowDown':
+                        v = parseInt(elem.style.top, 10) + inc;
+                        elem.style.top = `${v}px`;
+                        self.selectedTask.top = v;
+                        self.instance.repaintEverything();
+                        break
+                }
+                ev.stopPropagation();
+            }
+        },
         deleteSelected(ev) {
             let self = this;
             if (self.selectedTask) {
@@ -280,11 +421,6 @@ const DiagramComponent = Vue.extend({
                 let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
-        },
-        loadSample(ev) {
-            let graph = JSON.parse(
-                document.getElementById('sample-' + ev.target.dataset.sampleId).innerText.replace('\n', ''));
-            this.innerLoad(graph);
         },
         load(ev) {
             //let graph = JSON.parse(document.getElementById('save-area').value);
@@ -328,32 +464,37 @@ const DiagramComponent = Vue.extend({
             el.style["transform"] = s;
             el.style["transformOrigin"] = '0% 0% 0px'; //oString;
             instance.setZoom(zoom);
-            let adjust = (1.0 / zoom * 100) + '%'
+            let adjust = ((1.0 / zoom) * 5000) + 'px'
             el.style.width = adjust;
             el.style.height = adjust;
+            PerfectScrollbar.update(this.diagramElement.parentElement);
         },
         zoomIn(ev) {
             let self = this;
-            let diagram = document.querySelectorAll("#lemonade-diagram")[0];
             self.zoom += .1;
             if (self.zoom > 1.3) {
                 self.zoomInEnabled = false;
             }
             self.zoomOutEnabled = true;
-            this.setZoom(self.zoom, self.instance, null, diagram);
+            this.setZoom(self.zoom, self.instance, null, self.diagramElement);
             return;
         },
         zoomOut() {
             let self = this;
-            let diagram = document.querySelectorAll("#lemonade-diagram")[0];
             self.zoom -= .1;
             if (self.zoom < 0.8) {
                 self.zoomOutEnabled = false;
             }
             self.zoomInEnabled = true;
-            this.setZoom(self.zoom, self.instance, null, diagram);
+            this.setZoom(self.zoom, self.instance, null, self.diagramElement);
             return;
         },
+        scrollToTask(taskId){
+            let elemTask = document.getElementById(taskId);
+            let container = self.diagramElement.parentElement;
+            container.scrollTop = parseInt(elemTask.style.top);
+            container.scrollLeft = parseInt(elemTask.style.left);
+        }
     },
     watch: {
         /*
