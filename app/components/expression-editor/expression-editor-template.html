@@ -3,7 +3,7 @@
         <span class="fa fa-gear"></span> Open editor
     </button>
 
-    <modal-component :show.sync="showModal" :close="true" cancel="false">
+    <modal-component :show="showModal">
         <div slot="header">
             <h4>Expression</h4>
             <em>Construct an expression to transform data</em>
@@ -28,13 +28,13 @@
                     </table>
                 </div>
             </div>
-            <textarea type="text" class="form-control" @keyUp="changed | debounce 500" @paste="changed">{{expression}}</textarea>
+            <textarea type="text" class="form-control" @keyup="changed" @paste="changed">{{expression}}</textarea>
             <div :class="{hide: error === null}">
                 <div class="label label-danger">
                     {{error}}
                 </div>
             </div>
-            <pre style="height: 300px; overflow:auto"><code>{{{ tree }}}</code></pre>
+            <pre style="height: 300px; overflow:auto"><code>{{ tree }}</code></pre>
         </div>
     </modal-component>
 </div>

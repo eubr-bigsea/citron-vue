@@ -4,6 +4,11 @@ module.exports = {
   output: {
     filename: 'bundle.js'
   },
+  resolve: {
+    alias: {
+      'vue$': 'vue/dist/vue.common.js'
+    }
+  },
   module: {
     loaders: [
     { test: /\.css$/, loader: "style-loader!css-loader" },

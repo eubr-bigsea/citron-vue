@@ -27,8 +27,8 @@
                             <div class="panel-content">
                                 <div id="menu-operations" style="height: calc(100vh - 134px); position: relative; overflow:hidden">
                                     <ul class="nav nav-list">
-                                        <li class="drop-menu-item" v-for="operations in groupedOperations">
-                                            <a href="#" v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ $key }} </a>
+                                        <li class="drop-menu-item" v-for="(operations, groupName) in groupedOperations">
+                                            <a href="#" v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ groupName }} </a>
                                             <ul class="nav nav-list tree slide-up">
                                                 <div v-for="op in operations">
                                                     <toolbox-component :operation="op" />

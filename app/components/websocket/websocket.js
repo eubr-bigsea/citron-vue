@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import { getOperations } from '../vuex/getters';
 
 const WebSocketComponent = Vue.extend({
     beforeDestroy() {

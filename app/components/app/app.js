@@ -4,14 +4,15 @@ import PerfectScrollbar from 'perfect-scrollbar';
 import template from './app-template.html';
 import store from '../vuex/store';
 
+import eventHub from './event-hub';
 import html2canvas from 'html2canvas';
 
 import DiagramComponent from '../diagram/diagram';
 import ToolbarComponent from '../toolbox/toolbox';
 import LoadWorkflowComponent from '../load-workflow/load-workflow';
 
-import { loadOperations, updateTaskFormField, changeLanguage, login, connectWebSocket } from '../vuex/actions';
-import { getGroupedOperations, getLanguage, getUser } from '../vuex/getters';
+//import { loadOperations, updateTaskFormField, changeLanguage, login, connectWebSocket } from '../vuex/actions';
+//import { getGroupedOperations, getLanguage, getUser } from '../vuex/getters';
 
 
 import {
@@ -26,6 +27,7 @@ import {
 
 const AppComponent = Vue.extend({
     template,
+    /*
     vuex: {
         actions: {
             loadOperations,
@@ -39,6 +41,44 @@ const AppComponent = Vue.extend({
             language: getLanguage,
             user: getUser
         },
+    },*/
+    computed: {
+        groupedOperations: function(){
+            return this.$store.getters.getGroupedOperations;
+        },
+        language: 'en', //this.$store.getters.language,
+        user: function(){
+            return this.$store.getters.getUser;
+        },
+    },
+    created(){
+        eventHub.$on('onclick-task', (taskComponent) => {
+            let task = taskComponent.task;
+            /* An task (operation instance) was clicked in the diagram */
+            this.task = task;
+            this.filledForm = task.forms;
+            this.forms = task.operation.forms.sort((a, b) => {
+                return a.order - b.order;
+            });
+            // Reverse association between field and form. Used to retrieve category
+            this.forms.forEach((f, i) => {
+                f.fields.forEach((field, j) => {
+                    field.category = f.category;
+                });
+            });
+        });
+        eventHub.$on('update-form-field-value',(field, value) => {
+            //console.debug(this.task.forms[field.name])
+            let filled = this.task.forms[field.name];
+            if (filled) {
+                filled.value = value;
+                filled.category = field.category;
+            } else {
+                let category = field.category;
+                this.task.forms[field.name] = { value, category };
+            }
+            //this.task.forms[field.name]['category'] = 
+        });
     },
     components: {
         'toolbox-component': ToolbarComponent,
@@ -73,10 +113,6 @@ const AppComponent = Vue.extend({
             showModalLoadWorkflow: false
         }
     },
-    ready() {
-        //onsole.debug(LoadWorkflowComponent)
-        this.init();
-    },
     events: {
         'update-operations': function (operations) {
         },
@@ -96,18 +132,18 @@ const AppComponent = Vue.extend({
             //this.task.forms[field.name]['category'] = 
         },
         'onclick-task-in-diagram': function (task) {
-            /* An task (operation instance) was clicked in the diagram */
-            this.task = task;
-            this.filledForm = task.forms;
-            this.forms = task.operation.forms.sort((a, b) => {
-                return a.order - b.order;
-            });
-            // Reverse association between field and form. Used to retrieve category
-            this.forms.forEach((f, i) => {
-                f.fields.forEach((field, j) => {
-                    field.category = f.category;
-                });
-            });
+            // /* An task (operation instance) was clicked in the diagram */
+            // this.task = task;
+            // this.filledForm = task.forms;
+            // this.forms = task.operation.forms.sort((a, b) => {
+            //     return a.order - b.order;
+            // });
+            // // Reverse association between field and form. Used to retrieve category
+            // this.forms.forEach((f, i) => {
+            //     f.fields.forEach((field, j) => {
+            //         field.category = f.category;
+            //     });
+            // });
         },
         'onclear-selection': function () {
             this.task = null;
@@ -120,19 +156,19 @@ const AppComponent = Vue.extend({
         }, 
 
     },
+    mounted() {
+        //this.connectWebSocket();
+        if (true || this.user) {
+            this.loadOperations();
+            let elem = document.getElementById('menu-operations');
+            PerfectScrollbar.initialize(elem, {
+                wheelSpeed: 2,
+                wheelPropagation: true,
+                minScrollbarLength: 20
+            });
+        }
+    },
     methods: {
-        init() {
-            this.connectWebSocket();
-            if (this.user) {
-                this.loadOperations();
-                let elem = document.getElementById('menu-operations');
-                PerfectScrollbar.initialize(elem, {
-                    wheelSpeed: 2,
-                    wheelPropagation: true,
-                    minScrollbarLength: 20
-                });
-            }
-        },
         getValue(name) {
             return this.task && this.task.forms && this.task.forms[name] ? this.task.forms[name].value : null;
         },
@@ -161,6 +197,9 @@ const AppComponent = Vue.extend({
                         minimap.appendChild(canvas);
                     }, 
                 });
+        },
+        loadOperations(){
+            this.$store.dispatch('loadOperations');
         }
     },
     store

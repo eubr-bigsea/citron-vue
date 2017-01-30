@@ -2,6 +2,8 @@ import Vue from 'vue';
 import jsep from 'jsep';
 import template from './expression-editor-template.html';
 import ModalComponent from '../modal/modal-component.js';
+import _ from 'lodash'
+import eventHub from '../app/event-hub';
 
 function get_html_obj(obj) {
     var rv = $("<ul />");
@@ -48,6 +50,7 @@ const ExpressionEditorComponent = Vue.extend({
                 'datediff', 'dayofmonth', 'dayofyear',
 
             ],
+            showModal: false
         }
     },
     computed: {
@@ -66,11 +69,11 @@ const ExpressionEditorComponent = Vue.extend({
         }
     },
     methods: {
-        changed(e){
+        changed: _.debounce(function(e) {
             try {
                 if (e.target && e.target.value){
                     let tree = this.process(e.target.value)
-                    this.$dispatch('update-expression', e.target.value, tree);
+                    eventHub.$emit('update-expression', e.target.value, tree);
                 } else {
                     this.error = null;
                     this.$dispatch('update-expression', null, null);
@@ -78,7 +81,7 @@ const ExpressionEditorComponent = Vue.extend({
             } catch (e) {
                 this.error = e;
             }
-        },
+        }),
         process(v){
             let tree = jsep(v || '');
             jsep.addBinaryOp("=>", 1);
@@ -99,7 +102,6 @@ const ExpressionEditorComponent = Vue.extend({
         error: null,
         expression: "",
         removeOperators: [],
-        showModal: true,
         tree: '',
     },
     ready() {

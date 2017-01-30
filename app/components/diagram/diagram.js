@@ -4,9 +4,8 @@ import PerfectScrollbarCss from 'perfect-scrollbar/dist/css/perfect-scrollbar.cs
 
 import template from './diagram-template.html';
 
-import {addTask, removeTask, clearTasks, addFlow, removeFlow, 
-    clearFlows, changeWorkflowName, saveWorkflow, loadWorkflow, changeWorkflowId } from '../vuex/actions';
-import { getOperationFromId, getFlows, getTasks, getWorkflow } from '../vuex/getters';
+import eventHub from '../app/event-hub';
+
 import {CleanMissingComponent, DataReaderComponent, EmptyPropertiesComponent, 
     SplitComponent, PropertyDescriptionComponent} 
     from '../properties/properties-components.js';
@@ -21,7 +20,15 @@ const DiagramComponent = Vue.extend({
     computed: {
         zoomPercent: function () {
             return `${Math.round(100 * this.zoom, 0)}%`;
-
+        },
+        flows(){
+            return this.$store.getters.getFlows;
+        },
+        tasks(){
+            return this.$store.getters.getTasks;
+        },
+        workflow(){
+            return this.$store.getters.getWorkflow;
         }
     },
     components: {
@@ -33,38 +40,26 @@ const DiagramComponent = Vue.extend({
     props: {
         formContainer: null,
         title: {},
-        operation: {
+        xoperation: {
             'default': function () { return { name: '', icon: '' }; }
         },
-        zoom: 1
-    },
-    vuex: {
-        actions: {
-            getOperationFromId,
-            addTask, removeTask, clearTasks,
-            addFlow, removeFlow, clearFlows,
-            changeWorkflowName, 
-            saveWorkflow, loadWorkflow,
-            changeWorkflowId,
-        },
-        getters: {
-            flows: getFlows,
-            tasks: getTasks,
-            workflow: getWorkflow
-        }
+
     },
     data() {
         return {
+            zoom: 1,
             zoomInEnabled: true,
             zoomOutEnabled: true,
             selectedTask: null,
         }
     },
+    created(){
+    },
     events: {
         'onclick-task': function(taskComponent) {
             this.selectedTask = taskComponent.task;
             // Raise event to parent component 
-            this.$dispatch('onclick-task-in-diagram', this.selectedTask);
+            this.$emit('onclick-task-in-diagram', this.selectedTask);
         },
         'onclick-operationx': function (operationComponent) {
             let self = this;
@@ -105,12 +100,50 @@ const DiagramComponent = Vue.extend({
         }
     },
     template,
-    ready() {
+    mounted() {
         this.zoom = 1.0;
         this.currentZIndex = 10;
         this.init();
     },
     methods: {
+        /* Store */
+        addTask(task){
+            this.$store.dispatch('addTask', task)
+        }, 
+        removeTask(task){
+            this.$store.dispatch('removeTask', task);
+        }, 
+        clearTasks(){
+            this.$store.dispatch('clearTasks');
+        },
+        addFlow(flow){
+            this.$store.dispatch('addFlow', flow)
+        }, 
+        removeFlow(flow){
+            this.$store.dispatch('removeFlow', flow);
+        },
+        clearFlows(){
+            this.$store.dispatch('clearFlow');
+        },
+        changeWorkflowName(name){
+            this.$store.dispatch('changeWorkflowName', name)
+        }, 
+        saveWorkflow(){
+            this.$store.dispatch('saveWorkflow');
+        }, 
+        loadWorkflow(){
+            this.$store.dispatch('loadWorkflow');
+        },
+        changeWorkflowId(id){
+            this.$store.dispatch('changeWorkflowId', id);
+        },
+        /*--*/
+        getOperationFromId(id){
+            let operations = this.$store.getters.getOperations;
+            return operations.filter(v => {
+               return v.id === parseInt(id);
+            });
+        },
         init() {
             const self = this;
             self.diagramElement = document.getElementById('lemonade-diagram');
@@ -128,35 +161,8 @@ const DiagramComponent = Vue.extend({
                     console.debug('Resizing')
                     self.instance.repaintEverything();
                 });
-
-                self.instance.setContainer("lemonade-diagram");
+                self._bindJsPlumbEvents();
                 
-                self.instance.getContainer().addEventListener('click', function (ev) {
-                    //self.clearSelection(ev);
-                });
-                self.instance.bind("click", self.flowClick);
-
-                self.instance.bind('connectionDetached', (info, originalEvent) => {
-                    let source = info.sourceEndpoint.getUuid();
-                    let target = info.targetEndpoint.getUuid();
-                    
-                    self.removeFlow(source + '-' + target);
-                });
-                self.instance.bind('connection', (info, originalEvent) => {
-                    let con = info.connection;
-                    var arr = self.instance.select({ source: con.sourceId, target: con.targetId });
-                    if (false && arr.length > 1) { // @FIXME Review
-                        // self.instance.detach(con);
-                    } else if (originalEvent) {
-                        self.instance.detach(con);
-                        let [source_id, source_port] = info.sourceEndpoint.getUuid().split('/');
-                        let [target_id, target_port] = info.targetEndpoint.getUuid().split('/');
-                        self.addFlow({
-                            source_id, source_port,
-                            target_id, target_port, 
-                        });
-                    }
-                });
             });
             this.$el.addEventListener('keyup', this.keyboardAction, true);
             /* selection by dragging */
@@ -205,7 +211,7 @@ const DiagramComponent = Vue.extend({
                     elem.style.width = 0;
                     elem.style.height = 0;
                     
-                    this.$dispatch('onclear-selection');
+                    this.$emit('onclear-selection');
 
                     self.tasks.forEach((task)=>{
                         let taskElem = document.getElementById(task.id);
@@ -339,7 +345,7 @@ const DiagramComponent = Vue.extend({
                 left: ev.offsetX, top: ev.offsetY, z_index: ++self.currentZIndex, classes,
                 status: 'WAITING'
             });
-            //this.$dispatch('onclick-task-in-diagram', taskComponent);
+            //this.$emit('onclick-task-in-diagram', taskComponent);
         },
         allowDrop(ev) {
             ev.preventDefault();
@@ -414,7 +420,7 @@ const DiagramComponent = Vue.extend({
                 ev.preventDefault();
                 this.clearSelection(ev);
             }
-            this.$dispatch('onclear-selection');
+            this.$emit('onclear-selection');
         },
         generateId() {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -423,10 +429,12 @@ const DiagramComponent = Vue.extend({
             });
         },
         load(ev) {
+            this.instance.reset();
+            this._bindJsPlumbEvents();
             //let graph = JSON.parse(document.getElementById('save-area').value);
             this.loadWorkflow();
             //this.innerLoad(graph);
-            //this.$dispatch('load-workflow');
+            //this.$emit('load-workflow');
         },
         innerLoad(graph) {
             let self = this;
@@ -494,7 +502,39 @@ const DiagramComponent = Vue.extend({
             let container = self.diagramElement.parentElement;
             container.scrollTop = parseInt(elemTask.style.top);
             container.scrollLeft = parseInt(elemTask.style.left);
-        }
+        },
+        _bindJsPlumbEvents(){
+            let self = this;
+            self.instance.setContainer("lemonade-diagram");
+                
+            // self.instance.getContainer().addEventListener('click', function (ev) {
+            //     //self.clearSelection(ev);
+            // });
+            // self.instance.bind("click", self.flowClick);
+
+            self.instance.bind('connectionDetached', (info, originalEvent) => {
+                let source = info.sourceEndpoint.getUuid();
+                let target = info.targetEndpoint.getUuid();
+                
+                self.removeFlow(source + '-' + target);
+                console.debug('Removendo')
+            });
+            self.instance.bind('connection', (info, originalEvent) => {
+                let con = info.connection;
+                var arr = self.instance.select({ source: con.sourceId, target: con.targetId });
+                if (false && arr.length > 1) { // @FIXME Review
+                    // self.instance.detach(con);
+                } else if (originalEvent) {
+                    self.instance.detach(con);
+                    let [source_id, source_port] = info.sourceEndpoint.getUuid().split('/');
+                    let [target_id, target_port] = info.targetEndpoint.getUuid().split('/');
+                    self.addFlow({
+                        source_id, source_port,
+                        target_id, target_port, 
+                    });
+                }
+            });
+        },
     },
     watch: {
         /*

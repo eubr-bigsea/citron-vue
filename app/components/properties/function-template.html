@@ -8,7 +8,7 @@
         </button>
     </p>
 
-    <modal-component :show.sync="showModal" :close="true" :cancel="false">
+    <modal-component :show="showModal">
         <div slot="header">
             <h4>{{pairOptionValueList.options.title}}</h4>
             <em>{{pairOptionValueList.options.description}}</em>

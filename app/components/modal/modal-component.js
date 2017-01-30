@@ -6,7 +6,6 @@ import './modal.scss';
 const ModalComponent = Vue.component('modal', {
     created(){
         document.getElementsByTagName('body')[0].style.overflow = 'hidden';
-        console.debug('INICIANDO')
     },
     methods: {
         close(){
@@ -18,7 +17,7 @@ const ModalComponent = Vue.component('modal', {
         show: {
             type: Boolean,
             required: true,
-            twoWay: true
+            twoWay: true,
         },
         cancel: {
             type: Boolean,

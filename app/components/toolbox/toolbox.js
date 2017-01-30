@@ -1,7 +1,5 @@
 import Vue from 'vue';
 import template from './toolbox-template.html';
-import { getCount } from '../vuex/getters';
-import { getOperations } from '../vuex/getters';
 import './toolbox.scss';
 
 const ToolboxComponent = Vue.extend({

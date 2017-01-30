@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import template from './task-template.html';
+import eventHub from '../app/event-hub';
 
 const anchors = {
     input: [
@@ -90,7 +91,11 @@ const connectionOptions = {
 const TaskComponent = Vue.extend({
     beforeDestroy() {
         if (this.task) {
-            this.instance.remove(document.getElementById(this.task.id));
+            this.instance.removeAllEndpoints(this.task.id);
+            this.instance.detachAllConnections(this.task.id);
+            this.instance.detach(this.task.id);
+            //let elem = document.getElementById(this.task.id);
+            //elem.parentNode.removeChild(elem);
         }
     },
     methods: {
@@ -114,7 +119,7 @@ const TaskComponent = Vue.extend({
             self.instance.repaintEverything()
             
             // Raise the click event to upper components
-            self.$dispatch('onclick-task', self);
+            eventHub.$emit('onclick-task', self);
             ev.stopPropagation();
         },
         endPointMouseOver(endpoint){
@@ -155,14 +160,11 @@ const TaskComponent = Vue.extend({
             });
         }
     },
-    ready() {
+    mounted() {
         let self = this;
         let operation = this.task.operation;
         let taskId = this.task.id;
-        let elem = document.getElementById(taskId);
-        if (this.task.operation.slug === 'comment'){
-            elem.classList.add('comment');
-        }
+
         let zIndex = this.task['z_index'];
 
         let outputs = operation.ports.filter((p) => {
@@ -180,6 +182,10 @@ const TaskComponent = Vue.extend({
             ["Label", { cssClass: "endpoint-label", label: "", id: "lbl", padding: 20 }]
         ];
 
+        let elem = document.getElementById(taskId);
+        if (this.task.operation.slug === 'comment'){
+            elem.classList.add('comment');
+        }
         [[inputs, 'input', endPointOptionsInput], [outputs, 'output', endPointOptionsOutput]].forEach((item) => {
             let ports = item[0];
             let portType = item[1];

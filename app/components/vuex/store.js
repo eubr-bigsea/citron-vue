@@ -10,7 +10,7 @@ const state = {
     language: 'en',
     lookupOperations: {},
     operations: [],
-    user: { state: 'null' },
+    user: { state: {logged: false} },
     workflow: {
         name: "",
         id: 101,
@@ -117,7 +117,7 @@ const mutations = {
                 ops[op.id] = op;
                 op.categories.forEach((cat) => {
                     if (cat.type === 'parent') {
-                        if (!(cat.name in groupedOps)) {Acentuação
+                        if (!(cat.name in groupedOps)) {
                             groupedOps[cat.name] = [op];
                         } else {
                             groupedOps[cat.name].push(op);
@@ -190,55 +190,61 @@ const mutations = {
         }
     },
     LOAD_WORKFLOW(state) {
-        let id = state.workflow.id;
-        let url = `${baseUrl}/workflows/${id}`;
-        let headers = {'X-Auth-Token': '123456'}
-        let validTaskId = new Set([]);
-        let validPorts = new Set([]);
-        Vue.http.get(url, {headers}).then(response => {
-            // Set the correct operation object
-            let workflow = response.data;
-            workflow.tasks.forEach((t) => {
-                validTaskId.add(t.id);
-                t.operation = state.lookupOperations[t.operation.id];
-                t.status = 'WAITING';
-                t.operation.ports.forEach(function(v) {validPorts.add(v.id);});
-                
-                t.operation.forms.forEach((form) => {
-                    form.fields.forEach((field) => {
-                        if (! t.forms[field.name]){
-                            t.forms[field.name] = {
-                                "value": null,
-                                "category": form.name
+        state.workflow = {'id': state.workflow.id, tasks: [], flows:[]};
+        if (state.workflow.id == 0) return
+        Vue.nextTick(()=>{
+            let id = state.workflow.id;
+            let url = `${baseUrl}/workflows/${id}`;
+            let headers = {'X-Auth-Token': '123456'}
+            let validTaskId = new Set([]);
+            let validPorts = new Set([]);
+            Vue.http.get(url, {headers}).then(response => {
+                // Set the correct operation object
+                let workflow = response.data;
+                workflow.tasks.forEach((t) => {
+                    validTaskId.add(t.id);
+                    t.operation = state.lookupOperations[t.operation.id];
+                    t.status = 'WAITING';
+                    t.operation.ports.forEach(function(v) {validPorts.add(v.id);});
+                    
+                    t.operation.forms.forEach((form) => {
+                        form.fields.forEach((field) => {
+                            if (! t.forms[field.name]){
+                                t.forms[field.name] = {
+                                    "value": null,
+                                    "category": form.name
+                                }
                             }
-                        }
-                        if (! t.forms[field.name]['category']){
-                            t.forms[field.name]['category'] = form.name;
-                        }
+                            if (! t.forms[field.name]['category']){
+                                t.forms[field.name]['category'] = form.name;
+                            }
+                        });
                     });
                 });
-            });
-            /* Cannot bind flows before binding tasks */
-            let flows = workflow.flows;
-            workflow.flows = [];
-            let ids = new Set();
+                /* Cannot bind flows before binding tasks */
+                let flows = workflow.flows;
+                workflow.flows = [];
+                let ids = new Set();
 
-            state.workflow = workflow;
-            console.debug(validPorts, 'valid')
-            
-            flows.forEach((flow) => {
-                if (validTaskId.has(flow.source_id) && validTaskId.has(flow.target_id) 
-                        && validPorts.has(flow.source_port) && validPorts.has(flow.target_port)){
-                    flow.id = `${flow.source_id}/${flow.source_port}-${flow.target_id}/${flow.target_port}`;
-                    //console.debug(flow.id);
-                    if (!ids.has(flow.id)) {
-                        workflow.flows.push(flow);
-                        ids.add(flow.id)
+                state.workflow = workflow;
+                console.debug(validPorts, 'valid')
+                
+                flows.forEach((flow) => {
+                    if (validTaskId.has(flow.source_id) && validTaskId.has(flow.target_id) 
+                            && validPorts.has(flow.source_port) && validPorts.has(flow.target_port)){
+                        flow.id = `${flow.source_id}/${flow.source_port}-${flow.target_id}/${flow.target_port}`;
+                        //console.debug(flow.id);
+                        if (!ids.has(flow.id)) {
+                            workflow.flows.push(flow);
+                            ids.add(flow.id)
+                        }
                     }
-                }
+                });
             });
-            
         });
+    },
+    GET_OPERATIONS(state){
+        return state.operations;
     },
     CONNECT_WEBSOCKET(state) {
         return
@@ -273,5 +279,72 @@ window.store = state;
 export default new Vuex.Store({
     mutations,
     state,
+    actions: {
+        loadOperations({ commit, state }) {
+            return commit('LOAD_OPERATIONS');
+        },
+
+        addTask({ commit, state }, task) {
+            return commit('ADD_TASK', task);
+        },
+        removeTask({ commit, state }, task) {
+            return commit('REMOVE_TASK', task);
+        },
+        clearTasks({ commit, state }) {
+            return commit('CLEAR_TASKS');
+        },
+
+        addFlow({ commit, state }, flow) {
+            return commit('ADD_FLOW', flow);
+        },
+        removeFlow({ commit, state }, id) {
+            return commit('REMOVE_FLOW', id);
+        },
+        clearFlows({ commit, state }) {
+            return commit('CLEAR_FLOWS');
+        },
+
+        updateTaskFormField({ commit, state }, task, value) {
+            return commit('UPDATE_TASK_FORM_FIELD');
+        },
+        changeWorkflowName({commit, state}, name){
+            return commit('CHANGE_WORKFLOW_NAME', name)
+        },
+        changeWorkflowId({commit, state}, id){
+            return commit('CHANGE_WORKFLOW_ID', id)
+        },
+
+        changeLanguage({ commit, state }, lang) {
+            return commit('CHANGE_LANGUAGE', lang);
+        },
+        /* Auth */
+        login({commit, state}, login, passwd){
+            return commit('LOGIN', login, passwd);
+        },
+
+        saveWorkflow({commit, state}) {
+            return commit('SAVE_WORKFLOW');
+        },
+        loadWorkflow({commit, state}) {
+            return commit('LOAD_WORKFLOW');
+        },
+
+        connectWebSocket({commit, state}){
+            return commit('CONNECT_WEBSOCKET');
+        },
+        getOperations: ({ commit, state }) => {
+            return commit('GET_OPERATIONS');
+        },
+    },
+    getters: {
+        getCount: (state) => state.count,
+        getOperations: (state) => state.operations,
+        getGroupedOperations: (state) => state.groupedOperations,
+        getTasks: (state) => state.workflow.tasks,
+        getFlows: (state) => state.workflow.flows,
+        getLanguage: (state) => state.language,
+        getUser: (state) => state.user,
+        getWorkflow: (state) => state.workflow,
+    },
     strict: false,
 })
