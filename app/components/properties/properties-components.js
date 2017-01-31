@@ -145,7 +145,10 @@ const RangeComponent = Vue.extend({
             eventHub.$emit('update-form-field-value', this.field, e.target.value);
         }
     },
-    props: { value: 50, field: null },
+    props: {
+        value: String, 
+        field: Object
+    },
     template: '<div>' + baseLabel +
     '<input type="range" class="form-control" :value="value" @input="updated" min="1" max="99"/>' +
     '<span class="tag tag-pill tag-info">{{value}}% - {{100-value}}%</span>' +
@@ -164,9 +167,12 @@ const PercentageComponent = Vue.extend({
             eventHub.$emit('update-form-field-value', this.field, e.target.value);
         }
     },
-    props: { value: 50, field: null },
+    props: {
+        value: String, 
+        field: Object
+    },
     template: '<div>' + baseLabel +
-    '<input type="range" class="form-control" :value="value" @input="updated" min=".1" max="99.9" step="0.1"/>' +
+    '<input type="" class="form-control" :value="value" @input="updated" min=".1" max="99.9" step="0.1"/>' +
     '<span class="tag tag-pill tag-info">{{value}}%</span>' +
     '</div>',
 });

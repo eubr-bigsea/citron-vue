@@ -12,7 +12,37 @@
 
 <body>
     <div id="app">
-        <app-component></app-component>
+        <!--app-component></app-component -->
+        <div>
+            <nav class="navbar navbar-fixed-top navbar-inverse">
+                <div class="navbar-brand logo"><img/></div>
+                <a class="navbar-brand" href="#">Lemonade Citron</a>
+                <ul class="nav navbar-nav">
+                    <li class="nav-item active">
+                        <router-link to="/workflows/list" active-class="active">Workflows</router-link>
+                    </li>
+                    <li class="nav-item">
+                        <router-link to="/jobs/list" active-class="active">Jobs</router-link>
+                    </li>
+                    <li class="nav-item">
+                        <router-link to="/data-sources/list" active-class="active">Data sources</router-link>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav  pull-right">
+                <!--
+                    <li class="nav-item" :class="{hide: language === 'en'}">
+                        <a class="nav-link" href="#" @click="changeLanguage('en')">English version</a>
+                    </li>
+                    <li class="nav-item" :class="{hide: language === 'pt'}">
+                        <a class="nav-link" href="#" @click="changeLanguage('pt')">Versão em português</a>
+                    </li>
+                -->
+                    <router-link to="/workflows/editor">Go to Editor</router-link>
+                    
+                </ul>
+            </nav>
+        </div>
+        <router-view></router-view>
     </div>
     <script src="bundle.js"></script>
 </body>

@@ -6,10 +6,12 @@ import template from './diagram-template.html';
 
 import eventHub from '../app/event-hub';
 
-import {CleanMissingComponent, DataReaderComponent, EmptyPropertiesComponent, 
-    SplitComponent, PropertyDescriptionComponent} 
+import {
+    CleanMissingComponent, DataReaderComponent, EmptyPropertiesComponent,
+    SplitComponent, PropertyDescriptionComponent
+}
     from '../properties/properties-components.js';
-import {TaskComponent, connectionOptions} from '../task/task';
+import { TaskComponent, connectionOptions } from '../task/task';
 import FlowComponent from '../task/flow';
 
 import highlight from 'highlight.js';
@@ -21,13 +23,13 @@ const DiagramComponent = Vue.extend({
         zoomPercent: function () {
             return `${Math.round(100 * this.zoom, 0)}%`;
         },
-        flows(){
+        flows() {
             return this.$store.getters.getFlows;
         },
-        tasks(){
+        tasks() {
             return this.$store.getters.getTasks;
         },
-        workflow(){
+        workflow() {
             return this.$store.getters.getWorkflow;
         }
     },
@@ -53,45 +55,50 @@ const DiagramComponent = Vue.extend({
             selectedTask: null,
         }
     },
-    created(){
+    created() {
+        if (this.$route.params.id) {
+            this.changeWorkflowId(this.$route.params.id);
+            //this.loadWorkflow();
+            this.init();
+        }
     },
     events: {
-        'onclick-task': function(taskComponent) {
+        'onclick-task': function (taskComponent) {
             this.selectedTask = taskComponent.task;
             // Raise event to parent component 
             this.$emit('onclick-task-in-diagram', this.selectedTask);
         },
         'onclick-operationx': function (operationComponent) {
             let self = this;
-            this.selectedTask = operationComponent.task; 
+            this.selectedTask = operationComponent.task;
             debugger
-            if (self.currentComponent == 'property-description-component'){
+            if (self.currentComponent == 'property-description-component') {
                 self.currentComponent = 'empty-properties-component';
-            }else {
+            } else {
                 self.currentComponent = 'property-description-component';
             }
-            if (self.currentForm){
+            if (self.currentForm) {
                 //self.currentForm.$destroy(); FIXME
             }
         },
         'onclick-operation2': function (operationComponent) {
-            this.selectedTask = operationComponent.task; 
+            this.selectedTask = operationComponent.task;
             let elem = document.getElementById(this.formContainer);
             elem.innerHTML = '<div><h5>{{task.operation.name}}</h5><form-component :task="task"></form-component><property-description-component :task="task"/></div>';
-            if (self.currentForm){
+            if (self.currentForm) {
                 self.currentForm.$destroy();
             }
             self.currentForm = new Vue({
                 el: `#${this.formContainer}`,
                 components: {
-                    'form-component': slug2Component[operationComponent.task.operation.slug] 
-                        || EmptyPropertiesComponent,
+                    'form-component': slug2Component[operationComponent.task.operation.slug]
+                    || EmptyPropertiesComponent,
                     'property-description-component': PropertyDescriptionComponent
                 },
-                destroyed(){
-                    console.debug('form destroyed')
+                destroyed() {
+                    // console.debug('form destroyed')
                 },
-                data(){
+                data() {
                     return {
                         task: operationComponent.task,
                     }
@@ -104,93 +111,92 @@ const DiagramComponent = Vue.extend({
         this.zoom = 1.0;
         this.currentZIndex = 10;
         this.init();
+        let self = this;
+        self.diagramElement = document.getElementById('lemonade-diagram');
+        /* scroll bars */
+        PerfectScrollbar.initialize(self.diagramElement.parentElement);
+
+        this.$el.addEventListener('keyup', this.keyboardAction, true);
+        /* selection by dragging */
+        self.diagramElement.addEventListener("mousedown", (ev) => {
+            self.clearSelection(ev);
+            let ghostSelect = document.getElementsByClassName('ghost-select');
+            if (ghostSelect.length) {
+                Array.prototype.slice.call(ghostSelect, 0).forEach((elem) => {
+                    elem.classList.add("ghost-active");
+                    elem.style.left = ev.offsetY + 'px';
+                    elem.style.top = ev.offsetX + 'px';
+                    elem.style.width = '0px';
+                    elem.style.height = '0px';
+                    // console.debug('Initial', ev.offsetX, ev.offsetY)
+                })
+            } else {
+                console.error('ghost-select element not found!')
+            }
+            self.initialW = ev.offsetX;
+            self.initialH = ev.offsetY;
+
+            document.addEventListener("mouseup", self.selectElements);
+            document.addEventListener("mousemove", self.openSelector);
+        });
     },
     methods: {
         /* Store */
-        addTask(task){
+        addTask(task) {
             this.$store.dispatch('addTask', task)
-        }, 
-        removeTask(task){
+        },
+        removeTask(task) {
             this.$store.dispatch('removeTask', task);
-        }, 
-        clearTasks(){
+        },
+        clearTasks() {
             this.$store.dispatch('clearTasks');
         },
-        addFlow(flow){
+        addFlow(flow) {
             this.$store.dispatch('addFlow', flow)
-        }, 
-        removeFlow(flow){
+        },
+        removeFlow(flow) {
             this.$store.dispatch('removeFlow', flow);
         },
-        clearFlows(){
+        clearFlows() {
             this.$store.dispatch('clearFlow');
         },
-        changeWorkflowName(name){
+        changeWorkflowName(name) {
             this.$store.dispatch('changeWorkflowName', name)
-        }, 
-        saveWorkflow(){
+        },
+        saveWorkflow() {
             this.$store.dispatch('saveWorkflow');
-        }, 
-        loadWorkflow(){
+        },
+        loadWorkflow() {
             this.$store.dispatch('loadWorkflow');
         },
-        changeWorkflowId(id){
+        changeWorkflowId(id) {
             this.$store.dispatch('changeWorkflowId', id);
         },
         /*--*/
-        getOperationFromId(id){
+        getOperationFromId(id) {
             let operations = this.$store.getters.getOperations;
-            return operations.filter(v => {
-               return v.id === parseInt(id);
+            let result = operations.filter(v => {
+                return v.id === parseInt(id);
             });
+            return result;
         },
         init() {
             const self = this;
-            self.diagramElement = document.getElementById('lemonade-diagram');
-            /* scroll bars */
-            PerfectScrollbar.initialize(self.diagramElement.parentElement);
-            jsPlumb.bind('ready', function () {
-                self.instance = jsPlumb.getInstance({
-                    //Anchors: anchors,
-                    Endpoints: [["Dot", { radius: 2 }], ["Dot", { radius: 1 }]],
-                    EndpointHoverStyle: { fillStyle: "orange" },
-                    HoverPaintStyle: { strokeStyle: "blue" },
-                });
-
-                window.addEventListener('resize', (e) => {
-                    console.debug('Resizing')
-                    self.instance.repaintEverything();
-                });
-                self._bindJsPlumbEvents();
-                
+            self.instance = jsPlumb.getInstance({
+                //Anchors: anchors,
+                Endpoints: [["Dot", { radius: 2 }], ["Dot", { radius: 1 }]],
+                EndpointHoverStyle: { fillStyle: "orange" },
+                HoverPaintStyle: { strokeStyle: "blue" },
             });
-            this.$el.addEventListener('keyup', this.keyboardAction, true);
-            /* selection by dragging */
+            window.addEventListener('resize', (e) => {
+                self.instance.repaintEverything();
+            });
+            self._bindJsPlumbEvents();
+
             
 
-            self.diagramElement.addEventListener("mousedown", (ev) => {
-                self.clearSelection(ev);
-                let ghostSelect = document.getElementsByClassName('ghost-select');
-                if (ghostSelect.length){
-                    Array.prototype.slice.call(ghostSelect, 0).forEach((elem) => {
-                        elem.classList.add("ghost-active");
-                        elem.style.left = ev.offsetY + 'px';
-                        elem.style.top = ev.offsetX + 'px';
-                        elem.style.width = '0px';
-                        elem.style.height = '0px';
-                        console.debug('Initial', ev.offsetX, ev.offsetY)
-                    })
-                } else {
-                    console.error('ghost-select element not found!')
-                }
-                self.initialW = ev.offsetX;
-                self.initialH = ev.offsetY;
-                
-                document.addEventListener("mouseup", self.selectElements);
-                document.addEventListener("mousemove", self.openSelector);
-            });
         },
-        selectElements(ev){
+        selectElements(ev) {
             //$("#score>span").text('0');
             let self = this;
             document.removeEventListener("mousemove", self.openSelector);
@@ -198,25 +204,25 @@ const DiagramComponent = Vue.extend({
 
             self.initialW = 0;
             self.initialH = 0;
-            
+
             let ghostSelect = document.getElementsByClassName('ghost-select');
-            if (ghostSelect.length){
+            if (ghostSelect.length) {
                 Array.prototype.slice.call(ghostSelect, 0).forEach((elem) => {
-                    let x1 = parseInt(elem.style.left); 
+                    let x1 = parseInt(elem.style.left);
                     let y1 = parseInt(elem.style.top);
                     let x2 = parseInt(elem.style.width) + x1;
                     let y2 = parseInt(elem.style.height) + y1;
-                    
+
                     elem.classList.remove("ghost-active");
                     elem.style.width = 0;
                     elem.style.height = 0;
-                    
+
                     this.$emit('onclear-selection');
 
-                    self.tasks.forEach((task)=>{
+                    self.tasks.forEach((task) => {
                         let taskElem = document.getElementById(task.id);
                         let bounds = taskElem.getBoundingClientRect();
-                        
+
                         // Uses task left and top because offset calculation 
                         // was already done
                         /*console.debug(x1 <= task.left,  x2 >= task.left + bounds.width, 
@@ -224,8 +230,8 @@ const DiagramComponent = Vue.extend({
                                 bounds.width, bounds.height, x1, x2, y1, y2)
                                 */
                         if (x1 <= task.left && x2 >= task.left + bounds.width
-                                && y1 <= task.top && y2 >= task.top + bounds.height){
-                            console.debug(`overlap with ${task.operation.name}`)
+                            && y1 <= task.top && y2 >= task.top + bounds.height) {
+                            // console.debug(`overlap with ${task.operation.name}`)
                             self.instance.addToDragSelection(task.id);
                         }
                         //console.debug (bounds.left, task.left)
@@ -233,23 +239,23 @@ const DiagramComponent = Vue.extend({
                         //console.debug(task)
                     });
                 });
-            } 
+            }
         },
-        openSelector(ev){
-            if (ev.which == 1){ //left mouse
+        openSelector(ev) {
+            if (ev.which == 1) { //left mouse
                 let self = this;
                 let rect = this.diagramElement.getBoundingClientRect();
                 let x = ev.pageX - rect.left;
                 let y = ev.pageY - rect.top;
                 let w = Math.abs(self.initialW - x);
                 let h = Math.abs(self.initialH - y);
-                
+
                 let ghostSelect = document.getElementsByClassName('ghost-select');
-                if (ghostSelect.length){
+                if (ghostSelect.length) {
                     Array.prototype.slice.call(ghostSelect, 0).forEach((elem) => {
                         elem.style.width = w + 'px';
                         elem.style.height = h + 'px';
-                        
+
                         elem.style.left = Math.min(x, self.initialW) + 'px';
                         elem.style.top = Math.min(y, self.initialH) + 'px';
                         /*
@@ -262,10 +268,10 @@ const DiagramComponent = Vue.extend({
                             elem.style.top = ev.offsetY + 'px';
                             //console.debug('3bopenselector (x, y)', ev.offsetX, ev.offsetY, elem.style.left, elem.style.top)
                         }*/
-                        
-                });
+
+                    });
                 } else {
-                    console.error('ghost-select element not found!')
+                    // console.error('ghost-select element not found!')
                 }
             }
         },
@@ -284,10 +290,10 @@ const DiagramComponent = Vue.extend({
                 self.selectedFlow = null;
             });
         },
-        doChangeWorkflowName(ev){
+        doChangeWorkflowName(ev) {
             this.changeWorkflowName(ev.target.value);
         },
-        doChangeWorkflowId(ev){
+        doChangeWorkflowId(ev) {
             /** Debug */
             this.changeWorkflowId(ev.target.value);
         },
@@ -308,7 +314,7 @@ const DiagramComponent = Vue.extend({
                 this.selectedFlow = null;
             }
         },*/
-        
+
         flowClick(connection, e) {
             var self = this;
             self.selectedFlow = connection;
@@ -333,7 +339,7 @@ const DiagramComponent = Vue.extend({
             ev.preventDefault();
 
             let operation = this.getOperationFromId(ev.dataTransfer.getData('id'))[0];
-            if (! operation) {
+            if (!operation) {
                 return;
             }
 
@@ -365,13 +371,13 @@ const DiagramComponent = Vue.extend({
             self.clearFlows();
             self.clearTasks();
         },
-        keyboardAction(ev){
+        keyboardAction(ev) {
             let self = this;
-            if (self.selectedTask){
-                let elem =  document.getElementById(self.selectedTask.id);
+            if (self.selectedTask) {
+                let elem = document.getElementById(self.selectedTask.id);
                 let inc = ev.ctrlKey ? 10 : 1;
                 let v = 0;
-                switch(ev.code){
+                switch (ev.code) {
                     case 'Delete':
                         this.deleteSelected();
                         break;
@@ -455,7 +461,7 @@ const DiagramComponent = Vue.extend({
             });
             graph.flows.forEach(self.addFlow);
         },
-        
+
         setZoom(zoom, instance, transformOrigin, el) {
             transformOrigin = transformOrigin || [0.5, 0.5];
             instance = instance || jsPlumb;
@@ -497,16 +503,16 @@ const DiagramComponent = Vue.extend({
             this.setZoom(self.zoom, self.instance, null, self.diagramElement);
             return;
         },
-        scrollToTask(taskId){
+        scrollToTask(taskId) {
             let elemTask = document.getElementById(taskId);
             let container = self.diagramElement.parentElement;
             container.scrollTop = parseInt(elemTask.style.top);
             container.scrollLeft = parseInt(elemTask.style.left);
         },
-        _bindJsPlumbEvents(){
+        _bindJsPlumbEvents() {
             let self = this;
             self.instance.setContainer("lemonade-diagram");
-                
+
             // self.instance.getContainer().addEventListener('click', function (ev) {
             //     //self.clearSelection(ev);
             // });
@@ -515,9 +521,9 @@ const DiagramComponent = Vue.extend({
             self.instance.bind('connectionDetached', (info, originalEvent) => {
                 let source = info.sourceEndpoint.getUuid();
                 let target = info.targetEndpoint.getUuid();
-                
+
                 self.removeFlow(source + '-' + target);
-                console.debug('Removendo')
+                // console.debug('Removendo')
             });
             self.instance.bind('connection', (info, originalEvent) => {
                 let con = info.connection;
@@ -530,7 +536,7 @@ const DiagramComponent = Vue.extend({
                     let [target_id, target_port] = info.targetEndpoint.getUuid().split('/');
                     self.addFlow({
                         source_id, source_port,
-                        target_id, target_port, 
+                        target_id, target_port,
                     });
                 }
             });

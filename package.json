@@ -43,7 +43,7 @@
     "socket.io-client": "^1.5.1",
     "vue": "^2.1.10",
     "vue-resource": "^1.0.3",
-    "vue-router": "^2.1.0",
+    "vue-router": "^2.2.0",
     "vue-select": "github:sagalbot/vue-select#vue2",
     "vue-server-renderer": "^2.1.10",
     "vuex": "^2.1.0",

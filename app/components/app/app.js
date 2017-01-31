@@ -11,47 +11,32 @@ import DiagramComponent from '../diagram/diagram';
 import ToolbarComponent from '../toolbox/toolbox';
 import LoadWorkflowComponent from '../load-workflow/load-workflow';
 
-//import { loadOperations, updateTaskFormField, changeLanguage, login, connectWebSocket } from '../vuex/actions';
-//import { getGroupedOperations, getLanguage, getUser } from '../vuex/getters';
-
 
 import {
     EmptyPropertiesComponent,
     PropertyDescriptionComponent,
     IntegerComponent, DecimalComponent, CheckboxComponent, DropDownComponent, RangeComponent,
     TextComponent, TextAreaComponent, ColorComponent, IndeterminatedCheckboxComponent, LookupComponent,
-    AttributeSelectorComponent, PercentageComponent, 
+    AttributeSelectorComponent, PercentageComponent,
     ExpressionComponent, AttributeFunctionComponent, MultiSelectDropDownComponent
 }
     from '../properties/properties-components.js';
 
 const AppComponent = Vue.extend({
     template,
-    /*
-    vuex: {
-        actions: {
-            loadOperations,
-            updateTaskFormField,
-            changeLanguage,
-            login,
-            connectWebSocket,
-        },
-        getters: {
-            groupedOperations: getGroupedOperations,
-            language: getLanguage,
-            user: getUser
-        },
-    },*/
     computed: {
-        groupedOperations: function(){
+        groupedOperations: function () {
             return this.$store.getters.getGroupedOperations;
         },
         language: 'en', //this.$store.getters.language,
-        user: function(){
+        user: function () {
             return this.$store.getters.getUser;
         },
+        errors() {
+            return this.$store.getters.getErrors;
+        },
     },
-    created(){
+    created() {
         eventHub.$on('onclick-task', (taskComponent) => {
             let task = taskComponent.task;
             /* An task (operation instance) was clicked in the diagram */
@@ -67,8 +52,7 @@ const AppComponent = Vue.extend({
                 });
             });
         });
-        eventHub.$on('update-form-field-value',(field, value) => {
-            //console.debug(this.task.forms[field.name])
+        eventHub.$on('update-form-field-value', (field, value) => {
             let filled = this.task.forms[field.name];
             if (filled) {
                 filled.value = value;
@@ -120,7 +104,6 @@ const AppComponent = Vue.extend({
             this.showModalLoadWorkflow = true;
         },
         'update-form-field-value': function (field, value) {
-            //console.debug(this.task.forms[field.name])
             let filled = this.task.forms[field.name];
             if (filled) {
                 filled.value = value;
@@ -150,22 +133,33 @@ const AppComponent = Vue.extend({
             this.filledForm = null;
             this.forms = null;
         },
-        'onselect-tasks-in-diagram': function(coords) {
+        'onselect-tasks-in-diagram': function (coords) {
             this['onclear-selection']();
-            console.debug(coords, this)
-        }, 
+        },
 
     },
     mounted() {
         //this.connectWebSocket();
         if (true || this.user) {
-            this.loadOperations();
+
             let elem = document.getElementById('menu-operations');
             PerfectScrollbar.initialize(elem, {
                 wheelSpeed: 2,
                 wheelPropagation: true,
                 minScrollbarLength: 20
             });
+            if (this.$route.params.id) {
+                let self = this;
+                self.$store.dispatch('loadOperations').then(() => {
+                    self.$store.dispatch('changeWorkflowId', this.$route.params.id)
+                    self.$store.dispatch('loadWorkflow').catch((ex) => {
+                        debugger
+                        console.debug(ex)
+                    });
+                });
+            } else {
+                this.loadOperations();
+            }
         }
     },
     methods: {
@@ -173,7 +167,6 @@ const AppComponent = Vue.extend({
             return this.task && this.task.forms && this.task.forms[name] ? this.task.forms[name].value : null;
         },
         doLogin(ev) {
-            //console.debug(this.username, this.passwd);
             this.login(this.username, this.passwd)
             return false;
         },
@@ -186,20 +179,21 @@ const AppComponent = Vue.extend({
                 ul.classList.add('slide-up');
                 ul.classList.remove('slide-down');
             }
+            ev.stopPropagation();
         },
         minimap(ev) {
             html2canvas(document.getElementById('lemonade-diagram'),
                 {
-                    onrendered(canvas){
+                    onrendered(canvas) {
                         canvas.style.zoom = .15;
                         let minimap = document.getElementById('minimap');
                         minimap.innerHTML = "";
                         minimap.appendChild(canvas);
-                    }, 
+                    },
                 });
         },
-        loadOperations(){
-            this.$store.dispatch('loadOperations');
+        loadOperations() {
+            return this.$store.dispatch('loadOperations');
         }
     },
     store

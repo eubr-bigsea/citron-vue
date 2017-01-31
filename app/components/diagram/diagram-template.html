@@ -5,6 +5,7 @@
                 <input type="text" placeholder="Unnamed workflow" class="form-control" :value="workflow.name" @keyup="doChangeWorkflowName"
                 />
                 <input type="text" placeholder="#id" class="form-control" @keyup="doChangeWorkflowId" id="wfId"/>
+                
             </div>
             <div class="col-md-6">
                 <div class="buttons-toolbar btn-group pull-right diagram-toolbar">
@@ -28,7 +29,6 @@
         <div class="lemonade" v-on:drop="drop" v-on:dragover="allowDrop" id="lemonade-diagram" v-on:click="diagramClick">
             <task-component v-for="task of tasks" :task="task" :instance="instance"></task-component>
             <flow-component v-for="flow of flows" :flow="flow" :instance="instance"></flow-component>
-            
             <div class="ghost-select"><span></span></div>
         </div>
     </div>

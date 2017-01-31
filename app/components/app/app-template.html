@@ -1,21 +1,5 @@
 <div>
-    <div v-if="user.state">
-        <nav class="navbar navbar-fixed-top navbar-inverse">
-            <a class="navbar-brand" href="#">Lemonade</a>
-            <ul class="nav navbar-nav">
-                <li class="nav-item active">
-                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-                </li>
-            </ul>
-            <ul class="nav navbar-nav  pull-right">
-                <li class="nav-item" :class="{hide: language === 'en'}">
-                    <a class="nav-link" href="#" @click="changeLanguage('en')">English version</a>
-                </li>
-                <li class="nav-item" :class="{hide: language === 'pt'}">
-                    <a class="nav-link" href="#" @click="changeLanguage('pt')">Versão em português</a>
-                </li>
-            </ul>
-        </nav>
+    <div>
         <div class="container-fluid">
             <div class="row small-padding">
                 <div id="appx">
@@ -28,7 +12,7 @@
                                 <div id="menu-operations" style="height: calc(100vh - 134px); position: relative; overflow:hidden">
                                     <ul class="nav nav-list">
                                         <li class="drop-menu-item" v-for="(operations, groupName) in groupedOperations">
-                                            <a href="#" v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ groupName }} </a>
+                                            <a v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ groupName }} </a>
                                             <ul class="nav nav-list tree slide-up">
                                                 <div v-for="op in operations">
                                                     <toolbox-component :operation="op" />
@@ -76,7 +60,7 @@
         </div>
         <div class="row hide">
             <div class="col-md-12">
-                  <div style="text-align: left">
+                    <div style="text-align: left">
                     <small><pre><code class="python"></code></pre></small>
                 </div>
                 <textarea class="form-control" style="font-size:8pt" rows="10" id="save-area"></textarea>
@@ -86,11 +70,21 @@
             <load-workflow-component :show.sync="showModalLoadWorkflow"></load-workflow-component>
         </div>
     </div>
+    <div v-if="errors.length > 0">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>{{errors}}</h1>
+                </div>
+            </div>
+    </div>
+</div>
+    <!--
     <div v-else>
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-4"></div>
-    
+
                 <div class="col-md-4">
                     <section class="login-form">
                         <form method="post" action="#" role="login">
@@ -117,4 +111,4 @@
             </div>
         </div>
     </div>
-</div>
+    -->
