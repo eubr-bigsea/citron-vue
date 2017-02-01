@@ -32,7 +32,7 @@
                             </td>
                             <td>{{wf.name}}</td>
                             <td>{{wf.user_name}}</td>
-                            <td>{{wf.updated}}</td>
+                            <td>{{wf.updated}} {{ moment() }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -54,6 +54,8 @@
 
 <script>
     import Vue from 'vue';
+    import moment from 'moment';
+
     const fields = 'id, name, user_name, updated';
     const WorkflowListComponent = Vue.extend({
         data() {
@@ -63,20 +65,23 @@
             }
         },
         computed: {
-            pageData: function () {
+            pageData: function() {
                 return this.$store.getters.getWorkflowPage;
             },
         },
-        mounted: function () {
+        mounted: function() {
             this.performLoad();
         },
         methods: {
+            moment,
             changePlatform() {
                 this.performLoad(true)
             },
             load(parameters) {
-                this.$store.dispatch('updatePageParameters',
-                    { page: 'workflow-list', parameters });
+                this.$store.dispatch('updatePageParameters', {
+                    page: 'workflow-list',
+                    parameters
+                });
                 this.$store.dispatch('loadWorkflowPage', parameters);
             },
             performLoad(reload) {
@@ -87,7 +92,12 @@
                     } else {
                         this.page = 1;
                     }
-                    let data = { fields, page: this.page, size: 20, platform: this.platform }
+                    let data = {
+                        fields,
+                        page: this.page,
+                        size: 20,
+                        platform: this.platform
+                    }
                     this.load(data);
                 } else {
                     this.page = saved.page;
@@ -97,11 +107,13 @@
             }
         },
         watch: {
-            '$route': function () {
+            '$route': function() {
                 if (this.$route.params.page) {
                     this.page = parseInt(this.$route.params.page);
                     let data = {
-                        fields, page: this.page, size: 20,
+                        fields,
+                        page: this.page,
+                        size: 20,
                         platform: this.platform
                     };
                     this.load(data);
