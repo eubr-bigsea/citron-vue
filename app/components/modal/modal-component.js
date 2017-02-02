@@ -4,38 +4,16 @@ import './modal.scss';
 
 // register modal component
 const ModalComponent = Vue.component('modal', {
-    created(){
+    created() {
         document.getElementsByTagName('body')[0].style.overflow = 'hidden';
     },
     methods: {
-        close(){
-            this.show = false;
+        closeModal() {
             document.getElementsByTagName('body')[0].style.overflow = 'auto';
         }
     },
-    props: {
-        show: {
-            type: Boolean,
-            required: true,
-            twoWay: true,
-        },
-        cancel: {
-            type: Boolean,
-            required: false,
-            twoWay: false
-        },
-        close: {
-            type: Boolean,
-            required: false,
-            twoWay: false
-        }
-    },
-    ready: function () {
-        document.addEventListener("keydown", (e) => {
-            if (this.show && e.keyCode == 27) {
-                this.close();
-            }
-        });
+    ready: function() {
+
     },
     template,
 })

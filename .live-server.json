@@ -1,0 +1,12 @@
+{
+    "port": 3004,
+    "host": "0.0.0.0",
+    "root": "/",
+    "open": false,
+    "ignore": "app,node_modules",
+    "file": "index.html",
+    "wait": 1000,
+    "mount": [
+    ],
+    "logLevel": 2
+}

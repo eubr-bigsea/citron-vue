@@ -6,7 +6,7 @@
                 <hr/>
             </div>
             <div class="col-md-3">
-                <label>Filter by platform:</label>
+                <label>Working on platform:</label>
                 <p>
                     <select class="form-control" v-model="platform" v-on:change="changePlatform">
                     <option value="spark">Spark</option>
@@ -14,25 +14,36 @@
                 </select>
                 </p>
             </div>
+            <div class="col-md-9 pull-right text-right">
+                <a href="#/workflows/add" class="btn btn-primary" role="button"><span class="fa fa-plus"></span> Add workflow</a>
+            </div>
             <hr/>
             <div class="col-md-12">
                 <table class="table table-striped table-bordered">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Owner</th>
-                            <th>Updated</th>
+                            <th class="sortable primary text-center col-md-1" @click="sort('id')">
+                                 Id <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'id'"></span>
+                                 </th>
+                            <th class="sortable primary text-center col-md-6" @click="sort('name')">
+                                Name <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'name'"></span>
+                                </th>
+                            <th class="sortable primary text-center col-md-3" @click="sort('user_name')">
+                                Owner <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'user_name'"></span>
+                                </th>
+                            <th class="sortable primary text-center col-md-2" @click="sort('updated')">
+                                Updated <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'updated'"></span>
+                                </th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="wf in pageData.data">
-                            <td>
+                            <td class="text-center">
                                 <router-link :to="{name: 'editor', params: {id: wf.id }}">{{wf.id}}</router-link>
                             </td>
                             <td>{{wf.name}}</td>
                             <td>{{wf.user_name}}</td>
-                            <td>{{wf.updated}} {{ moment() }}</td>
+                            <td class="text-center">{{ formatDate(wf.updated, 'DD-MM-YYYY HH:mm:ss') }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -62,6 +73,8 @@
             return {
                 page: 1,
                 platform: 'spark',
+                asc: 'true',
+                orderBy: 'name',
             }
         },
         computed: {
@@ -73,9 +86,15 @@
             this.performLoad();
         },
         methods: {
-            moment,
+            formatDate(date, format) {
+                return moment(date).format(format);
+            },
             changePlatform() {
                 this.performLoad(true)
+            },
+            sort(orderBy) {
+                this.orderBy = orderBy;
+                this.performLoad(true, orderBy);
             },
             load(parameters) {
                 this.$store.dispatch('updatePageParameters', {
@@ -84,7 +103,7 @@
                 });
                 this.$store.dispatch('loadWorkflowPage', parameters);
             },
-            performLoad(reload) {
+            performLoad(reload, orderBy) {
                 let saved = this.$store.getters.getPageParameters['workflow-list'];
                 if (this.$route.params.page || !saved || reload) {
                     if (!reload) {
@@ -92,11 +111,16 @@
                     } else {
                         this.page = 1;
                     }
+                    if (orderBy) {
+                        this.asc = (this.asc === 'true') ? 'false' : 'true';
+                    }
                     let data = {
                         fields,
                         page: this.page,
                         size: 20,
-                        platform: this.platform
+                        platform: this.platform,
+                        sort: orderBy || '',
+                        asc: this.asc,
                     }
                     this.load(data);
                 } else {

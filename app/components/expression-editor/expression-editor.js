@@ -14,8 +14,7 @@ function get_html_obj(obj) {
             var li = $("<li />").appendTo(rv);
             var prop_name = $("<span />").addClass("prop_name")
                 .appendTo(li)
-                .text(prop + ": ")
-                ;
+                .text(prop + ": ");
             var prop_val = $("<span />").addClass("prop_val")
                 .appendTo(li);
 
@@ -33,6 +32,7 @@ function get_html_obj(obj) {
     }
     return rv;
 };
+
 function htmlize(obj) {
     var html_obj = get_html_obj(obj);
     return html_obj.html();
@@ -42,76 +42,69 @@ const ExpressionEditorComponent = Vue.extend({
     components: {
         'modal-component': ModalComponent
     },
-    data(){
+    data() {
         return {
             dateFunctions: [
                 'current_date', 'current_timestamp',
-                'date_add', 'date_format', 'date_sub', 
+                'date_add', 'date_format', 'date_sub',
                 'datediff', 'dayofmonth', 'dayofyear',
 
             ],
-            showModal: false
+            showModal: false,
+            error: ''
         }
     },
     computed: {
-        xtree() {
-            try {
-                jsep.addBinaryOp("=>", 1);
-                jsep.removeBinaryOp('^');
-                let tree = jsep(this.expression);
-                this.error = null;
-                //return htmlize(tree);
-                return JSON.stringify(tree, null, 4).replace('\n', '<br/>');
-            } catch (e) {
-                this.error = e;
-            }
-            return '';
+        tree() {
+            return JSON.parse(this.expression).tree;
+        },
+        jsExpression() {
+            return JSON.parse(this.expression).expression;
         }
     },
     methods: {
         changed: _.debounce(function(e) {
             try {
-                if (e.target && e.target.value){
-                    let tree = this.process(e.target.value)
-                    eventHub.$emit('update-expression', e.target.value, tree);
+                if (e.target && e.target.value) {
+                    let ttree = this.process(e.target.value)
+                    eventHub.$emit('update-expression', e.target.value, ttree);
+                    this.tree = ttree;
                 } else {
                     this.error = null;
-                    this.$dispatch('update-expression', null, null);
+                    eventHub.$emit('update-expression', null, null);
                 }
             } catch (e) {
-                this.error = e;
+                this.error = e.toString();
             }
         }),
-        process(v){
+        process(v) {
             let tree = jsep(v || '');
             jsep.addBinaryOp("=>", 1);
             jsep.removeBinaryOp('^');
             this.error = null;
             //return htmlize(tree);
-            this.tree = JSON.stringify(tree, null, 4).replace('\n', '<br/>');
+            //this.tree = JSON.stringify(tree, null, 4);
             return tree;
         },
-        selectTab(tab){
+        selectTab(tab) {
             this.currentTab = tab;
         },
     },
     props: {
-        categories: [],
-        currentTab: '',
-        addOperators: [],
-        error: null,
-        expression: "",
-        removeOperators: [],
-        tree: '',
+        categories: {},
+        currentTab: {},
+        addOperators: {},
+        expression: {},
+        removeOperators: {},
     },
     ready() {
         this.process(this.expression)
     },
     template,
     watch: {
-        expression(){
+        /*expression() {
             this.process(this.expression)
-        }
+        }*/
     }
 });
 

@@ -3,7 +3,7 @@ import Vue from 'vue';
 import io from 'socket.io-client'
 Vue.use(Vuex);
 
-const StoreException = function(message, code){
+const StoreException = function(message, code) {
     this.message = message;
     this.code = code;
 }
@@ -31,13 +31,14 @@ const baseUrl = 'http://beta.ctweb.inweb.org.br/tahiti';
 //const baseUrl = 'http://localhost:5000'; 
 function getWorkflows() {
     let url = `${baseUrl}/workflows?token=123456`;
-    return Vue.http.get(url).then(function (response) {
+    return Vue.http.get(url).then(function(response) {
         return response.data;
     })
 }
+
 function getWorkflow(id) {
     let url = `${baseUrl}/workflows${id}?token=123456`;
-    return Vue.http.get(url).then(function (response) {
+    return Vue.http.get(url).then(function(response) {
         return response.data;
     })
 }
@@ -56,7 +57,7 @@ function addTask(state, task) {
     state.workflow.tasks.push(task);
 }
 const mutations = {
-    SET_OPERATIONS(state, {operations, groupedOperations, lookupOperations}) {
+    SET_OPERATIONS(state, { operations, groupedOperations, lookupOperations }) {
         state.operations = operations;
         state.groupedOperations = groupedOperations;
         state.lookupOperations = lookupOperations;
@@ -64,7 +65,7 @@ const mutations = {
     UPDATE_TASK_FORM_FIELD(state, task, value) {
         console.debug(task, value);
     },
-    UPDATE_PAGE_PARAMETERS(state, parameters){
+    UPDATE_PAGE_PARAMETERS(state, parameters) {
         state.pageParameters[parameters.page] = parameters.parameters;
     },
     ADD_TASK(state, task) {
@@ -94,7 +95,7 @@ const mutations = {
     CHANGE_LANGUAGE(state, lang) {
         state.language = lang;
 
-        getOperations().then(function (data) {
+        getOperations().then(function(data) {
             let groupedOperations = {};
             let ops = {};
             data.forEach((op) => {
@@ -116,7 +117,7 @@ const mutations = {
             //console.debug(state.workflow.flows)
             state.operations = data;
             state.groupedOperations = groupedOperations;
-        }).catch(function (error) {
+        }).catch(function(error) {
             state.errors.push(error);
         });
     },
@@ -192,7 +193,7 @@ const mutations = {
                     state.errors.push(new StoreException("Invalid workflow", 'WF0001'));
                 } else {
                     t.status = 'WAITING';
-                    t.operation.ports.forEach(function (v) { validPorts.add(v.id); });
+                    t.operation.ports.forEach(function(v) { validPorts.add(v.id); });
 
                     t.operation.forms.forEach((form) => {
                         form.fields.forEach((field) => {
@@ -217,8 +218,8 @@ const mutations = {
             state.workflow = workflow;
 
             flows.forEach((flow) => {
-                if (validTaskId.has(flow.source_id) && validTaskId.has(flow.target_id)
-                    && validPorts.has(flow.source_port) && validPorts.has(flow.target_port)) {
+                if (validTaskId.has(flow.source_id) && validTaskId.has(flow.target_id) &&
+                    validPorts.has(flow.source_port) && validPorts.has(flow.target_port)) {
                     flow.id = `${flow.source_id}/${flow.source_port}-${flow.target_id}/${flow.target_port}`;
                     //console.debug(flow.id);
                     if (!ids.has(flow.id)) {
@@ -267,7 +268,10 @@ const mutations = {
             console.debug('update workflow', msg);
         });
 
-    }
+    },
+    RAISE_COMPONENT_EXCEPTION(state, msg) {
+        state.errors.push(msg);
+    },
 
 }
 window.store = state;
@@ -278,7 +282,7 @@ export default new Vuex.Store({
         loadOperations({ commit, state }) {
             let url = `${baseUrl}/operations?platform=spark&enabled=true&token=123456&lang=${state.language}`;
             //let url = `http://artemis.speed.dcc.ufmg.br:5000/operations?token=123456&lang=${state.language}`;
-            return Vue.http.get(url).then(function (response) {
+            return Vue.http.get(url).then(function(response) {
                 let operations = response.data;
                 let groupedOperations = {};
                 let lookupOperations = {}
@@ -295,9 +299,9 @@ export default new Vuex.Store({
                     lookupOperations[op.id] = op;
                 });
                 //console.debug(groupedOperations);
-                return {operations, groupedOperations, lookupOperations};
+                return { operations, groupedOperations, lookupOperations };
             }).then((values) => {
-                commit('SET_OPERATIONS', values); 
+                commit('SET_OPERATIONS', values);
             });
         },
 
@@ -324,10 +328,10 @@ export default new Vuex.Store({
         updateTaskFormField({ commit, state }, task, value) {
             return commit('UPDATE_TASK_FORM_FIELD');
         },
-        changeWorkflowName({commit, state}, name) {
+        changeWorkflowName({ commit, state }, name) {
             return commit('CHANGE_WORKFLOW_NAME', name)
         },
-        changeWorkflowId({commit, state}, id) {
+        changeWorkflowId({ commit, state }, id) {
             return commit('CHANGE_WORKFLOW_ID', id)
         },
 
@@ -335,25 +339,28 @@ export default new Vuex.Store({
             return commit('CHANGE_LANGUAGE', lang);
         },
         /* Auth */
-        login({commit, state}, login, passwd) {
+        login({ commit, state }, login, passwd) {
             return commit('LOGIN', login, passwd);
         },
 
-        saveWorkflow({commit, state}) {
+        saveWorkflow({ commit, state }) {
             return commit('SAVE_WORKFLOW');
         },
-        loadWorkflow({commit, state}) {
+        loadWorkflow({ commit, state }) {
             return commit('LOAD_WORKFLOW');
         },
-        loadWorkflowPage({commit, params}, p) {
+        loadWorkflowPage({ commit, params }, p) {
             return commit('LOAD_WORKFLOW_PAGE', p);
         },
 
-        connectWebSocket({commit, state}) {
+        connectWebSocket({ commit, state }) {
             return commit('CONNECT_WEBSOCKET');
         },
-        updatePageParameters({commit, state}, parameters){
+        updatePageParameters({ commit, state }, parameters) {
             return commit('UPDATE_PAGE_PARAMETERS', parameters);
+        },
+        raiseComponentException({ commit, state }, msg) {
+            return commit('RAISE_COMPONENT_EXCEPTION', msg);
         }
     },
     getters: {

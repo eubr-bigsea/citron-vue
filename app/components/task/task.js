@@ -102,7 +102,7 @@ const TaskComponent = Vue.extend({
         click(ev) {
             let self = this;
             let elem = ev.target.classList.contains('task') ? ev.target : ev.target.parentElement;
-            
+
             Array.prototype.slice.call(document.querySelectorAll(".task.selected"), 0).forEach((e) => {
                 e.classList.remove('selected');
             });
@@ -117,25 +117,25 @@ const TaskComponent = Vue.extend({
                 self.selectedTask = this;
             }
             self.instance.repaintEverything()
-            
+
             // Raise the click event to upper components
             eventHub.$emit('onclick-task', self);
             ev.stopPropagation();
         },
-        endPointMouseOver(endpoint){
+        endPointMouseOver(endpoint) {
             console.debug('highlight')
         },
-        endPointMouseOut(endpoint){
+        endPointMouseOut(endpoint) {
             console.debug('Out highlight')
         },
-        getForeColor(backgroundColor){
-            if (backgroundColor){
+        getForeColor(backgroundColor) {
+            if (backgroundColor) {
                 let d = document.createElement("div");
                 d.style.color = backgroundColor.value;
                 //document.body.appendChild(d)
                 //Color in RGB 
                 console.debug(window.getComputedStyle(d).color)
-                //let r, g, b = 
+                    //let r, g, b = 
             } else {
                 return "#222";
             }
@@ -143,18 +143,18 @@ const TaskComponent = Vue.extend({
     },
     props: {
         task: {
-            'default': function () { return { name: '', icon: '' }; }
+            'default': function() { return { name: '', icon: '' }; }
         },
         instance: null
     },
     xwatch: {
-        'task.operation.name': function(){
+        'task.operation.name': function() {
             let self = this;
             console.debug(this.task.operation);
-            this.instance.selectEndpoints(this.elem).each(function(endpoint){
+            this.instance.selectEndpoints(this.elem).each(function(endpoint) {
                 let labelOverlay = endpoint.getOverlay("lbl");
                 let port = self.task.operation.ports.filter((port) => port.id === endpoint._portId);
-                if (port){
+                if (port) {
                     labelOverlay.setLabel(port[0].name)
                 }
             });
@@ -163,6 +163,12 @@ const TaskComponent = Vue.extend({
     mounted() {
         let self = this;
         let operation = this.task.operation;
+
+        if (!operation) {
+            this.$store.dispatch('raiseComponentException', { msg: 'Invalid operation', code: 'TASK001' });
+            return;
+        }
+
         let taskId = this.task.id;
 
         let zIndex = this.task['z_index'];
@@ -183,10 +189,13 @@ const TaskComponent = Vue.extend({
         ];
 
         let elem = document.getElementById(taskId);
-        if (this.task.operation.slug === 'comment'){
+        if (this.task.operation.slug === 'comment') {
             elem.classList.add('comment');
         }
-        [[inputs, 'input', endPointOptionsInput], [outputs, 'output', endPointOptionsOutput]].forEach((item) => {
+        [
+            [inputs, 'input', endPointOptionsInput],
+            [outputs, 'output', endPointOptionsOutput]
+        ].forEach((item) => {
             let ports = item[0];
             let portType = item[1];
             let portOptions = item[2];
@@ -196,7 +205,7 @@ const TaskComponent = Vue.extend({
                 anchors[portType][ports.length - 1].forEach((anchor, inx) => {
                     lbls[0][1]['label'] = `<div class="has-${ports.length}-ports">${ports[inx].name}</div>`;
                     let options = JSON.parse(JSON.stringify(portOptions)); // clone
-                    options['endpoint'] = ports[inx].multiplicity !== 'ONE' ? 'Rectangle': options['endpoint'];
+                    options['endpoint'] = ports[inx].multiplicity !== 'ONE' ? 'Rectangle' : options['endpoint'];
 
                     options['anchors'] = anchor;
                     options['overlays'] = lbls;
@@ -205,7 +214,7 @@ const TaskComponent = Vue.extend({
                         options['maxConnections'] = 100;
                         // options['paintStyle']['fillStyle'] = 'rgba(228, 87, 46, 1)';
                     }
-                    if (ports[inx].interfaces.length && ports[inx].interfaces[0].color){
+                    if (ports[inx].interfaces.length && ports[inx].interfaces[0].color) {
                         options['paintStyle']['fillStyle'] = ports[inx].interfaces[0].color;
                     } else {
                         console.debug(ports[inx].id, operation.id)
@@ -234,4 +243,4 @@ const TaskComponent = Vue.extend({
     template,
 
 });
-export {TaskComponent, connectionOptions};
+export { TaskComponent, connectionOptions };

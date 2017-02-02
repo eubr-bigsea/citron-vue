@@ -2,7 +2,8 @@ html {
     overflow-y: scroll;
 }
 
-.slide-up, .slide-down {
+.slide-up,
+.slide-down {
     max-height: 0;
     overflow-y: hidden;
     -webkit-transition: max-height 0.3s ease-in-out;
@@ -14,6 +15,7 @@ html {
 .slide-down {
     max-height: 1000px;
 }
+
 .drop-menu-item {
     a {
         color: #888;
@@ -23,20 +25,23 @@ html {
         text-transform: uppercase;
     }
 }
+
 .drop-menu-item a {
     background: #eee;
     padding: 2px
 }
+
 .logo {
     margin: 5px 0 0 10px;
     padding: 0;
-        background: url('citron.png');
-        background-size: auto 40px;
-        height: 40px;
-        width: 42px;
-        border: none;
-        outline: none;
+    background: url('citron.png');
+    background-size: auto 40px;
+    height: 40px;
+    width: 45px;
+    border: none;
+    outline: none;
 }
+
 .minimap {
     border: 1px solid #222;
     bottom: 35px;
@@ -45,4 +50,26 @@ html {
     position: absolute;
     right: 0;
     width: 200px;
+}
+
+.blue {
+    background-color: #0074D9 !important;
+}
+
+.navy {
+    background-color: #001f3f !important;
+}
+
+th.primary {
+    background-color: #337ab7 !important;
+}
+
+th.blue,
+th.primary,
+th.navy {
+    color: white !important;
+}
+
+th.sortable {
+    cursor: pointer;
 }

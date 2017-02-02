@@ -9,27 +9,38 @@ import html2canvas from 'html2canvas';
 
 import DiagramComponent from '../diagram/diagram';
 import ToolbarComponent from '../toolbox/toolbox';
-import LoadWorkflowComponent from '../load-workflow/load-workflow';
+//import LoadWorkflowComponent from '../load-workflow/load-workflow';
 
 
 import {
     EmptyPropertiesComponent,
     PropertyDescriptionComponent,
-    IntegerComponent, DecimalComponent, CheckboxComponent, DropDownComponent, RangeComponent,
-    TextComponent, TextAreaComponent, ColorComponent, IndeterminatedCheckboxComponent, LookupComponent,
-    AttributeSelectorComponent, PercentageComponent,
-    ExpressionComponent, AttributeFunctionComponent, MultiSelectDropDownComponent
+    IntegerComponent,
+    DecimalComponent,
+    CheckboxComponent,
+    DropDownComponent,
+    RangeComponent,
+    TextComponent,
+    TextAreaComponent,
+    ColorComponent,
+    IndeterminatedCheckboxComponent,
+    LookupComponent,
+    AttributeSelectorComponent,
+    PercentageComponent,
+    ExpressionComponent,
+    AttributeFunctionComponent,
+    MultiSelectDropDownComponent
 }
-    from '../properties/properties-components.js';
+from '../properties/properties-components.js';
 
 const AppComponent = Vue.extend({
     template,
     computed: {
-        groupedOperations: function () {
+        groupedOperations: function() {
             return this.$store.getters.getGroupedOperations;
         },
         language: 'en', //this.$store.getters.language,
-        user: function () {
+        user: function() {
             return this.$store.getters.getUser;
         },
         errors() {
@@ -37,6 +48,7 @@ const AppComponent = Vue.extend({
         },
     },
     created() {
+        this.$Progress.start();
         eventHub.$on('onclick-task', (taskComponent) => {
             let task = taskComponent.task;
             /* An task (operation instance) was clicked in the diagram */
@@ -76,7 +88,7 @@ const AppComponent = Vue.extend({
         'dropdown-component': DropDownComponent,
         'indeterminated-checkbox-component': IndeterminatedCheckboxComponent,
         'integer-component': IntegerComponent,
-        'load-workflow-component': LoadWorkflowComponent,
+        //'load-workflow-component': LoadWorkflowComponent,
         'lookup-component': LookupComponent,
         'range-component': RangeComponent,
         'text-component': TextComponent,
@@ -93,17 +105,18 @@ const AppComponent = Vue.extend({
             filled: {},
             task: { operation: '' },
             title: 'Operations',
-            username: '', passwd: '',
-            showModalLoadWorkflow: false
+            username: '',
+            passwd: '',
+            //showModalLoadWorkflow: false
         }
     },
-    events: {
-        'update-operations': function (operations) {
-        },
-        'load-workflow': function () {
+    xxevents: {
+        'update-operations': function(operations) {},
+        /*
+        'load-workflow': function() {
             this.showModalLoadWorkflow = true;
-        },
-        'update-form-field-value': function (field, value) {
+        },*/
+        'update-form-field-value': function(field, value) {
             let filled = this.task.forms[field.name];
             if (filled) {
                 filled.value = value;
@@ -114,7 +127,7 @@ const AppComponent = Vue.extend({
             }
             //this.task.forms[field.name]['category'] = 
         },
-        'onclick-task-in-diagram': function (task) {
+        'onclick-task-in-diagram': function(task) {
             // /* An task (operation instance) was clicked in the diagram */
             // this.task = task;
             // this.filledForm = task.forms;
@@ -128,12 +141,12 @@ const AppComponent = Vue.extend({
             //     });
             // });
         },
-        'onclear-selection': function () {
+        'onclear-selection': function() {
             this.task = null;
             this.filledForm = null;
             this.forms = null;
         },
-        'onselect-tasks-in-diagram': function (coords) {
+        'onselect-tasks-in-diagram': function(coords) {
             this['onclear-selection']();
         },
 
@@ -152,9 +165,11 @@ const AppComponent = Vue.extend({
                 let self = this;
                 self.$store.dispatch('loadOperations').then(() => {
                     self.$store.dispatch('changeWorkflowId', this.$route.params.id)
+
                     self.$store.dispatch('loadWorkflow').catch((ex) => {
-                        debugger
                         console.debug(ex)
+                    }).then(function() {
+                        self.$Progress.finish();
                     });
                 });
             } else {
@@ -182,15 +197,14 @@ const AppComponent = Vue.extend({
             ev.stopPropagation();
         },
         minimap(ev) {
-            html2canvas(document.getElementById('lemonade-diagram'),
-                {
-                    onrendered(canvas) {
-                        canvas.style.zoom = .15;
-                        let minimap = document.getElementById('minimap');
-                        minimap.innerHTML = "";
-                        minimap.appendChild(canvas);
-                    },
-                });
+            html2canvas(document.getElementById('lemonade-diagram'), {
+                onrendered(canvas) {
+                    canvas.style.zoom = .15;
+                    let minimap = document.getElementById('minimap');
+                    minimap.innerHTML = "";
+                    minimap.appendChild(canvas);
+                },
+            });
         },
         loadOperations() {
             return this.$store.dispatch('loadOperations');

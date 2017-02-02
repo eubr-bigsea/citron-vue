@@ -3,7 +3,7 @@
         <span class="fa fa-gear"></span> Open editor
     </button>
 
-    <modal-component :show="showModal">
+    <modal-component v-if="showModal" @close="showModal = false">
         <div slot="header">
             <h4>Expression</h4>
             <em>Construct an expression to transform data</em>
@@ -11,14 +11,12 @@
         <div class="body" slot="body">
             <h4>Function reference</h4>
             <ul class="nav nav-tabs">
-                <li v-for="category in categories" track-by="$index" 
-                    :class="{'active': currentTab === category.category}" @click="selectTab(category.category)">
+                <li v-for="category in categories" track-by="$index" :class="{'active': currentTab === category.category}" @click="selectTab(category.category)">
                     <a href="#">{{category.category}}</a>
                 </li>
             </ul>
             <div class="tab-content">
-                <div v-for="category in categories" track-by="$index" class="tab-pane function-list" 
-                    :class="{'active': currentTab === category.category}" @click="selectTab(category.category)">
+                <div v-for="category in categories" track-by="$index" class="tab-pane function-list" :class="{'active': currentTab === category.category}" @click="selectTab(category.category)">
                     <table class="table-striped table-bordered table">
                         <tr v-for="funct in category.functions">
                             <td>{{funct.name}}</td>
@@ -28,8 +26,8 @@
                     </table>
                 </div>
             </div>
-            <textarea type="text" class="form-control" @keyup="changed" @paste="changed">{{expression}}</textarea>
-            <div :class="{hide: error === null}">
+            <textarea type="text" class="form-control" @keyup="changed" @paste="changed">{{jsExpression}}</textarea>
+            <div :class="{hide: error === null || error === ''}">
                 <div class="label label-danger">
                     {{error}}
                 </div>

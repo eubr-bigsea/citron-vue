@@ -1,5 +1,5 @@
 <div class="lemonade-modal">
-    <div class="modal-mask" v-show="show" transition="modal">
+    <div class="modal-mask" transition="modal">
         <div class="modal-wrapper">
             <div class="modal-container">
                 <div class="modal-header">
@@ -16,9 +16,11 @@
 
                 <div class="modal-footer">
                     <slot name="footer">
-                        <button class="btn btn-primary" @click="show = false">OK</button>
-                        <button class="btn btn-danger" @click="show = false" v-if="cancel">Cancel</button>
-                        <button class="btn btn-default" @click="show = false" v-if="close">Close</button>
+                        <button class="btn btn-primary" @click="$emit('close')">OK</button>
+                        <!--
+                        <button class="btn btn-danger" @click="$emit('close')">Cancel</button>
+                        <button class="btn btn-default" @click="$emit('close')">Close</button>
+                        -->
                     </slot>
                 </div>
             </div>

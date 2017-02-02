@@ -25,7 +25,7 @@
                         </div>
                     </div>
                     <div class="col-md-7">
-                        <div class="panel panel-success panel-inverse">
+                        <div class="panel panel-primary panel-inverse">
                             <div class="panel-heading">
                                 Workflow
                             </div>
@@ -36,7 +36,7 @@
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="panel panel-inverse panel-info lemonade-properties">
+                    <div class="panel panel-inverse panel-primary lemonade-properties">
                         <div class="panel-heading">
                             Properties
                         </div>
@@ -60,14 +60,11 @@
         </div>
         <div class="row hide">
             <div class="col-md-12">
-                    <div style="text-align: left">
+                <div style="text-align: left">
                     <small><pre><code class="python"></code></pre></small>
                 </div>
                 <textarea class="form-control" style="font-size:8pt" rows="10" id="save-area"></textarea>
             </div>
-        </div>
-        <div class="hide">
-            <load-workflow-component :show.sync="showModalLoadWorkflow"></load-workflow-component>
         </div>
     </div>
     <div v-if="errors.length > 0">
@@ -77,8 +74,8 @@
                     <h1>{{errors}}</h1>
                 </div>
             </div>
+        </div>
     </div>
-</div>
     <!--
     <div v-else>
         <div class="container-fluid">

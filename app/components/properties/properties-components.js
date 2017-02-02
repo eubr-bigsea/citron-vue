@@ -14,8 +14,8 @@ const PropertyDescriptionComponent = Vue.extend({
 });
 
 const fieldIsRequiredSymbol = '<span class="fa fa-asterisk" v-show="field.required"></span>'
-const baseLabel = '<p>{{field.label}} ' + fieldIsRequiredSymbol
-    + '<span class="fa fa-question-circle-o pull-right" :title="field.help"></span></p>';
+const baseLabel = '<p>{{field.label}} ' + fieldIsRequiredSymbol +
+    '<span class="fa fa-question-circle-o pull-right" :title="field.help"></span></p>';
 
 const DecimalComponent = Vue.extend({
     methods: {
@@ -25,7 +25,7 @@ const DecimalComponent = Vue.extend({
     },
     props: { value: 0, field: null },
     template: '<div>' + baseLabel +
-    '<input type="number" maxlenght="10" step="0.01" class="form-control" :value="value" @input="updated" pattern="\\d*\\.\\d{2}"/></div>',
+        '<input type="number" maxlenght="10" step="0.01" class="form-control" :value="value" @input="updated" pattern="\\d*\\.\\d{2}"/></div>',
 });
 const IntegerComponent = Vue.extend({
     methods: {
@@ -35,26 +35,26 @@ const IntegerComponent = Vue.extend({
     },
     props: { value: 0, field: null },
     template: '<div>' + baseLabel +
-    '<input type="number" maxlenght="10" class="form-control" :value="value" pattern="\\d*" @input="updated"/></div>',
+        '<input type="number" maxlenght="10" class="form-control" :value="value" pattern="\\d*" @input="updated"/></div>',
 });
 
 const TextComponent = Vue.extend({
     methods: {
-        updated: _.debounce(function(e) {eventHub.$emit('update-form-field-value', this.field, e.target.value);}, 500)
+        updated: _.debounce(function(e) { eventHub.$emit('update-form-field-value', this.field, e.target.value); }, 500)
     },
     props: { value: 0, field: null },
     template: '<div>' + baseLabel +
-    '<input type="text" maxlenght="100" class="form-control" :value="value" @input="updated" v-bind:required="field.required"/></div>',
+        '<input type="text" maxlenght="100" class="form-control" :value="value" @input="updated" v-bind:required="field.required"/></div>',
 });
 
 
 const TextAreaComponent = Vue.extend({
     methods: {
-        updated: _.debounce(function(e) {eventHub.$emit('update-form-field-value', this.field, e.target.value);}, 500)
+        updated: _.debounce(function(e) { eventHub.$emit('update-form-field-value', this.field, e.target.value); }, 500)
     },
     props: { value: 0, field: null },
     template: '<div>' + baseLabel +
-    '<textarea class="form-control" @keyup="updated">{{value}}</textarea></div>',
+        '<textarea class="form-control" @keyup="updated">{{value}}</textarea></div>',
 
 });
 
@@ -64,13 +64,13 @@ const CheckboxComponent = Vue.extend({
             eventHub.$emit('update-form-field-value', this.field, this.checked ? '1' : '0');
         }
     },
-    mounted(){
+    mounted() {
         let input = this.$el.querySelector('input[type="checkbox"]');
-        input.id = `checkboxComponentInput-${this.field.name}`; 
+        input.id = `checkboxComponentInput-${this.field.name}`;
     },
     props: { value: 0, field: null, checked: '0' },
     template: '<div class="checkbox"><input type="checkbox" @change="updated" :checked="checked" value="1"/> ' +
-    '<label for="checkboxComponentInput">{{field.label}}</label> <span class="fa fa-question-circle-o pull-right" :title="field.help"></span></div>'
+        '<label for="checkboxComponentInput">{{field.label}}</label> <span class="fa fa-question-circle-o pull-right" :title="field.help"></span></div>'
 });
 
 const IndeterminatedCheckboxComponent = Vue.extend({
@@ -80,12 +80,12 @@ const IndeterminatedCheckboxComponent = Vue.extend({
         }
     },
     props: { value: 0, field: null },
-    ready: function () {
+    ready: function() {
         let checkbox = this.$el.querySelector('input');
         checkbox.indeterminate = true;
     },
     template: '<div class="checkbox"><input type="checkbox" :value="value" @input="updated" value="Y"/> ' +
-    '<label for="checkboxComponentInput">{{field.label}}</label> <span class="fa fa-question-circle-o pull-right" :title="field.help"></span></div>'
+        '<label for="checkboxComponentInput">{{field.label}}</label> <span class="fa fa-question-circle-o pull-right" :title="field.help"></span></div>'
 });
 
 const MultiSelectDropDownComponent = Vue.extend({
@@ -111,7 +111,7 @@ const DropDownComponent = Vue.extend({
         pairOptionValueList() {
             return JSON.parse(this.field.values);
         },
-        selected(){
+        selected() {
             return this.value;
         }
     },
@@ -122,15 +122,15 @@ const DropDownComponent = Vue.extend({
         }
     },
     props: { value: 0, field: null, },
-    ready: function(){
+    ready: function() {
         //console.debug(this.field, this.field['default'], this.value)
-        if (this.field['default'] && (this.value === null || this.value === '')){
+        if (this.field['default'] && (this.value === null || this.value === '')) {
             this.value = this.field['default'];
         }
     },
     template: '<div>' + baseLabel +
-    '<select class="form-control" v-model="selected" @change="updated"><option></option><option v-for="opt in pairOptionValueList" :value="opt.key">{{opt.value}}</option></select>' +
-    '</div>',
+        '<select class="form-control" v-model="selected" @change="updated"><option></option><option v-for="opt in pairOptionValueList" :value="opt.key">{{opt.value}}</option></select>' +
+        '</div>',
 });
 
 const RangeComponent = Vue.extend({
@@ -146,13 +146,13 @@ const RangeComponent = Vue.extend({
         }
     },
     props: {
-        value: String, 
+        value: String,
         field: Object
     },
     template: '<div>' + baseLabel +
-    '<input type="range" class="form-control" :value="value" @input="updated" min="1" max="99"/>' +
-    '<span class="tag tag-pill tag-info">{{value}}% - {{100-value}}%</span>' +
-    '</div>',
+        '<input type="range" class="form-control" :value="value" @input="updated" min="1" max="99"/>' +
+        '<span class="tag tag-pill tag-info">{{value}}% - {{100-value}}%</span>' +
+        '</div>',
 });
 
 const PercentageComponent = Vue.extend({
@@ -168,13 +168,13 @@ const PercentageComponent = Vue.extend({
         }
     },
     props: {
-        value: String, 
+        value: String,
         field: Object
     },
     template: '<div>' + baseLabel +
-    '<input type="" class="form-control" :value="value" @input="updated" min=".1" max="99.9" step="0.1"/>' +
-    '<span class="tag tag-pill tag-info">{{value}}%</span>' +
-    '</div>',
+        '<input type="" class="form-control" :value="value" @input="updated" min=".1" max="99.9" step="0.1"/>' +
+        '<span class="tag tag-pill tag-info">{{value}}%</span>' +
+        '</div>',
 });
 
 const ColorComponent = Vue.extend({
@@ -190,8 +190,8 @@ const ColorComponent = Vue.extend({
     },
     props: { value: '', field: null },
     template: '<div>' + baseLabel +
-    '<div v-for="opt in pairOptionValueList" @click="doUpdate(opt)" class="color-item" :class="{active: value && opt && opt.background === value.background && opt.foreground == value.foreground}" :style="{background: opt.background}"></div>' +
-    '</div>',
+        '<div v-for="opt in pairOptionValueList" @click="doUpdate(opt)" class="color-item" :class="{active: value && opt && opt.background === value.background && opt.foreground == value.foreground}" :style="{background: opt.background}"></div>' +
+        '</div>',
 });
 const LookupComponent = Vue.extend({
     methods: {
@@ -203,7 +203,7 @@ const LookupComponent = Vue.extend({
     props: { value: null, field: null, options: [], selected: null, },
     ready() {
         if (this.field.values_url) {
-            this.$http.get(this.field.values_url).then(function (response) {
+            this.$http.get(this.field.values_url).then(function(response) {
                 this.options = response.data.map((v) => {
                     return { "key": v.id, "value": v.name };
                 });
@@ -212,8 +212,8 @@ const LookupComponent = Vue.extend({
         this.selected = this.value;
     },
     template: '<div>' + baseLabel +
-    '<select class="form-control" v-model="selected" @change="updated"><option></option><option v-for="opt in options" :value="opt.key">{{opt.key}} - {{opt.value}}</option></select>' +
-    '</div>',
+        '<select class="form-control" v-model="selected" @change="updated"><option></option><option v-for="opt in options" :value="opt.key">{{opt.key}} - {{opt.value}}</option></select>' +
+        '</div>',
     watch: {
         value() {
             this.selected = this.value;
@@ -247,7 +247,7 @@ const AttributeFunctionComponent = Vue.extend({
     components: {
         'modal-component': ModalComponent
     },
-    data(){
+    data() {
         return {
             currentTab: 'editor',
             showModal: false
@@ -258,44 +258,44 @@ const AttributeFunctionComponent = Vue.extend({
             row[attr] = e.target.value;
             eventHub.$emit('update-form-field-value', this.field, this.value);
         },
-        add(e){
-            if (this.value === null){
+        add(e) {
+            if (this.value === null) {
                 this.value = [];
-            } 
-            this.value.push({alias: '', attribute: '', f: ''})
+            }
+            this.value.push({ alias: '', attribute: '', f: '' })
             eventHub.$emit('update-form-field-value', this.field, this.value);
         },
-        remove(e, index){
+        remove(e, index) {
             this.value.splice(index, 1);
             e.stopPropagation();
             return false;
         },
-        moveUp(e, index){
+        moveUp(e, index) {
             let tmp = this.value.splice(index, 1)[0];
             this.value.splice(index - 1, 0, tmp)
             e.stopPropagation();
             return false;
         },
-        moveDown(e, index){
+        moveDown(e, index) {
             let tmp = this.value.splice(index, 1)[0]
             this.value.splice(index + 1, 0, tmp)
             e.stopPropagation();
             return false;
         },
-        selectTab(tab){
+        selectTab(tab) {
             this.currentTab = tab;
         }
     },
-    props: { 
-        value: [{attribute: '', f: '', alias: ''}], field: null, 
+    props: {
+        value: [{ attribute: '', f: '', alias: '' }],
+        field: null,
         options: []
     },
-    ready() {
-    },
+    ready() {},
     template: require('./function-template.html')
 
 });
-const SortSelectorComponent  = Vue.extend({
+const SortSelectorComponent = Vue.extend({
     components: {
         'v-select': vSelect
     },
@@ -319,7 +319,7 @@ const ExpressionComponent = Vue.extend({
             return JSON.parse(this.field.values);
         },
         expression() {
-            if (this.value){
+            if (this.value) {
                 return JSON.parse(this.value)['expression'];
             } else {
                 return "";
@@ -329,19 +329,16 @@ const ExpressionComponent = Vue.extend({
     components: {
         'expression-editor-component': ExpressionEditorComponent
     },
-    data() {
-        return {
-            split: 50,
-            seed: 0,
-        };
-    },
-    events: {
-        'update-expression': function (expression, tree) {
-            let value = JSON.stringify({expression, tree})
+    created() {
+        eventHub.$on('update-expression', (expression, tree) => {
+            let value = JSON.stringify({ expression, tree });
             eventHub.$emit('update-form-field-value', this.field, value);
-        },
+        });
     },
-    props: { value: {expression: ""}, field: null },
+    props: {
+        field: {},
+        value: {},
+    },
     template: require('./transformation-template.html')
 });
 
@@ -349,7 +346,20 @@ const ExpressionComponent = Vue.extend({
 export {
     PropertyDescriptionComponent,
 
-    DecimalComponent, IntegerComponent, CheckboxComponent, DropDownComponent, RangeComponent, TextComponent,
-    TextAreaComponent, ColorComponent, IndeterminatedCheckboxComponent, LookupComponent, AttributeSelectorComponent,
-    PercentageComponent, SortSelectorComponent, ExpressionComponent, AttributeFunctionComponent, MultiSelectDropDownComponent
+    DecimalComponent,
+    IntegerComponent,
+    CheckboxComponent,
+    DropDownComponent,
+    RangeComponent,
+    TextComponent,
+    TextAreaComponent,
+    ColorComponent,
+    IndeterminatedCheckboxComponent,
+    LookupComponent,
+    AttributeSelectorComponent,
+    PercentageComponent,
+    SortSelectorComponent,
+    ExpressionComponent,
+    AttributeFunctionComponent,
+    MultiSelectDropDownComponent
 };
