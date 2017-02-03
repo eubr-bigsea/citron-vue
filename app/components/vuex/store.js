@@ -3,7 +3,7 @@ import Vue from 'vue';
 import io from 'socket.io-client'
 Vue.use(Vuex);
 
-const StoreException = function(message, code) {
+const StoreException = function (message, code) {
     this.message = message;
     this.code = code;
 }
@@ -25,20 +25,22 @@ const state = {
         flows: []
     },
     pageParameters: {},
-    workflowPage: { pagination: {} }
+    workflowPage: { pagination: {} },
+    jobPage: { pagination: {} },
 }
-const baseUrl = 'http://beta.ctweb.inweb.org.br/tahiti';
-//const baseUrl = 'http://localhost:5000'; 
+const tahitiUrl = 'http://beta.ctweb.inweb.org.br/tahiti';
+const standUrl = 'http://beta.ctweb.inweb.org.br/stand';
+//const tahitiUrl = 'http://localhost:5000'; 
 function getWorkflows() {
-    let url = `${baseUrl}/workflows?token=123456`;
-    return Vue.http.get(url).then(function(response) {
+    let url = `${tahitiUrl}/workflows?token=123456`;
+    return Vue.http.get(url).then(function (response) {
         return response.data;
     })
 }
 
 function getWorkflow(id) {
-    let url = `${baseUrl}/workflows${id}?token=123456`;
-    return Vue.http.get(url).then(function(response) {
+    let url = `${tahitiUrl}/workflows${id}?token=123456`;
+    return Vue.http.get(url).then(function (response) {
         return response.data;
     })
 }
@@ -75,6 +77,14 @@ const mutations = {
     REMOVE_TASK(state, task) {
         let inx = state.workflow.tasks.findIndex((n, inx, arr) => n.id === task.id);
         state.workflow.tasks.splice(inx, 1);
+        let flows = state.workflow.flows;
+        for (let i = flows.length - 1; i > 0; i--) {
+            console.debug(flows[i].source_id, task.id)
+            if (flows[i].source_id === task.id) {
+                console.debug('Removendo', flows[i].source_id)
+                state.workflow.flows.splice(i, 1);
+            }
+        }
     },
     CLEAR_TASKS(state) {
         state.workflow.tasks.length = 0;
@@ -95,7 +105,7 @@ const mutations = {
     CHANGE_LANGUAGE(state, lang) {
         state.language = lang;
 
-        getOperations().then(function(data) {
+        getOperations().then(function (data) {
             let groupedOperations = {};
             let ops = {};
             data.forEach((op) => {
@@ -117,7 +127,7 @@ const mutations = {
             //console.debug(state.workflow.flows)
             state.operations = data;
             state.groupedOperations = groupedOperations;
-        }).catch(function(error) {
+        }).catch(function (error) {
             state.errors.push(error);
         });
     },
@@ -139,7 +149,7 @@ const mutations = {
         let cloned = JSON.parse(JSON.stringify(state.workflow));
         let tmp = document.getElementById('save-area');
 
-        let url = `${baseUrl}/workflows`;
+        let url = `${tahitiUrl}/workflows`;
         let headers = { 'Content-Type': 'application/json', 'X-Auth-Token': '123456' }
         let httpMethod = 'post';
         if (cloned.id !== 0) {
@@ -178,7 +188,7 @@ const mutations = {
         state.workflow = { 'id': state.workflow.id, tasks: [], flows: [] };
         if (state.workflow.id == 0) return
         let id = state.workflow.id;
-        let url = `${baseUrl}/workflows/${id}`;
+        let url = `${tahitiUrl}/workflows/${id}`;
         let headers = { 'X-Auth-Token': '123456' }
         let validTaskId = new Set([]);
         let validPorts = new Set([]);
@@ -193,7 +203,7 @@ const mutations = {
                     state.errors.push(new StoreException("Invalid workflow", 'WF0001'));
                 } else {
                     t.status = 'WAITING';
-                    t.operation.ports.forEach(function(v) { validPorts.add(v.id); });
+                    t.operation.ports.forEach(function (v) { validPorts.add(v.id); });
 
                     t.operation.forms.forEach((form) => {
                         form.fields.forEach((field) => {
@@ -231,12 +241,21 @@ const mutations = {
         });
     },
     LOAD_WORKFLOW_PAGE(state, params) {
-        let url = `${baseUrl}/workflows`;
+        let url = `${tahitiUrl}/workflows`;
         let headers = { 'X-Auth-Token': '123456' }
 
         Vue.http.get(url, { params, headers }).then(response => {
             let workflows = response.data;
             state.workflowPage = workflows;
+        });
+    },
+    LOAD_JOB_PAGE(state, params) {
+        let url = `${standUrl}/jobs`;
+        let headers = { 'X-Auth-Token': '123456' }
+
+        Vue.http.get(url, { params, headers }).then(response => {
+            let jobs = response.data;
+            state.jobPage = jobs;
         });
     },
     GET_OPERATIONS(state) {
@@ -280,9 +299,9 @@ export default new Vuex.Store({
     state,
     actions: {
         loadOperations({ commit, state }) {
-            let url = `${baseUrl}/operations?platform=spark&enabled=true&token=123456&lang=${state.language}`;
+            let url = `${tahitiUrl}/operations?platform=spark&enabled=true&token=123456&lang=${state.language}`;
             //let url = `http://artemis.speed.dcc.ufmg.br:5000/operations?token=123456&lang=${state.language}`;
-            return Vue.http.get(url).then(function(response) {
+            return Vue.http.get(url).then(function (response) {
                 let operations = response.data;
                 let groupedOperations = {};
                 let lookupOperations = {}
@@ -349,10 +368,13 @@ export default new Vuex.Store({
         loadWorkflow({ commit, state }) {
             return commit('LOAD_WORKFLOW');
         },
+
         loadWorkflowPage({ commit, params }, p) {
             return commit('LOAD_WORKFLOW_PAGE', p);
         },
-
+        loadJobPage({ commit, params }, p) {
+            return commit('LOAD_JOB_PAGE', p);
+        },
         connectWebSocket({ commit, state }) {
             return commit('CONNECT_WEBSOCKET');
         },
@@ -374,6 +396,7 @@ export default new Vuex.Store({
         getUser: (state) => state.user,
         getWorkflow: (state) => state.workflow,
         getWorkflowPage: (state) => state.workflowPage,
+        getJobPage: (state) => state.jobPage,
         getPageParameters: (state) => state.pageParameters,
     },
     strict: false,

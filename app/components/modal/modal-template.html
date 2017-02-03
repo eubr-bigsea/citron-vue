@@ -16,9 +16,9 @@
 
                 <div class="modal-footer">
                     <slot name="footer">
-                        <button class="btn btn-primary" @click="$emit('close')">OK</button>
+                        <button class="btn btn-primary" @click="onOkClick">OK</button>
+                        <button class="btn btn-danger" @click="onCancelClick">Cancel</button>
                         <!--
-                        <button class="btn btn-danger" @click="$emit('close')">Cancel</button>
                         <button class="btn btn-default" @click="$emit('close')">Close</button>
                         -->
                     </slot>

@@ -1,9 +1,10 @@
 <div class="expression-editor">
-    <button class="btn btn-default btn-xs" @click="showModal = true">
+    <button class="btn btn-default" @click="showModal = true">
         <span class="fa fa-gear"></span> Open editor
     </button>
 
-    <modal-component v-if="showModal" @close="showModal = false">
+    <modal-component v-if="showModal" @close="showModal = false"
+                :onOkClick="ok" :onCancelClick="cancel">
         <div slot="header">
             <h4>Expression</h4>
             <em>Construct an expression to transform data</em>

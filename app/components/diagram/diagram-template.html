@@ -25,7 +25,7 @@
     </div>
     <div class="lemonade-container" id="lemonade-container">
         <div class="lemonade" v-on:drop="drop" v-on:dragover="allowDrop" id="lemonade-diagram" v-on:click="diagramClick">
-            <task-component v-for="task of tasks" :task="task" :instance="instance"></task-component>
+            <task-component v-for="task of tasks" :task="task" :instance="instance" :key="task.id"></task-component>
             <flow-component v-for="flow of flows" :flow="flow" :instance="instance"></flow-component>
             <div class="ghost-select"><span></span></div>
         </div>

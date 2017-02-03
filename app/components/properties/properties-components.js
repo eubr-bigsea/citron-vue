@@ -250,48 +250,56 @@ const AttributeFunctionComponent = Vue.extend({
     data() {
         return {
             currentTab: 'editor',
-            showModal: false
+            showModal: false,
+            valueList: JSON.parse(JSON.stringify(this.value || [])),
+            ok: this.okClicked,
+            cancel: this.cancelClicked
         }
     },
     methods: {
         updated(e, row, attr) {
             row[attr] = e.target.value;
-            eventHub.$emit('update-form-field-value', this.field, this.value);
+            /*eventHub.$emit('update-form-field-value', this.field, 
+                this.valueValue);*/
         },
         add(e) {
-            if (this.value === null) {
-                this.value = [];
+            if (this.valueList === null) {
+                this.valueList = [];
             }
-            this.value.push({ alias: '', attribute: '', f: '' })
-            eventHub.$emit('update-form-field-value', this.field, this.value);
+            this.valueList.push({ alias: '', attribute: '', f: '' })
+            eventHub.$emit('update-form-field-value', this.field, 
+                this.valueList);
         },
         remove(e, index) {
-            this.value.splice(index, 1);
+            this.valueList.splice(index, 1);
             e.stopPropagation();
             return false;
         },
         moveUp(e, index) {
-            let tmp = this.value.splice(index, 1)[0];
-            this.value.splice(index - 1, 0, tmp)
+            let tmp = this.valueList.splice(index, 1)[0];
+            this.valueList.splice(index - 1, 0, tmp)
             e.stopPropagation();
             return false;
         },
         moveDown(e, index) {
-            let tmp = this.value.splice(index, 1)[0]
-            this.value.splice(index + 1, 0, tmp)
+            let tmp = this.valueList.splice(index, 1)[0]
+            this.valueList.splice(index + 1, 0, tmp)
             e.stopPropagation();
             return false;
         },
         selectTab(tab) {
             this.currentTab = tab;
+        },
+        okClicked(ev){
+            eventHub.$emit('update-form-field-value', this.field, 
+                this.valueList);
+            this.showModal = false;
+        },
+        cancelClicked(ev){
+            this.showModal = false;
         }
     },
-    props: {
-        value: [{ attribute: '', f: '', alias: '' }],
-        field: null,
-        options: []
-    },
-    ready() {},
+    props: ['value', 'field', 'options'],
     template: require('./function-template.html')
 
 });
@@ -309,7 +317,10 @@ const SortSelectorComponent = Vue.extend({
             eventHub.$emit('update-form-field-value', this.field, val);
         }
     },
-    props: { value: "", field: null },
+    props: [ 
+        'value', 
+        'field'
+    ],
     template: require('./projection-template.html')
 });
 

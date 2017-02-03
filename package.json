@@ -20,11 +20,13 @@
     "extract-text-webpack-plugin": "^1.0.1",
     "font-awesome": "^4.6.3",
     "imports-loader": "^0.6.5",
+    "less-loader": "^2.2.3",
     "live-server": "^1.0.0",
     "node-sass": "^3.8.0",
     "raw-loader": "^0.5.1",
     "sass-loader": "^4.0.0",
     "script-loader": "^0.7.0",
+    "scss-loader": "0.0.1",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
     "vue-cli": "^2.8.1",
@@ -53,6 +55,7 @@
     "vue-router": "^2.2.0",
     "vue-select": "github:sagalbot/vue-select#vue2",
     "vue-server-renderer": "^2.1.10",
+    "vue-toastr": "^2.0.5",
     "vuex": "^2.1.0",
     "vuex-router-sync": "^4.0.2"
   }

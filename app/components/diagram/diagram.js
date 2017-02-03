@@ -61,6 +61,9 @@ const DiagramComponent = Vue.extend({
             //this.loadWorkflow();
             this.init();
         }
+        eventHub.$on('onclick-task', (taskComponent) => {
+            this.selectedTask = taskComponent.task;
+        });
     },
     events: {
         'onclick-task': function (taskComponent) {
@@ -71,7 +74,7 @@ const DiagramComponent = Vue.extend({
         'onclick-operationx': function (operationComponent) {
             let self = this;
             this.selectedTask = operationComponent.task;
-            debugger
+            
             if (self.currentComponent == 'property-description-component') {
                 self.currentComponent = 'empty-properties-component';
             } else {
@@ -146,7 +149,20 @@ const DiagramComponent = Vue.extend({
             this.$store.dispatch('addTask', task)
         },
         removeTask(task) {
-            this.$store.dispatch('removeTask', task);
+            let self = this;
+            this.instance.detachAllConnections(task.id);
+            this.instance.removeAllEndpoints(task.id);
+            this.instance.detach(task.id);
+            let elem = document.getElementById(task.id)
+            //elem.parentNode.removeChild(elem);
+
+            console.debug(this.instance.getConnections());
+            this.instance.repaintEverything();
+            
+            Vue.nextTick(function () {
+                self.$store.dispatch('removeTask', task);
+            })
+
         },
         clearTasks() {
             this.$store.dispatch('clearTasks');
@@ -182,6 +198,9 @@ const DiagramComponent = Vue.extend({
         },
         init() {
             const self = this;
+            if (self.instance) {
+                 this.instance.reset();
+            }
             self.instance = jsPlumb.getInstance({
                 //Anchors: anchors,
                 Endpoints: [["Dot", { radius: 2 }], ["Dot", { radius: 1 }]],
@@ -435,6 +454,7 @@ const DiagramComponent = Vue.extend({
             });
         },
         load(ev) {
+            console.debug('Reseting')
             this.instance.reset();
             this._bindJsPlumbEvents();
             //let graph = JSON.parse(document.getElementById('save-area').value);
@@ -519,11 +539,13 @@ const DiagramComponent = Vue.extend({
             // self.instance.bind("click", self.flowClick);
 
             self.instance.bind('connectionDetached', (info, originalEvent) => {
-                let source = info.sourceEndpoint.getUuid();
-                let target = info.targetEndpoint.getUuid();
+                if (originalEvent){
+                    let source = info.sourceEndpoint.getUuid();
+                    let target = info.targetEndpoint.getUuid();
 
-                self.removeFlow(source + '-' + target);
-                // console.debug('Removendo')
+                    self.removeFlow(source + '-' + target);
+                    console.debug('Removendo via connectionDetached', originalEvent)
+                }
             });
             self.instance.bind('connection', (info, originalEvent) => {
                 let con = info.connection;

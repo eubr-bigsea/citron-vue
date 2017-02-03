@@ -2,121 +2,93 @@
     <div class="container">
         <div class="row small-padding">
             <div class="col-md-12">
-                <div class="panel  panel-primary panel-inverse">
-                    <div class="panel-heading">
-                        Add Workflow
-                    </div>
-                    <div class="panel-content">
-                        <div class="container">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label>Name:</label>
-                                <input type="text" class="form-control">
-                            </div>
-                            <div class="col-md-3">
-                                <label>Platform:</label>
-                                <select class="form-control">
-                                    <option value="spark">Spark</option>
-                                </select>    
-                            </div>
-                            <div class="col-md-3">
-                                <label>Your name:</label>
-                                <input type="text" class="form-control">  
-                            </div>
-                            <hr/>
-                            <div style="margin-top:30px" class="col-md-12">
-                                <button class="btn btn-success"><span class="fa fa-save"></span> Create</button>
-                                <a href="#/workflow/list" class="btn btn-danger">Cancel</a>
-                            </div>
-                            </div>
-                        </div>
+                <h2>Add Workflow</h2>
+            </div>
+            <form>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" class="form-control" id="name" v-model="name">
                     </div>
                 </div>
-            </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="platform">Platform:</label>
+                        <select class="form-control" id="platform" v-model="platform.id">
+                            <option value="1">Spark</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="userName">Your name:</label>
+                        <input type="text" id="userName" class="form-control" v-model="user.name">
+                    </div>
+
+                    <button class="btn btn-success" @click="create"><span class="fa fa-save"></span> Create</button>
+                    <a href="#/workflow/list" class="btn btn-danger">Cancel</a>
+
+                    <button class="btn btn-info" @click="alert">Alert</button>
+                </div>
+            </form>
         </div>
-    </div>
 </template>
 
 <script>
     import Vue from 'vue';
     import moment from 'moment';
 
+    const tahitiUrl = 'http://beta.ctweb.inweb.org.br/tahiti';
     const fields = 'id, name, user_name, updated';
     const WorkflowAddComponent = Vue.extend({
         data() {
             return {
-                page: 1,
-                platform: 'spark',
-                asc: 'true',
-                orderBy: 'name',
+                name: '',
+                platform: { id: '1' },
+                user: {
+                    id: 1,
+                    login: 'guest',
+                    name: ''
+                }
             }
         },
         computed: {
-            pageData: function() {
-                return this.$store.getters.getWorkflowPage;
-            },
         },
-        mounted: function() {
-            this.performLoad();
+        mounted: function () {
+            this.$el.querySelector('#name').focus();
+
         },
         methods: {
-            formatDate(date, format) {
-                return moment(date).format(format);
+            alert() {
+                //this.$root.$refs.toastr.e("ERRROR MESSAGE");
+                this.$root.$refs.toastr.s("SUCCESS MESSAGE");
             },
-            changePlatform() {
-                this.performLoad(true)
-            },
-            sort(orderBy) {
-                this.orderBy = orderBy;
-                this.performLoad(true, orderBy);
-            },
-            load(parameters) {
-                this.$store.dispatch('updatePageParameters', {
-                    page: 'workflow-list',
-                    parameters
+            create() {
+                let url = `${tahitiUrl}/workflows`;
+                let token = '123456';
+
+                let data = {
+                    name: this.name,
+                    platform: this.platform,
+                    user: this.user,
+                };
+                let headers = {
+                    'X-Auth-Token': token,
+                    'Content-Type': 'application/json'
+                };
+                let self = this;
+                Vue.http.post(url, data, { headers }).then(function (response) {
+                    self.$root.$refs.toastr.s(
+                        `Workflow '${response.data.name}' created`);
+                    self.$router.push({ name: 'editor', 
+                        params: { id: response.data.id } });
+                }).catch(function (error) {
+                    console.debug(error);
                 });
-                this.$store.dispatch('loadWorkflowPage', parameters);
-            },
-            performLoad(reload, orderBy) {
-                let saved = this.$store.getters.getPageParameters['workflow-list'];
-                if (this.$route.params.page || !saved || reload) {
-                    if (!reload) {
-                        this.page = parseInt(this.$route.params.page) || 1;
-                    } else {
-                        this.page = 1;
-                    }
-                    if (orderBy) {
-                        this.asc = (this.asc === 'true') ? 'false' : 'true';
-                    }
-                    let data = {
-                        fields,
-                        page: this.page,
-                        size: 20,
-                        platform: this.platform,
-                        sort: orderBy || '',
-                        asc: this.asc,
-                    }
-                    this.load(data);
-                } else {
-                    this.page = saved.page;
-                    this.platform = saved.platform || 'spark';
-                    this.load(saved);
-                }
+                return false;
             }
         },
         watch: {
-            '$route': function() {
-                if (this.$route.params.page) {
-                    this.page = parseInt(this.$route.params.page);
-                    let data = {
-                        fields,
-                        page: this.page,
-                        size: 20,
-                        platform: this.platform
-                    };
-                    this.load(data);
-                }
-            }
         }
     });
     export default WorkflowAddComponent;

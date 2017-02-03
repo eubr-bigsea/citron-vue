@@ -1,6 +1,6 @@
 <div class="function-editor">
     <p>
-       {{pairOptionValueList.options.title}}:
+       <strong>{{pairOptionValueList.options.title}}</strong>
     </p>
     <p>
         <button class="btn btn-default flat" @click="showModal = true">
@@ -8,7 +8,8 @@
         </button>
     </p>
 
-    <modal-component :show="showModal">
+    <modal-component v-if="showModal" @close="showModal = false" 
+                :onOkClick="ok" :onCancelClick="cancel">
         <div slot="header">
             <h4>{{pairOptionValueList.options.title}}</h4>
             <em>{{pairOptionValueList.options.description}}</em>
@@ -32,7 +33,7 @@
                     </table>
                 </div>
                 <div v-if="currentTab === 'editor'">
-                    <table class="table table-bordered fixed_headers">
+                    <table class="table table-bordered">
                         <thead>
                             <th>Attribute</th>
                             <th>Function</th>
@@ -41,7 +42,7 @@
                             <th style="width:15%"></th>
                         </thead>
                         <tbody>
-                            <tr v-for="(index, row) in value">
+                            <tr v-for="(row, index) in valueList">
                                 <td><input class="form-control" :value="row.attribute" @change="updated($event, row, 'attribute')"></td>
                                 <td>
                                     <select class="form-control" :value="row.f" @change="updated($event, row, 'f')">
@@ -53,7 +54,7 @@
                                 <td style="width:15%">
                                     <a href="#" @click="remove($event, index)"><span class="fa fa-2x fa-minus-circle"></span></a>
                                     <a href="#" @click="moveUp($event, index)" v-if="index !== 0"><span class="fa fa-2x fa-chevron-circle-up"></span></a>
-                                    <a href="#" @click="moveDown($event, index)" v-if="index !== (value.length-1)"><span class="fa fa-2x fa-chevron-circle-down"></span></a>
+                                    <a href="#" @click="moveDown($event, index)" v-if="index !== (valueList.length-1)"><span class="fa fa-2x fa-chevron-circle-down"></span></a>
                                 </td>
                             </tr>
                         </tbody>

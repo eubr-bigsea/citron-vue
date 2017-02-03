@@ -51,7 +51,8 @@ const ExpressionEditorComponent = Vue.extend({
 
             ],
             showModal: false,
-            error: ''
+            error: '',
+            expressionValue: '',
         }
     },
     computed: {
@@ -63,15 +64,23 @@ const ExpressionEditorComponent = Vue.extend({
         }
     },
     methods: {
+        ok(e){
+            eventHub.$emit('update-expression', this.expressionValue, this.tree);
+            this.showModal = false;
+        },
+        cancel(e){
+            this.showModal = false;
+        },
         changed: _.debounce(function(e) {
             try {
                 if (e.target && e.target.value) {
                     let ttree = this.process(e.target.value)
-                    eventHub.$emit('update-expression', e.target.value, ttree);
+                    this.expressionValue = e.target.value;
+                    //eventHub.$emit('update-expression', e.target.value, ttree);
                     this.tree = ttree;
                 } else {
                     this.error = null;
-                    eventHub.$emit('update-expression', null, null);
+                    //eventHub.$emit('update-expression', null, null);
                 }
             } catch (e) {
                 this.error = e.toString();

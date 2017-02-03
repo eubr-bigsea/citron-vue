@@ -89,12 +89,16 @@ const connectionOptions = {
 }
 
 const TaskComponent = Vue.extend({
+    rende(createElement){
+        console.debug('RENDERRRRRRRRRRRRRRRR')
+    },
     beforeDestroy() {
-        if (this.task) {
-            this.instance.removeAllEndpoints(this.task.id);
+        if (this.task && false) {
             this.instance.detachAllConnections(this.task.id);
+            this.instance.removeAllEndpoints(this.task.id);
             this.instance.detach(this.task.id);
-            //let elem = document.getElementById(this.task.id);
+            let elem = document.getElementById(this.task.id);
+            console.debug(elem)
             //elem.parentNode.removeChild(elem);
         }
     },
@@ -161,6 +165,7 @@ const TaskComponent = Vue.extend({
         }
     },
     mounted() {
+        console.debug('Mounted task')
         let self = this;
         let operation = this.task.operation;
 

@@ -4,7 +4,7 @@ import './modal.scss';
 
 // register modal component
 const ModalComponent = Vue.component('modal', {
-    created() {
+    mounted() {
         document.getElementsByTagName('body')[0].style.overflow = 'hidden';
     },
     methods: {
@@ -16,5 +16,6 @@ const ModalComponent = Vue.component('modal', {
 
     },
     template,
+    props: ['onOkClick', 'onCancelClick']
 })
 export default ModalComponent;

@@ -22,22 +22,40 @@
                 <table class="table table-striped table-bordered">
                     <thead>
                         <tr>
+                            <th class="col-md-1 primary text-center">Options</th>
                             <th class="sortable primary text-center col-md-1" @click="sort('id')">
-                                 Id <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'id'"></span>
-                                 </th>
+                                Id <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'id'"></span>
+                            </th>
                             <th class="sortable primary text-center col-md-6" @click="sort('name')">
-                                Name <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'name'"></span>
-                                </th>
+                                Name <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]"
+                                    v-show="orderBy === 'name'"></span>
+                            </th>
                             <th class="sortable primary text-center col-md-3" @click="sort('user_name')">
-                                Owner <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'user_name'"></span>
-                                </th>
+                                Owner <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]"
+                                    v-show="orderBy === 'user_name'"></span>
+                            </th>
                             <th class="sortable primary text-center col-md-2" @click="sort('updated')">
-                                Updated <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'updated'"></span>
-                                </th>
+                                Updated <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]"
+                                    v-show="orderBy === 'updated'"></span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="wf in pageData.data">
+                        <tr v-for="wf in pageData.data" :key="wf.id">
+                            <td class="text-center">
+                                <a href="" title="Remove" @click="remove">
+                                    <span class="fa-stack fa-lg">
+                                        <span class="fa fa-circle fa-stack-2x"></span>
+                                        <span class="fa fa-trash-o fa-stack-1x  fa-inverse"></span>
+                                    </span>
+                                </a>
+                                <router-link :to="{name: 'editor', params: {id: wf.id }}">
+                                    <span class="fa-stack fa-lg">
+                                        <span class="fa fa-circle fa-stack-2x"></span>
+                                        <span class="fa fa-pencil fa-stack-1x fa-inverse"></span>
+                                    </span>
+                                </router-link>
+                            </td>
                             <td class="text-center">
                                 <router-link :to="{name: 'editor', params: {id: wf.id }}">{{wf.id}}</router-link>
                             </td>
@@ -78,11 +96,11 @@
             }
         },
         computed: {
-            pageData: function() {
+            pageData: function () {
                 return this.$store.getters.getWorkflowPage;
             },
         },
-        mounted: function() {
+        mounted: function () {
             this.performLoad();
         },
         methods: {
@@ -91,6 +109,9 @@
             },
             changePlatform() {
                 this.performLoad(true)
+            },
+            remove() {
+                console.debug('teste');
             },
             sort(orderBy) {
                 this.orderBy = orderBy;
@@ -131,7 +152,7 @@
             }
         },
         watch: {
-            '$route': function() {
+            '$route': function () {
                 if (this.$route.params.page) {
                     this.page = parseInt(this.$route.params.page);
                     let data = {
