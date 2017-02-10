@@ -152,15 +152,22 @@ const AppComponent = Vue.extend({
 
     },
     mounted() {
-        //this.connectWebSocket();
+        this.$store.dispatch('connectWebSocket');
         if (true || this.user) {
-
             let elem = document.getElementById('menu-operations');
             PerfectScrollbar.initialize(elem, {
                 wheelSpeed: 2,
                 wheelPropagation: true,
                 minScrollbarLength: 20
             });
+
+            let properties = document.getElementById('panel-properties');
+            PerfectScrollbar.initialize(properties, {
+                wheelSpeed: 2,
+                wheelPropagation: true,
+                minScrollbarLength: 20
+            });
+
             if (this.$route.params.id) {
                 let self = this;
                 self.$store.dispatch('loadOperations').then(() => {

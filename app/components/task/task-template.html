@@ -1,10 +1,10 @@
-<div class="operation task" :title="task.operation.description" :data-operation-id="task.operation.id"
+<div :class="task.status? task.status.toLowerCase(): ''" class="operation task" :title="task.operation.description" :data-operation-id="task.operation.id"
     :id="task.id" v-bind:style="{zIndex: task.z_index, top: task.top + 'px', left: task.left + 'px'}" v-on:click="click">
     <div :style="{backgroundColor: task.forms.color && task.forms.color.value ? task.forms.color.value.background: '#fff', color: task.forms.color && task.forms.color.value ? task.forms.color.value.foreground: '#222'}" style="height:20px">
     <strong><span class="fa"  :class="task.operation.icon"></span> {{task.operation.name}}</strong>
     </div>
     <em>{{task.forms.comment ? task.forms.comment.value: ''}}</em>
-    <div class="decor" :class="task.status.toLowerCase()">
+    <div class="decor" :class="task.status? task.status.toLowerCase(): ''">
         <span class="fa fa-check-circle fa-2x"></span>
     </div>
 </div>

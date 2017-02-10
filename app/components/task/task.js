@@ -89,9 +89,6 @@ const connectionOptions = {
 }
 
 const TaskComponent = Vue.extend({
-    rende(createElement){
-        console.debug('RENDERRRRRRRRRRRRRRRR')
-    },
     beforeDestroy() {
         if (this.task && false) {
             this.instance.detachAllConnections(this.task.id);
@@ -103,6 +100,13 @@ const TaskComponent = Vue.extend({
         }
     },
     methods: {
+        getOperationFromId(id) {
+            let operations = this.$store.getters.getOperations;
+            let result = operations.filter(v => {
+                return v.id === parseInt(id);
+            });
+            return result.length ? result[0] : null;
+        },
         click(ev) {
             let self = this;
             let elem = ev.target.classList.contains('task') ? ev.target : ev.target.parentElement;
@@ -151,8 +155,11 @@ const TaskComponent = Vue.extend({
         },
         instance: null
     },
-    xwatch: {
-        'task.operation.name': function() {
+    watch: {
+        'task.status': function(){
+            
+        },
+        'xtask.operation.name'() {
             let self = this;
             console.debug(this.task.operation);
             this.instance.selectEndpoints(this.elem).each(function(endpoint) {
@@ -167,12 +174,12 @@ const TaskComponent = Vue.extend({
     mounted() {
         console.debug('Mounted task')
         let self = this;
-        let operation = this.task.operation;
-
+        let operation = self.getOperationFromId(this.task.operation.id);
         if (!operation) {
             this.$store.dispatch('raiseComponentException', { msg: 'Invalid operation', code: 'TASK001' });
             return;
         }
+        this.task.operation = operation;
 
         let taskId = this.task.id;
 

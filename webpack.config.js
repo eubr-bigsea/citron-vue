@@ -1,8 +1,12 @@
 ExtractTextPlugin = require('extract-text-webpack-plugin');
+
+var PROD = JSON.parse(process.env.PROD_ENV || '0')
+
 module.exports = {
   entry: './app/main',
+  devtool: 'source-map',
   output: {
-    filename: 'bundle.js'
+    filename: PROD ? 'bundle.min.js' : 'bundle.js'
   },
   resolve: {
     alias: {

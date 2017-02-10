@@ -34,7 +34,7 @@
                             <div class="form-group bottom-margin">
                                 <!-- Button -->
                                 <div class="col-sm-12 controls">
-                                    <a id="btn-login" href="#" class="btn btn-success">Login  </a>
+                                    <a id="btn-login" href="#" class="btn btn-success" @click="authenticate">Login  </a>
                                 </div>
                             </div>
                             <div class="form-group bottom-margin">
@@ -77,6 +77,9 @@
             this.$el.querySelector('#login-username').focus();
         },
         methods: {
+            authenticate(){
+                
+            }
         },
         watch: {
         }

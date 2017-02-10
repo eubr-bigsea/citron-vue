@@ -40,7 +40,7 @@
                         <div class="panel-heading">
                             Properties
                         </div>
-                        <div class="panel-block">
+                        <div class="panel-block" id="panel-properties">
                             <div id="properties-form" class="container" v-if="task">
                                 <div>
                                     <h4>{{task.operation.name}}</h4>
@@ -50,9 +50,13 @@
                                             <component :is="field.suggested_widget + '-component'" :task="task" keep-alive :field="field" :value="getValue(field.name)"></component>
                                         </div>
                                     </fieldset>
-                                    <property-description-component :task="task" />
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-inverse panel-primary lemondade-property-help">
+                        <div class="panel-block">
+                             <property-description-component :task="task" />
                         </div>
                     </div>
                 </div>

@@ -1,8 +1,4 @@
 const ListingMixin = {
-    /* Life-cycle */
-    mounted: function () {
-        this.performLoad();
-    },
     /* Data related*/
     computed: {
         pageData: function () {

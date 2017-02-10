@@ -31,6 +31,7 @@ Vue.use(VueProgressBar, {
     inverse: false
 })
 Vue.http.interceptors.push((request, next) => {
+    Vue.prototype.$Progress.finish();
     Vue.prototype.$Progress.start();
     next((response) => {
         Vue.prototype.$Progress.finish();
@@ -51,7 +52,8 @@ const routes = [
     { path: '/workflows/list/:page', component: WorkflowListComponent, name: 'workflow-page' },
     { path: '/workflows/list', component: WorkflowListComponent, name: 'workflow-list' },
 
-    { path: '/jobs/list/:page', component: JobListComponent, name: 'job-page' },
+    { path: '/jobs/list/:page', component: JobListComponent, name: 'job-page',
+        query: {sort: 'id'}},
     { path: '/jobs/list', component: JobListComponent, name: 'job-list' },
     { path: '/jobs/:id', component: JobDetailComponent, name: 'job-detail' },
 

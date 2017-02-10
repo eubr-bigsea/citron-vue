@@ -1,26 +1,26 @@
 <div tabindex="0">
     <div>
-        <div class="row">
+        <div class="row" v-if="showToolbar">
             <div class="col-md-5" style="margin-left: 18px;padding-top:5px">
                 <input type="text" placeholder="Unnamed workflow" class="form-control" :value="workflow.name" @keyup="doChangeWorkflowName" />
-                <input type="text" placeholder="#id" class="form-control" @keyup="doChangeWorkflowId" id="wfId" />
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6" v-if="showToolbar">
                 <div class="buttons-toolbar btn-group pull-right diagram-toolbar">
+                    <button class="btn btn-success btn-sm" v-on:click="saveWorkflow"><span class="fa fa-save"></span> Save</button>
+                    <button class="btn btn-primary btn-sm add-margin" v-on:click="zoomOut" :disabled="!zoomOutEnabled"><span class="fa fa-play"></span> Execute</button>
+                    <!--
                     <button class="btn btn-default btn-sm" v-on:click="load"><span class="fa fa-folder-open-o"></span></button>
-                    <button class="btn btn-default btn-sm add-margin" v-on:click="deleteSelected"><span class="fa fa-remove"></span></button>
+                    -->
 
-                    <button class="btn btn-default btn-sm" v-on:click="zoomIn" :disabled="!zoomInEnabled"><span class="fa fa-search-plus"></span></button>
-                    <button class="btn btn-default btn-sm add-margin" v-on:click="zoomOut" :disabled="!zoomOutEnabled"><span class="fa fa-search-minus"></span></button>
+                    <button class="btn btn-default btn-sm" v-on:click="zoomIn" :disabled="!zoomInEnabled"><span class="fa fa-search-plus"></span> Zoom in</button>
+                    <button class="btn btn-default btn-sm add-margin" v-on:click="zoomOut" :disabled="!zoomOutEnabled"><span class="fa fa-search-minus"></span> Zoom out</button>
 
-                    <button class="btn btn-primary btn-sm" v-on:click="zoomOut" :disabled="!zoomOutEnabled"><span class="fa fa-play"></span></button>
-                    <button class="btn btn-warning btn-sm add-margin" v-on:click="zoomOut" :disabled="!zoomOutEnabled"><span class="fa fa-stop"></span></button>
                     <div class="pull-right">{{zoomPercent}}</div>
-                    <button class="btn btn-success btn-sm add-margin pull-right" v-on:click="saveWorkflow"><span class="fa fa-save"></span></button>
+                    <button class="btn btn-danger btn-sm add-margin pull-right" v-on:click="deleteSelected"><span class="fa fa-remove"></span> Remove selected</button>
                 </div>
             </div>
         </div>
-        <div class="buttons-toolbar btn-group pull-right diagram-toolbar">
+        <div class="buttons-toolbar btn-group pull-right diagram-toolbar" v-if="showToolbar">
         </div>
     </div>
     <div class="lemonade-container" id="lemonade-container">

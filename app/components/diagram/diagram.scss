@@ -87,7 +87,7 @@ li.dragging {
 }
 .lemonade-container {
     //background: url(grid1.png);
-    height: calc(100vh - 215px); 
+    height: calc(100vh - 186px); 
     overflow:hidden;
     position: relative; 
     width:100%; 
@@ -133,6 +133,15 @@ li.dragging {
         font-size: 7pt;
         background: white;
         
+        &.completed {
+            border: none;
+        };
+        &.running, &.interrupted, &.canceled, &.error, &.canceled, &.highlight {
+            border: 1px dashed red !important;
+            box-shadow: 0px 0px 50px #a93;
+            -moz-box-sha: 0px 0px 50px #a93;
+            -webkit-box-: 0px 0px 50px #a93;
+        };
         .decor {
                 color: #aaa;
                 background-color: #fff;

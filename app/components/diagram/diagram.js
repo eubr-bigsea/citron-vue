@@ -24,13 +24,33 @@ const DiagramComponent = Vue.extend({
             return `${Math.round(100 * this.zoom, 0)}%`;
         },
         flows() {
-            return this.$store.getters.getFlows;
+            if (this.renderFrom) {
+                if (this.renderFrom && this.renderFrom.flows) {
+                    return this.renderFrom.flows;
+                } else {
+                    return {};
+                }
+            } else {
+                return this.$store.getters.getFlows;
+            }
         },
         tasks() {
-            return this.$store.getters.getTasks;
+            if (this.renderFrom) {
+                if (this.renderFrom && this.renderFrom.tasks) {
+                    return this.renderFrom.tasks;
+                } else {
+                    return {};
+                }
+            } else {
+                return this.$store.getters.getTasks;
+            }
         },
         workflow() {
-            return this.$store.getters.getWorkflow;
+            if (this.renderFrom) {
+                return this.renderFrom;
+            } else {
+                return this.$store.getters.getWorkflow;
+            }
         }
     },
     components: {
@@ -42,10 +62,21 @@ const DiagramComponent = Vue.extend({
     props: {
         formContainer: null,
         title: {},
-        xoperation: {
-            'default': function () { return { name: '', icon: '' }; }
+        renderFrom: null,
+        showToolbar: {
+            default: true,
         },
-
+        draggableTasks: true,
+        multipleSelectionEnabled: true,
+    },
+    watch: {
+        draggableTasks() {
+            if (!this.draggableTasks) {
+                let ids = this.workflow.tasks.map((t) => t.id);
+                console.debug(ids);
+                this.instance.setDraggable(ids, this.draggableTasks);
+            }
+        }
     },
     data() {
         return {
@@ -74,7 +105,7 @@ const DiagramComponent = Vue.extend({
         'onclick-operationx': function (operationComponent) {
             let self = this;
             this.selectedTask = operationComponent.task;
-            
+
             if (self.currentComponent == 'property-description-component') {
                 self.currentComponent = 'empty-properties-component';
             } else {
@@ -158,7 +189,7 @@ const DiagramComponent = Vue.extend({
 
             console.debug(this.instance.getConnections());
             this.instance.repaintEverything();
-            
+
             Vue.nextTick(function () {
                 self.$store.dispatch('removeTask', task);
             })
@@ -199,7 +230,7 @@ const DiagramComponent = Vue.extend({
         init() {
             const self = this;
             if (self.instance) {
-                 this.instance.reset();
+                this.instance.reset();
             }
             self.instance = jsPlumb.getInstance({
                 //Anchors: anchors,
@@ -212,56 +243,58 @@ const DiagramComponent = Vue.extend({
             });
             self._bindJsPlumbEvents();
 
-            
+
 
         },
         selectElements(ev) {
-            //$("#score>span").text('0');
-            let self = this;
-            document.removeEventListener("mousemove", self.openSelector);
-            document.removeEventListener("mouseup", self.selectElements);
+            if (this.multipleSelectionEnabled) {
+                //$("#score>span").text('0');
+                let self = this;
+                document.removeEventListener("mousemove", self.openSelector);
+                document.removeEventListener("mouseup", self.selectElements);
 
-            self.initialW = 0;
-            self.initialH = 0;
+                self.initialW = 0;
+                self.initialH = 0;
 
-            let ghostSelect = document.getElementsByClassName('ghost-select');
-            if (ghostSelect.length) {
-                Array.prototype.slice.call(ghostSelect, 0).forEach((elem) => {
-                    let x1 = parseInt(elem.style.left);
-                    let y1 = parseInt(elem.style.top);
-                    let x2 = parseInt(elem.style.width) + x1;
-                    let y2 = parseInt(elem.style.height) + y1;
+                let ghostSelect = document.getElementsByClassName('ghost-select');
+                if (ghostSelect.length) {
+                    Array.prototype.slice.call(ghostSelect, 0).forEach((elem) => {
+                        let x1 = parseInt(elem.style.left);
+                        let y1 = parseInt(elem.style.top);
+                        let x2 = parseInt(elem.style.width) + x1;
+                        let y2 = parseInt(elem.style.height) + y1;
 
-                    elem.classList.remove("ghost-active");
-                    elem.style.width = 0;
-                    elem.style.height = 0;
+                        elem.classList.remove("ghost-active");
+                        elem.style.width = 0;
+                        elem.style.height = 0;
 
-                    this.$emit('onclear-selection');
+                        this.$emit('onclear-selection');
 
-                    self.tasks.forEach((task) => {
-                        let taskElem = document.getElementById(task.id);
-                        let bounds = taskElem.getBoundingClientRect();
+                        self.tasks.forEach((task) => {
+                            let taskElem = document.getElementById(task.id);
+                            let bounds = taskElem.getBoundingClientRect();
 
-                        // Uses task left and top because offset calculation 
-                        // was already done
-                        /*console.debug(x1 <= task.left,  x2 >= task.left + bounds.width, 
-                                y1 <= task.top, y2 >= task.top + bounds.height,
-                                bounds.width, bounds.height, x1, x2, y1, y2)
-                                */
-                        if (x1 <= task.left && x2 >= task.left + bounds.width
-                            && y1 <= task.top && y2 >= task.top + bounds.height) {
-                            // console.debug(`overlap with ${task.operation.name}`)
-                            self.instance.addToDragSelection(task.id);
-                        }
-                        //console.debug (bounds.left, task.left)
+                            // Uses task left and top because offset calculation 
+                            // was already done
+                            /*console.debug(x1 <= task.left,  x2 >= task.left + bounds.width, 
+                                    y1 <= task.top, y2 >= task.top + bounds.height,
+                                    bounds.width, bounds.height, x1, x2, y1, y2)
+                                    */
+                            if (x1 <= task.left && x2 >= task.left + bounds.width
+                                && y1 <= task.top && y2 >= task.top + bounds.height) {
+                                // console.debug(`overlap with ${task.operation.name}`)
+                                self.instance.addToDragSelection(task.id);
+                            }
+                            //console.debug (bounds.left, task.left)
 
-                        //console.debug(task)
+                            //console.debug(task)
+                        });
                     });
-                });
+                }
             }
         },
         openSelector(ev) {
-            if (ev.which == 1) { //left mouse
+            if (ev.which === 1 && this.multipleSelectionEnabled) { //left mouse
                 let self = this;
                 let rect = this.diagramElement.getBoundingClientRect();
                 let x = ev.pageX - rect.left;
@@ -316,24 +349,6 @@ const DiagramComponent = Vue.extend({
             /** Debug */
             this.changeWorkflowId(ev.target.value);
         },
-        /*
-        taskSelect(ev) {
-            console.debug('xxx', ev)
-            if (ev.currentTarget.classList.contains("task")) {
-                var tasks = document.querySelectorAll(".task.selected");
-                Array.prototype.slice.call(tasks, 0).forEach(e => {
-                    e.classList.remove('selected');
-                });
-                ev.currentTarget.classList.add('selected');
-                var self = this;
-                self.selectedTask = ev.currentTarget;
-            }
-            if (this.selectedFlow) {
-                this.selectedFlow.setPaintStyle(connectorPaintStyle);
-                this.selectedFlow = null;
-            }
-        },*/
-
         flowClick(connection, e) {
             var self = this;
             self.selectedFlow = connection;
@@ -349,9 +364,6 @@ const DiagramComponent = Vue.extend({
             });
             e.stopPropagation();
             e.preventDefault();
-        },
-        endPointMouseOver(endpoint, event) {
-            //console.debug(endpoint)
         },
         drop(ev) {
             const self = this;
@@ -378,15 +390,6 @@ const DiagramComponent = Vue.extend({
 
         clear() {
             let self = this;
-            /*
-            self.instance.getConnections().forEach(conn => {
-                self.instance.detach(conn);
-            });
-            let tasks = Array.prototype.slice.call(document.querySelectorAll(".diagram .task"), 0);
-            tasks.forEach(task => {
-                self.instance.remove(task);
-            });
-            */
             self.clearFlows();
             self.clearTasks();
         },
@@ -539,7 +542,7 @@ const DiagramComponent = Vue.extend({
             // self.instance.bind("click", self.flowClick);
 
             self.instance.bind('connectionDetached', (info, originalEvent) => {
-                if (originalEvent){
+                if (originalEvent) {
                     let source = info.sourceEndpoint.getUuid();
                     let target = info.targetEndpoint.getUuid();
 
@@ -564,13 +567,6 @@ const DiagramComponent = Vue.extend({
             });
         },
     },
-    watch: {
-        /*
-        theTasks: (e) => {
-            console.debug('changed', e)
-        }
-        */
-    }
 });
 
 export default DiagramComponent;

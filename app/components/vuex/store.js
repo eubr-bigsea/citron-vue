@@ -29,7 +29,8 @@ const state = {
     jobPage: { pagination: {} },
 }
 const tahitiUrl = 'http://beta.ctweb.inweb.org.br/tahiti';
-const standUrl = 'http://beta.ctweb.inweb.org.br/stand';
+//const standUrl = 'http://beta.ctweb.inweb.org.br/stand';
+const standUrl = 'http://localhost:5000';
 //const tahitiUrl = 'http://localhost:5000'; 
 function getWorkflows() {
     let url = `${tahitiUrl}/workflows?token=123456`;
@@ -63,9 +64,6 @@ const mutations = {
         state.operations = operations;
         state.groupedOperations = groupedOperations;
         state.lookupOperations = lookupOperations;
-    },
-    UPDATE_TASK_FORM_FIELD(state, task, value) {
-        console.debug(task, value);
     },
     UPDATE_PAGE_PARAMETERS(state, parameters) {
         state.pageParameters[parameters.page] = parameters.parameters;
@@ -261,30 +259,41 @@ const mutations = {
     GET_OPERATIONS(state) {
         return state.operations;
     },
-    CONNECT_WEBSOCKET(state) {
-        return
-        const standBaseUrl = 'http://localhost:3320';
+    CONNECT_WEBSOCKET(state, room) {
+        //const standBaseUrl = 'http://beta.ctweb.inweb.org.br:5000';
+        const standBaseUrl = 'http://localhost:5000';
         let namespace = '/stand';
         var counter = 0;
-        var socket = io(standBaseUrl + namespace, { upgrade: true });
+        console.debug(standBaseUrl + namespace)
+        var socket = io(standBaseUrl + namespace, 
+            { upgrade: true, path: '/socket.io' });
 
         socket.on('disconnect', () => {
             console.debug('disconnect')
         });
+         socket.on('response', (msg) => {
+            console.debug('response', msg)
+        });
         socket.on('connect', () => {
-            socket.emit('join', { room: '21401' });
+            if (store.workflow){
+                console.debug('Connecting to room', room);
+                socket.emit('join', { room: store.workflow['id'] });
+            }
         });
         socket.on('connect_error', () => {
             console.debug('Web socket server offline');
         });
         socket.on('update task', (msg) => {
             let inx = state.workflow.tasks.findIndex((n, inx, arr) => n.id === msg.id);
+            console.debug('Found', inx, msg.id)
             if (inx > -1) {
                 state.workflow.tasks[inx].status = msg.status;
+                state.workflow.tasks[inx].forms.color.value = 'green';
             }
+            console.debug('update task', msg)
         });
-        socket.on('update workflow', (msg) => {
-            console.debug('update workflow', msg);
+        socket.on('update job', (msg) => {
+            console.debug('update job', msg);
         });
 
     },
@@ -294,7 +303,7 @@ const mutations = {
 
 }
 window.store = state;
-export default new Vuex.Store({
+const diagramModuleStore = {
     mutations,
     state,
     actions: {
@@ -344,9 +353,6 @@ export default new Vuex.Store({
             return commit('CLEAR_FLOWS');
         },
 
-        updateTaskFormField({ commit, state }, task, value) {
-            return commit('UPDATE_TASK_FORM_FIELD');
-        },
         changeWorkflowName({ commit, state }, name) {
             return commit('CHANGE_WORKFLOW_NAME', name)
         },
@@ -375,8 +381,8 @@ export default new Vuex.Store({
         loadJobPage({ commit, params }, p) {
             return commit('LOAD_JOB_PAGE', p);
         },
-        connectWebSocket({ commit, state }) {
-            return commit('CONNECT_WEBSOCKET');
+        connectWebSocket({ commit, state }, room) {
+            return commit('CONNECT_WEBSOCKET', room);
         },
         updatePageParameters({ commit, state }, parameters) {
             return commit('UPDATE_PAGE_PARAMETERS', parameters);
@@ -400,4 +406,10 @@ export default new Vuex.Store({
         getPageParameters: (state) => state.pageParameters,
     },
     strict: false,
-})
+};
+const store = new Vuex.Store({
+    modules: {
+        digram: diagramModuleStore
+    }
+});
+export default store;

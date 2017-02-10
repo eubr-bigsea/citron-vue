@@ -1,7 +1,16 @@
 $defaultFontSize: 1.2rem;
 
+.lemondade-property-help {
+    height: 120px;
+    background-color: #ccc !important;
+    padding: 5px;
+}
+#panel-properties{
+    height: calc(100vh - 290px);
+}
 .lemonade-properties {
-    height: calc(100vh - 100px);
+    height: calc(100vh - 233px);
+    overflow: hidden;
     #properties-form {
         background: white;
         z-index: 100;
