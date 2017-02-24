@@ -9,6 +9,8 @@ import LoginComponent from './components/app/login.vue';
 import ToolboxComponent from './components/toolbox/toolbox';
 
 import jsPlumb from 'jsplumb';
+import eventHub from './components/app/event-hub';
+
 import './components/diagram/diagram.scss';
 import "bootstrap-sass/assets/stylesheets/_bootstrap.scss";
 import './components/app/app.scss';
@@ -30,11 +32,22 @@ Vue.use(VueProgressBar, {
     autoRevert: true,
     inverse: false
 })
+let requestCounter = 0;
+
 Vue.http.interceptors.push((request, next) => {
-    Vue.prototype.$Progress.finish();
-    Vue.prototype.$Progress.start();
+    /*if (requestCounter === 0){
+        Vue.prototype.$Progress.start(1000*30);
+    } else {
+        Vue.prototype.$Progress.increase(100);
+    }*/
+    document.querySelector('.page-overlay').style.visibility = 'visible';
+    requestCounter ++;
     next((response) => {
-        Vue.prototype.$Progress.finish();
+        requestCounter --;
+        if (requestCounter === 0){
+            //Vue.prototype.$Progress.finish();
+            document.querySelector('.page-overlay').style.visibility = 'hidden';
+        }
     });
 });
 
@@ -70,6 +83,7 @@ const router = new VueRouter({
     mode: 'hash',
 });
 router.beforeEach(function (to, from, next) {
+    eventHub.$emit('route-change', to, from);
     next();
     return 
     let auth = { state: { token: null } };

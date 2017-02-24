@@ -57,10 +57,18 @@ const ExpressionEditorComponent = Vue.extend({
     },
     computed: {
         tree() {
-            return JSON.parse(this.expression).tree;
+            if (this.expression){
+                return JSON.parse(this.expression).tree;
+            } else {
+                return '';
+            }
         },
         jsExpression() {
-            return JSON.parse(this.expression).expression;
+            if (this.expression){
+                return JSON.parse(this.expression).expression;
+            } else {
+                return '';
+            }
         }
     },
     methods: {

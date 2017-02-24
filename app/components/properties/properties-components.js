@@ -352,6 +352,7 @@ const ExpressionComponent = Vue.extend({
             return JSON.parse(this.field.values);
         },
         expression() {
+            debugger
             if (this.value) {
                 return JSON.parse(this.value)['expression'];
             } else {

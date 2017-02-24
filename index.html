@@ -33,6 +33,12 @@
         </div>
         <router-view></router-view>
         <vue-progress-bar></vue-progress-bar>
+        <transition name="overlay-fade">
+            <div class="page-overlay">
+                <div></div>
+                <i class="fa fa-circle-o-notch fa-spin fa-5x fa-fw"></i>
+            </div>
+        </transition>
     </div>
     <script src="bundle.js"></script>
 </body>

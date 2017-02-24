@@ -7,7 +7,7 @@
             <div class="col-md-6" v-if="showToolbar">
                 <div class="buttons-toolbar btn-group pull-right diagram-toolbar">
                     <button class="btn btn-success btn-sm" v-on:click="saveWorkflow"><span class="fa fa-save"></span> Save</button>
-                    <button class="btn btn-primary btn-sm add-margin" v-on:click="zoomOut" :disabled="!zoomOutEnabled"><span class="fa fa-play"></span> Execute</button>
+                    <button class="btn btn-primary btn-sm add-margin" v-on:click="onClickExecute"><span class="fa fa-play"></span> Execute</button>
                     <!--
                     <button class="btn btn-default btn-sm" v-on:click="load"><span class="fa fa-folder-open-o"></span></button>
                     -->
@@ -30,4 +30,32 @@
             <div class="ghost-select"><span></span></div>
         </div>
     </div>
+    <modal-component v-if="showExecutionModal" @close="showExecutionModal = false">
+        <div slot="header">
+            <h4>Execution of workflow</h4>
+            Please, complete the required information for the execution of the workflow:
+        </div>
+        <div class="body" slot="body">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label>Cluster:</label>
+                        <select class="form-control">
+                            <option value="1">Default</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label>Missing required parameters:</label>
+                        <p>
+                        There is no missing required parameter
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div slot="footer">
+            <button class="btn btn-primary" @click="execute"><span class="fa fa-play"></span> Execute</button>
+            <button class="btn btn-danger" @click="cancelExecute">Cancel</button>
+        </div>
+    </modal-component>
 </div>

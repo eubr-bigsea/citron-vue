@@ -3,57 +3,42 @@
         <div class="row xsmall-padding">
             <div class="col-md-12">
                 <h2>Job #{{job.id}} :: Workflow #{{job.workflow.id}} - {{job.workflow.name}}
-                    <span class="fa fa-reply"></span>
                 </h2>
+                <router-link :to="{name: 'editor', params: {id: job.workflow.id }}"><span class="fa fa-edit"></span> Edit workflow</router-link>
                 <hr/>
             </div>
             <div class="col-md-6">
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-12">
                         <div class="panel panel-primary">
                             <div class="panel-heading">
                                 Job
                             </div>
                             <div class="panel-body">
-                                <p>
-                                    <strong>Workflow:</strong> {{job.workflow.id}} - {{job.workflow.name}}
-                                </p>
-                                <p>
-                                    <strong>Created:</strong> {{formatDate(job.created, 'DD-MM-YYYY HH:mm:ss')}}
-                                </p>
-                                <p>
-                                    <strong>Started:</strong> {{formatDate(job.started, 'DD-MM-YYYY HH:mm:ss') || '-'}}
-                                </p>
-                                <p>
-                                    <strong>Finished:</strong> {{formatDate(job.finished, 'DD-MM-YYYY HH:mm:ss') || '-'}}
-                                </p>
-                                <p>
-                                    <strong>Status:</strong> {{job.status}}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">
-                                User
-                            </div>
-                            <div class="panel-body">
-                                <p>
-                                    <strong>{{job.user.id}} - {{job.user.name}}</strong>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Cluster
-                            </div>
-                            <div class="panel-body">
-                                <p>
-                                    <strong>{{job.cluster.id}} - {{job.cluster.name}}</strong>
-                                </p>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <p>
+                                            <strong>Status:</strong> {{job.status}}
+                                        </p>
+                                        <p>
+                                            <strong>User:</strong> {{job.user.id}} - {{job.user.name}}
+                                        </p>
+                                        <p>
+                                        <strong>Cluster: </strong> {{job.cluster.id}} - {{job.cluster.name}}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p>
+                                            <strong>Created:</strong> {{formatDate(job.created, 'DD-MM-YYYY HH:mm:ss')}}
+                                        </p>
+                                        <p>
+                                            <strong>Started:</strong> {{formatDate(job.started, 'DD-MM-YYYY HH:mm:ss') || '-'}}
+                                        </p>
+                                        <p>
+                                            <strong>Finished:</strong> {{formatDate(job.finished, 'DD-MM-YYYY HH:mm:ss') || '-'}}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -62,25 +47,26 @@
                             <div class="panel-heading">
                                 Job messages output
                             </div>
-                            <div class="panel-body">
+                            <div class="panel-body  overflow">
                                 <table class="table table-hover table-bordered table-condensed small">
                                     <tbody>
-                                        <tr class="task-status" v-for="step in job.steps" :id="'log-' + step.task.id" @mouseover="selectTask(step.task.id)">
+                                        <tr class="task-status" v-for="step in job.steps" :id="'log-' + step.task.id" @mouseover="selectTask(step.task.id)" @mouseout="deselectTask(step.task.id)">
                                             <td class="col-md-2 text-center">
                                                 {{step.status}}
                                             </td>
                                             <td class="col-md-2 text-center">
                                                 {{getOperationName(step.operation.id)}}
                                             </td>
-                                            <td class="col-md-2 text-center">{{formatDate(step.date, 'DD-MM-YYYY HH:mm:ss')}}</td>
-                                            <td class="col-md-6">
+                                            <td class="col-md-1 text-center">{{formatDate(step.date, 'DD-MM-YYYY HH:mm:ss')}}</td>
+                                            <td class="col-md-7">
                                                 <span v-if="step.logs.length === 0">
                                                     No log information
                                                 </span>
-                                                <div v-else v-for="log in step.logs">
-                                                    <i class="fa fa-2x" :class="'fa-' + log.level.toLowerCase()"></i> {{log.message}}
-                                                    <br/>
-                                                </div>
+                                                <transition-group name="log" tag="p" v-else>
+                                                    <span v-for="log in step.logs" v-bind:key="log" class="log-item">
+                                                    {{log.message}}
+                                                    </span>
+                                                </transition-group>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -93,7 +79,7 @@
                 <div class="panel panel-primary">
                     <div class="panel-body">
                         <diagram-component :render-from="job.workflow" :multiple-selection-enabled="false" 
-                            :show-toolbar="false" :draggable-tasks="draggableTasks"></diagram-component>
+                            :show-toolbar="false" :draggable-tasks="draggableTasks" zoom=".8"></diagram-component>
                     </div>
                 </div>
             </div>
@@ -118,22 +104,39 @@
         content: "\f057";
         color: #FF4136;
     }
+    .overflow {
+        overflow: auto;
+    }
 </style>
 <script>
     import Vue from 'vue';
     import DiagramComponent from '../diagram/diagram';
     import MomentMixin from '../mixins/moment-mixin';
+    import eventHub from '../app/event-hub';
     import store from '../vuex/store';
+    import io from 'socket.io-client';
 
-    const standUrl = 'http://beta.ctweb.inweb.org.br/stand';
+    import {standUrl, tahitiUrl, authToken} from '../../config';
     const JobDetailComponent = Vue.extend({
         /* Life-cycle */
         store,
         mounted: function () {
             let self = this;
+            
             this.$store.dispatch('loadOperations').then(function (result) {
-                self.performLoad();
-                self.$store.dispatch('connectWebSocket', self.job.id);
+                self.performLoad().then((r) => {
+                    self.connectWebSocket();
+                });
+            });
+            eventHub.$on('route-change', (to, from) => {
+                if (from.name === 'job-detail'){
+                    let room = self.job.id;
+                    console.debug('Disconnecting from room', room);
+                    let socket = self.socket;
+                    socket.emit('leave', { room: room });
+                    //socket.emit('disconnect');
+                    socket.close();
+                }
             });
         },
         components: {
@@ -144,11 +147,68 @@
             return {
                 job: { id: null, workflow: {}, user: {}, cluster: {} },
                 draggableTasks: true,
-                highlight: null,
+                highlight: null
             };
         },
         /* Methods */
         methods: {
+            connectWebSocket(){
+                let self = this;
+                var counter = 0;
+                let namespace = '/stand';
+
+                let socket = io(standUrl + namespace, 
+                    { upgrade: true, path: '/socket.io' });
+
+                socket.on('disconnect', () => {
+                    console.debug('disconnect')
+                });
+                socket.on('response', (msg) => {
+                    console.debug('response', msg)
+                });
+                socket.on('connect', () => {
+                    let self = this;
+                    let room = self.job.id;
+                    console.debug('Connecting to room', room);
+                    socket.emit('join', { room: room });
+                    self.socket = socket;
+                });
+                socket.on('connect_error', () => {
+                    console.debug('Web socket server offline');
+                });
+                socket.on('update task', (msg) => {
+                    let self = this;
+                    //self.selectTask(msg.id, msg.status.toLowerCase());
+
+                    let inx = self.job.workflow.tasks.findIndex(
+                        (n, inx, arr) => n.id === msg.id);
+                    
+                    console.debug('Found', inx, msg.id)
+                    if (inx > -1) {
+                        let task = self.job.workflow.tasks[inx];
+                        task.status = msg.status;
+                        let step = self.job.steps.find((step) => step.task.id === task.id);
+                        if (step){
+                            step.status = msg.status;
+                            step.logs.push({level: 'INFO', message: msg.message})
+                        }
+                        //self.job.workflow.tasks[inx].forms.color.value = 'green';
+                    }
+                    console.debug('update task', msg)
+                });
+                socket.on('update job', (msg) => {
+                    if (msg.id === self.job.id){
+                        self.job.status = msg.status;
+                        if (msg.message){
+                            if (msg.status === 'COMPLETED'){
+                                self.$root.$refs.toastr.i(msg.message, 'Success');
+                            } else {
+                                self.$root.$refs.toastr.e(msg.message, 'Problem');
+                            }
+                        }
+                    }
+                });
+            },
             getOperationName(id) {
                 let ops = this.$store.getters.getOperations.filter((op) => op.id === id);
                 if (ops.length > 0){
@@ -162,22 +222,32 @@
                 let id = this.$route.params.id;
                 this.job.id = id;
                 let url = `${standUrl}/jobs/${id}?token=123456`;
-                Vue.http.get(url).then(function (response) {
+                return Vue.http.get(url).then(function (response) {
+                    response.data.workflow.tasks.forEach((task) => task.status = '');
                     self.job = response.data;
                     self.$nextTick(function () {
                         self.draggableTasks = false;
                     });
                 })
             },
-            selectTask(taskId){
+            selectTask(taskId, addClass){
                 let current = document.querySelector('.highlight');
                 if (current){
                     current.classList.remove('highlight');
                 }
-                document.getElementById(taskId).classList.add('highlight');
+                let elem = document.getElementById(taskId);
+                if (elem) {
+                    elem.classList.add('highlight');
+                }
+            },
+            deselectTask(taskId){
+                let current = document.querySelector('.highlight');
+                if (current){
+                    current.classList.remove('highlight');
+                }
             },
         },
-        mixins: [MomentMixin]
+        mixins: [MomentMixin],
     });
     export default JobDetailComponent;
 </script>

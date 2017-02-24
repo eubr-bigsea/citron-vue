@@ -94,9 +94,9 @@ li.dragging {
 }
 #lemonade-diagram {
     background-image: url(grid1.png);
-    .ghost-active {
     width: 2000px;
     height: 4000px;
+    .ghost-active {
         display: block !important;
     }
     .ghost-select > span {
@@ -136,7 +136,8 @@ li.dragging {
         &.completed {
             border: none;
         };
-        &.running, &.interrupted, &.canceled, &.error, &.canceled, &.highlight {
+        /*&.interrupted, &.canceled, &.error, &.canceled,*/
+        &.running, &.highlight {
             border: 1px dashed red !important;
             box-shadow: 0px 0px 50px #a93;
             -moz-box-sha: 0px 0px 50px #a93;
@@ -354,4 +355,16 @@ li.dragging {
 }
 .jsplumb-connector {
     z-index: 2;
+}
+.log-item {
+  margin-right: 10px;
+}
+.log-enter-active, .log-leave-active {
+  transition: all 2s;
+  font-weight: bold;
+}
+.log-enter, .log-leave-to /* .list-leave-active for <2.1.8 */ {
+  opacity: 0;
+  color: red;
+  /*transform: translateY(5px);*/
 }

@@ -1,6 +1,8 @@
 import Vuex from 'vuex';
 import Vue from 'vue';
 import io from 'socket.io-client'
+import {standUrl, tahitiUrl} from '../../config';
+
 Vue.use(Vuex);
 
 const StoreException = function (message, code) {
@@ -28,10 +30,6 @@ const state = {
     workflowPage: { pagination: {} },
     jobPage: { pagination: {} },
 }
-const tahitiUrl = 'http://beta.ctweb.inweb.org.br/tahiti';
-//const standUrl = 'http://beta.ctweb.inweb.org.br/stand';
-const standUrl = 'http://localhost:5000';
-//const tahitiUrl = 'http://localhost:5000'; 
 function getWorkflows() {
     let url = `${tahitiUrl}/workflows?token=123456`;
     return Vue.http.get(url).then(function (response) {
@@ -144,43 +142,7 @@ const mutations = {
         state.workflow.id = id;
     },
     SAVE_WORKFLOW(state) {
-        let cloned = JSON.parse(JSON.stringify(state.workflow));
-        let tmp = document.getElementById('save-area');
-
-        let url = `${tahitiUrl}/workflows`;
-        let headers = { 'Content-Type': 'application/json', 'X-Auth-Token': '123456' }
-        let httpMethod = 'post';
-        if (cloned.id !== 0) {
-            httpMethod = 'patch';
-            url = `${url}/${cloned.id}`;
-        }
-        cloned.platform_id = 1; //FIXME
-        cloned.tasks.forEach((task) => {
-            task.operation = { id: task.operation.id };
-            delete task.version; //
-        });
-        //
-        Vue.http[httpMethod](url, cloned, { headers }).then((response) => {
-            //console.debug(response);
-            return response.data;
-        });
-        if (tmp) {
-            tmp.value = JSON.stringify(cloned,
-                (key, value) => {
-                    if (key === 'operation') {
-                        const op = state.lookupOperations[value.id];
-                        if (op) {
-                            return { name: op.name, slug: op.slug, id: op.id };
-                        } else {
-                            return {}
-                        }
-                    } else if (key === 'classes') {
-                        return undefined;
-                    } else {
-                        return value;
-                    }
-                });
-        }
+        
     },
     LOAD_WORKFLOW(state) {
         state.workflow = { 'id': state.workflow.id, tasks: [], flows: [] };
@@ -260,12 +222,11 @@ const mutations = {
         return state.operations;
     },
     CONNECT_WEBSOCKET(state, room) {
-        //const standBaseUrl = 'http://beta.ctweb.inweb.org.br:5000';
-        const standBaseUrl = 'http://localhost:5000';
+        return
         let namespace = '/stand';
         var counter = 0;
-        console.debug(standBaseUrl + namespace)
-        var socket = io(standBaseUrl + namespace, 
+        console.debug(standUrl + namespace)
+        var socket = io(standUrl + namespace, 
             { upgrade: true, path: '/socket.io' });
 
         socket.on('disconnect', () => {
@@ -369,7 +330,27 @@ const diagramModuleStore = {
         },
 
         saveWorkflow({ commit, state }) {
-            return commit('SAVE_WORKFLOW');
+            let cloned = JSON.parse(JSON.stringify(state.workflow));
+
+            let url = `${tahitiUrl}/workflows`;
+            let headers = { 'Content-Type': 'application/json', 'X-Auth-Token': '123456' }
+            let httpMethod = 'post';
+            if (cloned.id !== 0) {
+                httpMethod = 'patch';
+                url = `${url}/${cloned.id}`;
+            }
+            cloned.platform_id = 1; //FIXME
+            cloned.tasks.forEach((task) => {
+                task.operation = { id: task.operation.id };
+                delete task.version; //
+            });
+            
+            return new Promise((resolve, reject) => {
+                Vue.http[httpMethod](url, cloned, { headers }).then((response) => {
+                    commit('SAVE_WORKFLOW');
+                    resolve(response.data);
+                }).catch((reason) => reject(reason));
+            });
         },
         loadWorkflow({ commit, state }) {
             return commit('LOAD_WORKFLOW');

@@ -15,7 +15,6 @@ const FlowComponent = Vue.extend({
         instance: null
     },
     mounted() {
-        console.debug('Flow mounted')
         this.$nextTick(()=>{
             let uuids = this.flow.uuids;
             if (! uuids) {

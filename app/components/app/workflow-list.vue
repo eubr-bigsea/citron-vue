@@ -19,10 +19,9 @@
             </div>
             <hr/>
             <div class="col-md-12">
-                <table class="table table-striped table-bordered">
+                <table class="table table-hover table-bordered table-condensed">
                     <thead>
                         <tr>
-                            <th class="col-md-1 primary text-center">Options</th>
                             <th class="sortable primary text-center col-md-1" @click="sort('id')">
                                 Id <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'id'"></span>
                             </th>
@@ -30,38 +29,39 @@
                                 Name <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]"
                                     v-show="orderBy === 'name'"></span>
                             </th>
-                            <th class="sortable primary text-center col-md-3" @click="sort('user_name')">
-                                Owner <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]"
-                                    v-show="orderBy === 'user_name'"></span>
+                            <th class="sortable primary text-center col-md-2" @click="sort('user_name')">
+                                Owner
                             </th>
                             <th class="sortable primary text-center col-md-2" @click="sort('updated')">
                                 Updated <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]"
                                     v-show="orderBy === 'updated'"></span>
                             </th>
+                            <th class="col-md-2 primary text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="wf in pageData.data" :key="wf.id">
-                            <td class="text-center">
-                                <a href="" title="Remove" @click="remove">
-                                    <span class="fa-stack fa-lg">
-                                        <span class="fa fa-circle fa-stack-2x"></span>
-                                        <span class="fa fa-trash-o fa-stack-1x  fa-inverse"></span>
-                                    </span>
-                                </a>
-                                <router-link :to="{name: 'editor', params: {id: wf.id }}">
-                                    <span class="fa-stack fa-lg">
-                                        <span class="fa fa-circle fa-stack-2x"></span>
-                                        <span class="fa fa-pencil fa-stack-1x fa-inverse"></span>
-                                    </span>
-                                </router-link>
-                            </td>
                             <td class="text-center">
                                 <router-link :to="{name: 'editor', params: {id: wf.id }}">{{wf.id}}</router-link>
                             </td>
                             <td>{{wf.name}}</td>
                             <td>{{wf.user_name}}</td>
                             <td class="text-center">{{ formatDate(wf.updated, 'DD-MM-YYYY HH:mm:ss') }}</td>
+                            <td class="text-center">
+                                <dropdown-component variant="btn-default" label="Edit" :link="resolve( {name: 'editor', params: {id: wf.id }})">
+                                    <li>
+                                        <a href="" title="Remove" @click="remove">
+                                            <span class="fa fa-trash-o"></span>
+                                            </span> Remove
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="" title="Execute" @click="remove">
+                                            <span class="fa fa-play-circle-o"></span> Execute
+                                        </a>
+                                    </li>
+                                </dropdown-component>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -84,6 +84,7 @@
 <script>
     import Vue from 'vue';
     import moment from 'moment';
+    import DropdownComponent from '../ui/dropdown.vue';
 
     const fields = 'id, name, user_name, updated';
     const WorkflowListComponent = Vue.extend({
@@ -95,6 +96,9 @@
                 orderBy: 'name',
             }
         },
+        components: {
+            'dropdown-component': DropdownComponent,
+        },
         computed: {
             pageData: function () {
                 return this.$store.getters.getWorkflowPage;
@@ -104,6 +108,10 @@
             this.performLoad();
         },
         methods: {
+            resolve(route){
+                let r = this.$router.resolve(route);
+                return r ? r.href : '';
+            },
             formatDate(date, format) {
                 return moment(date).format(format);
             },

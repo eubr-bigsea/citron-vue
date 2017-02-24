@@ -3,7 +3,6 @@ import PerfectScrollbar from 'perfect-scrollbar';
 import PerfectScrollbarCss from 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
 import template from './diagram-template.html';
-
 import eventHub from '../app/event-hub';
 
 import {
@@ -11,12 +10,16 @@ import {
     SplitComponent, PropertyDescriptionComponent
 }
     from '../properties/properties-components.js';
+    
+import ModalComponent from '../modal/modal-component.js';
 import { TaskComponent, connectionOptions } from '../task/task';
 import FlowComponent from '../task/flow';
 
 import highlight from 'highlight.js';
 import highlightCass from 'highlight.js/styles/default.css';
 import solarizedDark from 'highlight.js/styles/solarized-dark.css';
+
+import {standUrl, tahitiUrl, authToken} from '../../config';
 
 const DiagramComponent = Vue.extend({
     computed: {
@@ -58,6 +61,7 @@ const DiagramComponent = Vue.extend({
         'flow-component': FlowComponent,
         'property-description-component': PropertyDescriptionComponent,
         'empty-properties-component': EmptyPropertiesComponent,
+        'modal-component': ModalComponent
     },
     props: {
         formContainer: null,
@@ -67,7 +71,12 @@ const DiagramComponent = Vue.extend({
             default: true,
         },
         draggableTasks: true,
-        multipleSelectionEnabled: true,
+        multipleSelectionEnabled: {
+            default: true,
+        },
+        zoom: {
+            default: 1.0
+        }
     },
     watch: {
         draggableTasks() {
@@ -80,7 +89,7 @@ const DiagramComponent = Vue.extend({
     },
     data() {
         return {
-            zoom: 1,
+            showExecutionModal: false,
             zoomInEnabled: true,
             zoomOutEnabled: true,
             selectedTask: null,
@@ -142,11 +151,15 @@ const DiagramComponent = Vue.extend({
     },
     template,
     mounted() {
-        this.zoom = 1.0;
+        
+        this.$root.$refs.toastr.defaultPosition = 'toast-bottom-full-width';
         this.currentZIndex = 10;
         this.init();
         let self = this;
+        
         self.diagramElement = document.getElementById('lemonade-diagram');
+        this.setZoom(self.zoom, self.instance, null, self.diagramElement);
+        
         /* scroll bars */
         PerfectScrollbar.initialize(self.diagramElement.parentElement);
 
@@ -211,7 +224,12 @@ const DiagramComponent = Vue.extend({
             this.$store.dispatch('changeWorkflowName', name)
         },
         saveWorkflow() {
-            this.$store.dispatch('saveWorkflow');
+            let self = this;
+            this.$store.dispatch('saveWorkflow').then(() => {
+                self.$root.$refs.toastr.s(`Workflow saved`);
+            }).catch((err) => {
+                self.$root.$refs.toastr.e('Error saving workflow');
+            });
         },
         loadWorkflow() {
             this.$store.dispatch('loadWorkflow');
@@ -532,6 +550,44 @@ const DiagramComponent = Vue.extend({
             container.scrollTop = parseInt(elemTask.style.top);
             container.scrollLeft = parseInt(elemTask.style.left);
         },
+        cancelExecute() {
+            this.showExecutionModal = false;
+        },
+        execute() {
+            console.debug('Executing')
+            this.showExecutionModal = false;
+            let url = `${standUrl}/jobs`;
+
+            let cloned = JSON.parse(JSON.stringify(this.workflow));
+            cloned.platform_id = 1; //FIXME
+            cloned.tasks.forEach((task) => {
+                task.operation = { id: task.operation.id };
+                delete task.version; 
+            });
+
+            let body = {
+                workflow: cloned,
+                cluster: { id: 1 },
+                user: { id: 13, login: 'war', name: 'Sun Tzu' }
+            }
+            let self = this;
+            let headers = {'X-Auth-Token': authToken};
+            Vue.http.post(url, body, {headers})
+                .then(function (response) {
+                    self.$router.push({name: 'job-detail', 
+                        params: {id: response.body.data.id}});
+                }).catch((ex) =>{
+                    if (ex.body){
+                        self.$root.$refs.toastr.e(ex.body.message);
+                    } else {
+                        debugger
+                    }
+                });
+        },
+        onClickExecute() {
+            console.debug('Executing', this.workflow);
+            this.showExecutionModal = true;
+        },
         _bindJsPlumbEvents() {
             let self = this;
             self.instance.setContainer("lemonade-diagram");
@@ -542,13 +598,23 @@ const DiagramComponent = Vue.extend({
             // self.instance.bind("click", self.flowClick);
 
             self.instance.bind('connectionDetached', (info, originalEvent) => {
-                if (originalEvent) {
-                    let source = info.sourceEndpoint.getUuid();
-                    let target = info.targetEndpoint.getUuid();
+                let source = info.sourceEndpoint.getUuid();
+                let target = info.targetEndpoint.getUuid();
 
-                    self.removeFlow(source + '-' + target);
-                    console.debug('Removendo via connectionDetached', originalEvent)
-                }
+                self.removeFlow(source + '-' + target);
+            });
+            self.instance.bind('connectionMoved', (info, originalEvent) => {
+                let source = info.originalSourceEndpoint.getUuid();
+                let target = info.originalTargetEndpoint.getUuid();
+
+                self.removeFlow(source + '-' + target);
+
+                let [source_id, source_port] = info.newSourceEndpoint.getUuid().split('/');
+                let [target_id, target_port] = info.newTargetEndpoint.getUuid().split('/');
+                self.addFlow({
+                    source_id, source_port,
+                    target_id, target_port,
+                });
             });
             self.instance.bind('connection', (info, originalEvent) => {
                 let con = info.connection;
@@ -556,7 +622,7 @@ const DiagramComponent = Vue.extend({
                 if (false && arr.length > 1) { // @FIXME Review
                     // self.instance.detach(con);
                 } else if (originalEvent) {
-                    self.instance.detach(con);
+                    //self.instance.detach(con);
                     let [source_id, source_port] = info.sourceEndpoint.getUuid().split('/');
                     let [target_id, target_port] = info.targetEndpoint.getUuid().split('/');
                     self.addFlow({
