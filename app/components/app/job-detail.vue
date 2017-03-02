@@ -18,9 +18,6 @@
                                 <div class="row">
                                     <div class="col-md-4">
                                         <p>
-                                            <strong>Status:</strong> {{job.status}}
-                                        </p>
-                                        <p>
                                             <strong>User:</strong> {{job.user.id}} - {{job.user.name}}
                                         </p>
                                         <p>
@@ -48,6 +45,12 @@
                                 Job messages output
                             </div>
                             <div class="panel-body  overflow">
+                                <p>
+                                    <strong>Status:</strong> {{job.status}}
+                                </p>
+                                <p :visible="job.status_text !== ''">
+                                    <em>{{job.status_text}}</em>
+                                </p>
                                 <table class="table table-hover table-bordered table-condensed small">
                                     <tbody>
                                         <tr class="task-status" v-for="step in job.steps" :id="'log-' + step.task.id" @mouseover="selectTask(step.task.id)" @mouseout="deselectTask(step.task.id)">
@@ -63,9 +66,9 @@
                                                     No log information
                                                 </span>
                                                 <transition-group name="log" tag="p" v-else>
-                                                    <span v-for="log in step.logs" v-bind:key="log" class="log-item">
-                                                    {{log.message}}
-                                                    </span>
+                                                    <p v-for="log in step.logs" v-bind:key="log" class="log-item">
+                                                    {{log.date || new Date()}} {{log.message}}
+                                                    </p>
                                                 </transition-group>
                                             </td>
                                         </tr>
@@ -123,6 +126,7 @@
         mounted: function () {
             let self = this;
             
+            // Required to build workflow
             this.$store.dispatch('loadOperations').then(function (result) {
                 self.performLoad().then((r) => {
                     self.connectWebSocket();
@@ -190,7 +194,8 @@
                         let step = self.job.steps.find((step) => step.task.id === task.id);
                         if (step){
                             step.status = msg.status;
-                            step.logs.push({level: 'INFO', message: msg.message})
+                            step.logs.push({level: 'INFO', 
+                                message: msg.message || msg.msg})
                         }
                         //self.job.workflow.tasks[inx].forms.color.value = 'green';
                     }
@@ -199,11 +204,23 @@
                 socket.on('update job', (msg) => {
                     if (msg.id === self.job.id){
                         self.job.status = msg.status;
-                        if (msg.message){
+                        if (msg.message || msg.msg){
+                            let finalMsg = msg.message || msg.msg;
+                            
+                            self.job.status_text = finalMsg;
                             if (msg.status === 'COMPLETED'){
-                                self.$root.$refs.toastr.i(msg.message, 'Success');
+                                self.$root.$refs.toastr.s(finalMsg, msg.status);
+                            } else if (msg.status !== 'ERROR'){
+                                self.$root.$refs.toastr.i(finalMsg, msg.status);
                             } else {
-                                self.$root.$refs.toastr.e(msg.message, 'Problem');
+                                self.$root.$refs.toastr.Add({
+                                    title:  msg.status,
+                                    msg: finalMsg,
+                                    clickClose: true, 
+                                    timeout: 0, 
+                                    position: "toast-bottom-full-width",
+                                    type: "error" 
+                                });
                             }
                         }
                     }
