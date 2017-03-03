@@ -60,21 +60,30 @@ const Dashboard = { template: '<div>Dashboard Page!!!!</div>' }
 
 /* Routes configuration */
 const routes = [
-    { path: '/workflows/add', component: WorkflowAddComponent, name: 'add-workflow' },
-    { path: '/workflows/editor/:id', component: AppComponent, name: 'editor' },
-    { path: '/workflows/list/:page', component: WorkflowListComponent, name: 'workflow-page' },
-    { path: '/workflows/list', component: WorkflowListComponent, name: 'workflow-list' },
+    { path: '/workflows/add', component: WorkflowAddComponent, name: 'add-workflow',
+        meta: {title: 'New workflow' }},
+    { path: '/workflows/editor/:id', component: AppComponent, name: 'editor',
+    meta: {title: 'Edit workflow' }},
+    { path: '/workflows/list/:page', component: WorkflowListComponent, name: 'workflow-page',
+    meta: { title: 'Workflow list' }},
+    { path: '/workflows/list', component: WorkflowListComponent, name: 'workflow-list',
+    meta: {title: 'Workflow list'}},
 
     { path: '/jobs/list/:page', component: JobListComponent, name: 'job-page',
-        query: {sort: 'id'}},
-    { path: '/jobs/list', component: JobListComponent, name: 'job-list' },
-    { path: '/jobs/:id', component: JobDetailComponent, name: 'job-detail' },
+    query: {sort: 'id'}, meta: {title: 'Job list'}},
+    { path: '/jobs/list', component: JobListComponent, name: 'job-list',
+    meta: {title: 'Job list' }},
+    { path: '/jobs/:id', component: JobDetailComponent, name: 'job-detail',
+    meta: {title: 'Job result' }},
 
 
-    { path: '/login', component: LoginComponent, name: 'login' },
-    { path: '/dashboard', component: Dashboard, name: 'dashboard' },
+    { path: '/login', component: LoginComponent, name: 'login',
+    meta: {title: 'Login' }},
+    { path: '/dashboard', component: Dashboard, name: 'dashboard',
+    meta: {title: 'Dashboard' }},
 
-    { path: '/data-sources/list', component: Foo },
+    { path: '/data-sources/list', component: Foo,
+    meta: {title: 'Data sources' }},
     { path: '*', redirect: '/workflows/list' }
 ]
 
@@ -84,6 +93,9 @@ const router = new VueRouter({
 });
 router.beforeEach(function (to, from, next) {
     eventHub.$emit('route-change', to, from);
+    if (to.meta.title){
+        document.title = to.meta.title;
+    }
     next();
     return 
     let auth = { state: { token: null } };

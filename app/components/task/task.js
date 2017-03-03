@@ -99,6 +99,12 @@ const TaskComponent = Vue.extend({
             //elem.parentNode.removeChild(elem);
         }
     },
+    computed: {
+        'classes': function(){
+            return (this.task.status? this.task.status.toLowerCase(): '') + 
+                    (this.isComment ? ' comment ': '') + 'test';
+        }
+    },
     methods: {
         getOperationFromId(id) {
             let operations = this.$store.getters.getOperations;
@@ -153,7 +159,10 @@ const TaskComponent = Vue.extend({
         task: {
             'default': function() { return { name: '', icon: '' }; }
         },
-        instance: null
+        instance: null,
+        isComment: {
+            default: false
+        }
     },
     watch: {
         'task.status': function(){
@@ -203,6 +212,7 @@ const TaskComponent = Vue.extend({
         let elem = document.getElementById(taskId);
         if (this.task.operation.slug === 'comment') {
             elem.classList.add('comment');
+            this.isComment = true;
         }
         [
             [inputs, 'input', endPointOptionsInput],
