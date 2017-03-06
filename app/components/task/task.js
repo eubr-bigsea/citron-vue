@@ -162,6 +162,9 @@ const TaskComponent = Vue.extend({
         instance: null,
         isComment: {
             default: false
+        },
+        showDecoration: {
+            default: false
         }
     },
     watch: {

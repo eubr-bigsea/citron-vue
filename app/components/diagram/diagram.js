@@ -70,6 +70,7 @@ const DiagramComponent = Vue.extend({
         showToolbar: {
             default: true,
         },
+        showTaskDecoration: false,
         draggableTasks: true,
         multipleSelectionEnabled: {
             default: true,

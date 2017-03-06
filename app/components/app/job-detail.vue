@@ -39,6 +39,23 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-12" v-if="job.results">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                Job results
+                            </div>
+                            <div class="panel-body">
+                                <div class="col-md-2 text-center result-item" v-for="result in job.results">
+                                    <a :href="computeLink(result)" class="button result">
+                                        <span class="fa fa-3x" :class="getOperationIcon(result.operation.id)"></span>
+                                        <br/>
+                                        {{result.title}}<br/>
+                                        <small>{{result.type}}</small>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-md-12">
                         <div class="panel panel-primary panel-diagram">
                             <div class="panel-heading">
@@ -73,6 +90,7 @@
                                             </td>
                                         </tr>
                                     </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -82,7 +100,8 @@
                 <div class="panel panel-primary">
                     <div class="panel-body">
                         <diagram-component :render-from="job.workflow" :multiple-selection-enabled="false" 
-                            :show-toolbar="false" :draggable-tasks="draggableTasks" zoom=".8"></diagram-component>
+                            :show-task-decoration="true" :show-toolbar="false" 
+                            :draggable-tasks="draggableTasks" zoom=".8"></diagram-component>
                     </div>
                 </div>
             </div>
@@ -110,6 +129,20 @@
     .overflow {
         overflow: auto;
     }
+    div.result-item {
+        padding: 5px;
+        background-color: #f9f9f9;
+        border: 1px solid #aaa;
+    }
+    .result-item:hover{
+        color: #fff;
+        text-decoration: none;
+        background-color: #563d7c;
+    }
+    a.result:hover, a.result:visited, a.result:link, a.result:active{
+        text-decoration: none;
+        color: inherit;
+    }
 </style>
 <script>
     import Vue from 'vue';
@@ -119,7 +152,7 @@
     import store from '../vuex/store';
     import io from 'socket.io-client';
 
-    import {standUrl, tahitiUrl, authToken} from '../../config';
+    import {standUrl, tahitiUrl, authToken, caipirinhaUrl} from '../../config';
     const JobDetailComponent = Vue.extend({
         /* Life-cycle */
         store,
@@ -156,6 +189,9 @@
         },
         /* Methods */
         methods: {
+            computeLink(result){
+                return `${caipirinhaUrl}/visualizations/${this.job.id}/${result.task.id}?token=${authToken}`;
+            },
             connectWebSocket(){
                 let self = this;
                 var counter = 0;
@@ -225,6 +261,9 @@
                         }
                     }
                 });
+                socket.on('task result', (msg) => {
+                    debugger;
+                });
             },
             getOperationName(id) {
                 let ops = this.$store.getters.getOperations.filter((op) => op.id === id);
@@ -234,11 +273,19 @@
                     return 'Unknown operation';
                 }
             },
+            getOperationIcon(id) {
+                let ops = this.$store.getters.getOperations.filter((op) => op.id === id);
+                if (ops.length > 0){
+                    return ops[0].icon;
+                } else {
+                    return 'fa-question-circle';
+                }
+            },
             performLoad() {
                 let self = this;
                 let id = this.$route.params.id;
                 this.job.id = id;
-                let url = `${standUrl}/jobs/${id}?token=123456`;
+                let url = `${standUrl}/jobs/${id}?token=${authToken}`;
                 return Vue.http.get(url).then(function (response) {
                     response.data.workflow.tasks.forEach((task) => task.status = '');
                     self.job = response.data;

@@ -7,6 +7,8 @@ const standUrl = 'http://localhost:3323';
 //const limoneroUrl = 'http://localhost:5000';
 const limoneroUrl = 'http://beta.ctweb.inweb.org.br/limonero';
 
+const caipirinhaUrl = 'http://beta.ctweb.inweb.org.br/caipirinha';
+
 const authToken = '123456';
 
-export { tahitiUrl, standUrl, limoneroUrl, authToken };
+export { tahitiUrl, standUrl, limoneroUrl, authToken, caipirinhaUrl };

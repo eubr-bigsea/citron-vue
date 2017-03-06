@@ -4,7 +4,7 @@
     <strong><span class="fa"  :class="task.operation.icon"></span> {{task.operation.name}}</strong>
     </div>
     <em>{{task.forms.comment ? task.forms.comment.value: ''}}</em>
-    <div class="decor" :class="task.status? task.status.toLowerCase(): ''">
+    <div v-if="showDecoration" class="decor" :class="task.status? task.status.toLowerCase(): ''">
         <span class="fa fa-check-circle fa-2x"></span>
     </div>
 </div>
