@@ -130,7 +130,8 @@
         overflow: auto;
     }
     div.result-item {
-        padding: 5px;
+        padding: 5px; 
+        margin-left: 5px;
         background-color: #f9f9f9;
         border: 1px solid #aaa;
     }
@@ -262,7 +263,7 @@
                     }
                 });
                 socket.on('task result', (msg) => {
-                    debugger;
+                    self.job.results.push(msg);
                 });
             },
             getOperationName(id) {
@@ -274,7 +275,7 @@
                 }
             },
             getOperationIcon(id) {
-                let ops = this.$store.getters.getOperations.filter((op) => op.id === id);
+                let ops = this.$store.getters.getOperations.filter((op) => op.id === parseInt(id));
                 if (ops.length > 0){
                     return ops[0].icon;
                 } else {
