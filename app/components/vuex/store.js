@@ -201,7 +201,7 @@ const mutations = {
         });
     },
     LOAD_WORKFLOW_PAGE(state, params) {
-        let url = `${tahitiUrl}/workflows`;
+        let url = `${tahitiUrl}/workflows?enabled=true`;
         let headers = { 'X-Auth-Token': '123456' }
 
         Vue.http.get(url, { params, headers }).then(response => {

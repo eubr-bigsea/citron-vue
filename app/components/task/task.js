@@ -184,7 +184,6 @@ const TaskComponent = Vue.extend({
         }
     },
     mounted() {
-        console.debug('Mounted task')
         let self = this;
         let operation = self.getOperationFromId(this.task.operation.id);
         if (!operation) {
@@ -242,7 +241,7 @@ const TaskComponent = Vue.extend({
                     if (ports[inx].interfaces.length && ports[inx].interfaces[0].color) {
                         options['paintStyle']['fillStyle'] = ports[inx].interfaces[0].color;
                     } else {
-                        console.debug(ports[inx].id, operation.id)
+                        //console.debug(ports[inx].id, operation.id)
                     }
 
                     let endpoint = self.instance.addEndpoint(elem, options);

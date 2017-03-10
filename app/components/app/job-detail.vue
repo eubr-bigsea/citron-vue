@@ -50,6 +50,8 @@
                                         <span class="fa fa-3x" :class="getOperationIcon(result.operation.id)"></span>
                                         <br/>
                                         {{result.title}}<br/>
+                                        <div v-if="result.type === 'HTML'" v-html="result.content">
+                                        </div>
                                         <small>{{result.type}}</small>
                                     </a>
                                 </div>
@@ -153,7 +155,7 @@
     import store from '../vuex/store';
     import io from 'socket.io-client';
 
-    import {standUrl, tahitiUrl, authToken, caipirinhaUrl} from '../../config';
+    import {standUrl, tahitiUrl, authToken, caipirinhaUrl, standNamespace, standSocketIOdPath} from '../../config';
     const JobDetailComponent = Vue.extend({
         /* Life-cycle */
         store,
@@ -196,10 +198,9 @@
             connectWebSocket(){
                 let self = this;
                 var counter = 0;
-                let namespace = '/stand';
 
-                let socket = io(standUrl + namespace, 
-                    { upgrade: true, path: '/socket.io' });
+                let socket = io(standUrl + standNamespace, 
+                    { upgrade: true, path: `${standSocketIOdPath}/socket.io`,  });
 
                 socket.on('disconnect', () => {
                     console.debug('disconnect')

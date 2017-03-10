@@ -50,13 +50,13 @@
                             <td class="text-center">
                                 <dropdown-component variant="btn-default" label="Edit" :link="resolve( {name: 'editor', params: {id: wf.id }})">
                                     <li>
-                                        <a href="" title="Remove" @click="remove">
+                                        <a href="" title="Remove" @click.prevent="remove(wf.id)">
                                             <span class="fa fa-trash-o"></span>
                                             </span> Remove
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="" title="Execute" @click="remove">
+                                        <a href="" title="Execute" @click="">
                                             <span class="fa fa-play-circle-o"></span> Execute
                                         </a>
                                     </li>
@@ -85,6 +85,7 @@
     import Vue from 'vue';
     import moment from 'moment';
     import DropdownComponent from '../ui/dropdown.vue';
+    import {standUrl, tahitiUrl, authToken, caipirinhaUrl} from '../../config';
 
     const fields = 'id, name, user_name, updated';
     const WorkflowListComponent = Vue.extend({
@@ -118,8 +119,17 @@
             changePlatform() {
                 this.performLoad(true)
             },
-            remove() {
-                console.debug('teste');
+            remove(id) {
+                if (confirm(`Remove workflow ${id}?`)) {
+                    let self = this;
+                    let url = `${tahitiUrl}/workflows/${id}`;
+                    let headers = { 'X-Auth-Token': authToken,
+                        'Content-Type': 'text/html' }
+                    Vue.http.delete(url, { headers }).then(response => {
+                        self.performLoad();
+                    });
+                }
+                return false;
             },
             sort(orderBy) {
                 this.orderBy = orderBy;
