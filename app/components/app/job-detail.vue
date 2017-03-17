@@ -7,7 +7,7 @@
                 <router-link :to="{name: 'editor', params: {id: job.workflow.id }}"><span class="fa fa-edit"></span> Edit workflow</router-link>
                 <hr/>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="panel panel-primary">
@@ -45,14 +45,13 @@
                                 Job results
                             </div>
                             <div class="panel-body">
-                                <div class="col-md-2 text-center result-item" v-for="result in job.results">
+                                <div class="col-md-3 text-center result-item" v-for="result in job.results">
                                     <a :href="computeLink(result)" class="button result">
                                         <span class="fa fa-3x" :class="getOperationIcon(result.operation.id)"></span>
                                         <br/>
                                         {{result.title}}<br/>
                                         <div v-if="result.type === 'HTML'" v-html="result.content">
                                         </div>
-                                        <small>{{result.type}}</small>
                                     </a>
                                 </div>
                             </div>
@@ -98,7 +97,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <div class="panel panel-primary">
                     <div class="panel-body">
                         <diagram-component :render-from="job.workflow" :multiple-selection-enabled="false" 
@@ -242,8 +241,11 @@
                 socket.on('update job', (msg) => {
                     if (msg.id === self.job.id){
                         self.job.status = msg.status;
-                        if (msg.message || msg.msg){
-                            let finalMsg = msg.message || msg.msg;
+                        if (msg.message){
+                            let finalMsg = msg.message.replace(/&/g, '&amp;')
+                              .replace(/"/g, '&quot;')
+                              .replace(/</g, '&lt;')
+                              .replace(/>/g, '&gt;');;
                             
                             self.job.status_text = finalMsg;
                             if (msg.status === 'COMPLETED'){
@@ -252,7 +254,7 @@
                                 self.$root.$refs.toastr.i(finalMsg, msg.status);
                             } else {
                                 self.$root.$refs.toastr.Add({
-                                    title:  msg.status,
+                                    title:  status,
                                     msg: finalMsg,
                                     clickClose: true, 
                                     timeout: 0, 

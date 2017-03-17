@@ -42,11 +42,9 @@ const connectorPaintStyle = {
 
 const endPointPaintStyle = {
     fillStyle: 'rgba(102, 155, 188, 1)',
-    lineWidth: 0,
     radius: 8,
     height: 15,
     width: 15,
-    strokeStyle: "transparent",
     zIndex: 99
 }
 const overlays = [
@@ -227,12 +225,22 @@ const TaskComponent = Vue.extend({
 
             if (ports.length > 0) {
                 anchors[portType][ports.length - 1].forEach((anchor, inx) => {
-                    lbls[0][1]['label'] = `<div class="has-${ports.length}-ports">${ports[inx].name}</div>`;
                     let options = JSON.parse(JSON.stringify(portOptions)); // clone
-                    options['endpoint'] = ports[inx].multiplicity !== 'ONE' ? 'Rectangle' : options['endpoint'];
-
+                    
+                    lbls[0][1]['label'] = `<div class="has-${ports.length}-ports">${ports[inx].name}</div>`;
                     options['anchors'] = anchor;
                     options['overlays'] = lbls;
+                    
+                    if (ports[inx].multiplicity !== 'ONE'){
+                        if (portType === 'input'){
+                            options['paintStyle']['radius'] = 15;
+                            options['paintStyle']['width'] = 15;
+                            options['endpoint'] = 'Dot';
+                            options['anchors'] = [0.5, -0.2, 0, -1]
+                        }
+                    }
+                    //options['endpoint'] = ports[inx].multiplicity !== 'ONE' ? 'Dot' : options['endpoint'];
+
                     options['uuid'] = `${taskId}/${ports[inx].id}`;
                     if (ports[inx].multiplicity !== 'ONE') {
                         options['maxConnections'] = 100;

@@ -84,11 +84,11 @@ const ExpressionEditorComponent = Vue.extend({
                 if (e.target && e.target.value) {
                     let ttree = this.process(e.target.value)
                     this.expressionValue = e.target.value;
-                    //eventHub.$emit('update-expression', e.target.value, ttree);
+                    eventHub.$emit('update-expression', e.target.value, ttree);
                     this.tree = ttree;
                 } else {
                     this.error = null;
-                    //eventHub.$emit('update-expression', null, null);
+                    eventHub.$emit('update-expression', null, null);
                 }
             } catch (e) {
                 this.error = e.toString();
