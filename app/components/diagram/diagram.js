@@ -2,6 +2,8 @@ import Vue from 'vue';
 import PerfectScrollbar from 'perfect-scrollbar';
 import PerfectScrollbarCss from 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
+import lodash from 'lodash';
+
 import template from './diagram-template.html';
 import eventHub from '../app/event-hub';
 
@@ -10,7 +12,7 @@ import {
     SplitComponent, PropertyDescriptionComponent
 }
     from '../properties/properties-components.js';
-    
+
 import ModalComponent from '../modal/modal-component.js';
 import { TaskComponent, connectionOptions } from '../task/task';
 import FlowComponent from '../task/flow';
@@ -19,7 +21,7 @@ import highlight from 'highlight.js';
 import highlightCass from 'highlight.js/styles/default.css';
 import solarizedDark from 'highlight.js/styles/solarized-dark.css';
 
-import {standUrl, tahitiUrl, authToken} from '../../config';
+import { standUrl, tahitiUrl, authToken } from '../../config';
 
 const DiagramComponent = Vue.extend({
     computed: {
@@ -94,6 +96,7 @@ const DiagramComponent = Vue.extend({
             zoomInEnabled: true,
             zoomOutEnabled: true,
             selectedTask: null,
+            selectedElements: []
         }
     },
     created() {
@@ -152,15 +155,15 @@ const DiagramComponent = Vue.extend({
     },
     template,
     mounted() {
-        
+
         this.$root.$refs.toastr.defaultPosition = 'toast-bottom-full-width';
         this.currentZIndex = 10;
         this.init();
         let self = this;
-        
+
         self.diagramElement = document.getElementById('lemonade-diagram');
         this.setZoom(self.zoom, self.instance, null, self.diagramElement);
-        
+
         /* scroll bars */
         PerfectScrollbar.initialize(self.diagramElement.parentElement);
 
@@ -303,6 +306,7 @@ const DiagramComponent = Vue.extend({
                                 && y1 <= task.top && y2 >= task.top + bounds.height) {
                                 // console.debug(`overlap with ${task.operation.name}`)
                                 self.instance.addToDragSelection(task.id);
+                                self.selectedElements.push(task.id);
                             }
                             //console.debug (bounds.left, task.left)
 
@@ -353,10 +357,12 @@ const DiagramComponent = Vue.extend({
             }
             let self = this;
             let tasks = document.querySelectorAll(".task");
+
             self.instance.clearDragSelection();
+            self.selectedElements.length = 0;
             Array.prototype.slice.call(tasks, 0).forEach((e) => {
                 e.classList.remove('selected');
-                self.instance.clearDragSelection();
+                //self.instance.clearDragSelection();
                 self.selectedTask = null;
                 self.selectedFlow = null;
             });
@@ -545,6 +551,28 @@ const DiagramComponent = Vue.extend({
             this.setZoom(self.zoom, self.instance, null, self.diagramElement);
             return;
         },
+        align(pos, fn) {
+            let self = this;
+            let selectedTasks = this.workflow.tasks.filter((task) => {
+                return lodash.includes(this.selectedElements, task.id);
+            })
+            if (selectedTasks.length) {
+                let minPosTask = selectedTasks.reduce((prev, cur, inx, arr) => {
+                    if (fn === 'min') {
+                        return prev[pos] < cur[pos] ? prev : cur;
+                    } else {
+                        return prev[pos] > cur[pos] ? prev : cur;
+                    }
+                });
+                selectedTasks.forEach((task, inx) => {
+                    task[pos] = minPosTask[pos];
+                });
+                Vue.nextTick(function () {
+                    self.instance.repaintEverything();
+                })
+            }
+            console.debug(this.selectedElements);
+        },
         scrollToTask(taskId) {
             let elemTask = document.getElementById(taskId);
             let container = self.diagramElement.parentElement;
@@ -563,7 +591,7 @@ const DiagramComponent = Vue.extend({
             cloned.platform_id = 1; //FIXME
             cloned.tasks.forEach((task) => {
                 task.operation = { id: task.operation.id };
-                delete task.version; 
+                delete task.version;
             });
 
             let body = {
@@ -572,13 +600,15 @@ const DiagramComponent = Vue.extend({
                 user: { id: 13, login: 'war', name: 'Sun Tzu' }
             }
             let self = this;
-            let headers = {'X-Auth-Token': authToken};
-            Vue.http.post(url, body, {headers})
+            let headers = { 'X-Auth-Token': authToken };
+            Vue.http.post(url, body, { headers })
                 .then(function (response) {
-                    self.$router.push({name: 'job-detail', 
-                        params: {id: response.body.data.id}});
-                }).catch((ex) =>{
-                    if (ex.body){
+                    self.$router.push({
+                        name: 'job-detail',
+                        params: { id: response.body.data.id }
+                    });
+                }).catch((ex) => {
+                    if (ex.body) {
                         self.$root.$refs.toastr.e(ex.body.message);
                     } else {
                         debugger

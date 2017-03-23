@@ -78,7 +78,6 @@
                                             <td class="col-md-2 text-center">
                                                 {{getOperationName(step.operation.id)}}
                                             </td>
-                                            <td class="col-md-1 text-center">{{formatDate(step.date, 'DD-MM-YYYY HH:mm:ss')}}</td>
                                             <td class="col-md-7">
                                                 <span v-if="step.logs.length === 0">
                                                     No log information
