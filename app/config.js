@@ -1,5 +1,6 @@
 const tahitiUrl = 'http://beta.ctweb.inweb.org.br/tahiti';
-//const tahitiUrl = 'http://artemis.speed.dcc.ufmg.br:5000'; 
+// const tahitiUrl = 'http://artemis.speed.dcc.ufmg.br:5000'; 
+//const tahitiUrl = 'http://127.0.0.1:5000'; 
 
 const standUrl = 'http://beta.ctweb.inweb.org.br/stand';
 const standNamespace = '';

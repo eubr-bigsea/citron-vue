@@ -27,7 +27,7 @@
 
                     <button class="btn btn-success" @click="create"><span class="fa fa-save"></span> Create</button>
                     <a href="#/workflow/list" class="btn btn-danger">Cancel</a>
-                    </div>
+                </div>
             </form>
         </div>
 </template>
@@ -36,7 +36,7 @@
     import Vue from 'vue';
     import moment from 'moment';
 
-    import {standUrl, tahitiUrl, authToken, caipirinhaUrl} from '../../config';
+    import {standUrl, tahitiUrl, authToken, caipirinhaUrl} from '../config';
     const fields = 'id, name, user_name, updated';
     const WorkflowAddComponent = Vue.extend({
         data() {

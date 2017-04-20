@@ -1,10 +1,84 @@
+<template>
+    <div tabindex="0">
+    <div>
+        <div class="row" v-if="showToolbar">
+            <div class="col-md-4" style="margin-left: 18px;padding-top:5px">
+                <input type="text" placeholder="Unnamed workflow" class="form-control" :value="workflow.name" @keyup="doChangeWorkflowName" />
+            </div>
+            <div class="col-md-7" v-if="showToolbar">
+                <div class="buttons-toolbar btn-group pull-right diagram-toolbar">
+                    <button class="btn btn-success btn-sm" v-on:click="saveWorkflow"><span class="fa fa-save"></span> Save</button>
+                    <button class="btn btn-primary btn-sm add-margin" v-on:click="onClickExecute"><span class="fa fa-play"></span> Execute</button>
+                    <!--
+                    <button class="btn btn-default btn-sm" v-on:click="load"><span class="fa fa-folder-open-o"></span></button>
+                    -->
+
+                    <button class="btn btn-default btn-sm" v-on:click="zoomIn" :disabled="!zoomInEnabled"><span class="fa fa-search-plus"></span> Zoom in</button>
+                    <button class="btn btn-default btn-sm add-margin" v-on:click="zoomOut" :disabled="!zoomOutEnabled"><span class="fa fa-search-minus"></span> Zoom out</button>
+
+                    <button class="btn btn-default btn-sm" v-on:click="align('left', 'min')" :disabled="!zoomInEnabled"><span class="fa fa-arrow-left"></span></button>
+                    <button class="btn btn-default btn-sm" v-on:click="align('left', 'max')" :disabled="!zoomInEnabled"><span class="fa fa-arrow-right"></span></button>
+
+                    <button class="btn btn-default btn-sm" v-on:click="align('top', 'min')" :disabled="!zoomOutEnabled"><span class="fa fa-arrow-up"></span></button>
+                    <button class="btn btn-default btn-sm add-margin" v-on:click="align('top', 'max')" :disabled="!zoomOutEnabled"><span class="fa fa-arrow-down"></span></button>
+
+                    <div class="pull-right">{{zoomPercent}}</div>
+                    <button class="btn btn-danger btn-sm add-margin pull-right" v-on:click="deleteSelected"><span class="fa fa-remove"></span> Remove selected</button>
+                </div>
+            </div>
+        </div>
+        <div class="buttons-toolbar btn-group pull-right diagram-toolbar" v-if="showToolbar">
+        </div>
+    </div>
+    <div class="lemonade-container" id="lemonade-container">
+        <div class="lemonade" v-on:drop="drop" v-on:dragover="allowDrop" id="lemonade-diagram" v-on:click="diagramClick" :show-task-decoration="false">
+            <task-component v-for="task of tasks" :task="task" :instance="instance" :key="task.id" 
+                :show-decoration="showTaskDecoration"></task-component>
+            <flow-component v-for="flow of flows" :flow="flow" :instance="instance"></flow-component>
+            <div class="ghost-select"><span></span></div>
+            <ctx-menu-component>
+                
+            </ctx-menu-component>
+        </div>
+    </div>
+    <modal-component v-if="showExecutionModal" @close="showExecutionModal = false">
+        <div slot="header">
+            <h4>Execution of workflow</h4>
+            Please, complete the required information for the execution of the workflow:
+        </div>
+        <div class="body" slot="body">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label>Cluster:</label>
+                        <select class="form-control">
+                            <option value="1">Default</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12">
+                        <label>Missing required parameters:</label>
+                        <p>
+                        There is no missing required parameter
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div slot="footer">
+            <button class="btn btn-primary" @click="execute"><span class="fa fa-play"></span> Execute</button>
+            <button class="btn btn-danger" @click="cancelExecute">Cancel</button>
+        </div>
+    </modal-component>
+</div>
+</template>
+
+<script>
 import Vue from 'vue';
 import PerfectScrollbar from 'perfect-scrollbar';
 import PerfectScrollbarCss from 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 
 import lodash from 'lodash';
 
-import template from './diagram-template.html';
 import eventHub from '../app/event-hub';
 
 import {
@@ -14,12 +88,15 @@ import {
     from '../properties/properties-components.js';
 
 import ModalComponent from '../modal/modal-component.js';
-import { TaskComponent, connectionOptions } from '../task/task';
-import FlowComponent from '../task/flow';
+import TaskComponent from '../task/task.vue';
+import FlowComponent from '../task/flow.vue';
+import CtxMenuComponent from '../ctx-menu/ctx-menu.vue';
 
+/*
 import highlight from 'highlight.js';
 import highlightCass from 'highlight.js/styles/default.css';
 import solarizedDark from 'highlight.js/styles/solarized-dark.css';
+*/
 
 import { standUrl, tahitiUrl, authToken } from '../../config';
 
@@ -63,7 +140,8 @@ const DiagramComponent = Vue.extend({
         'flow-component': FlowComponent,
         'property-description-component': PropertyDescriptionComponent,
         'empty-properties-component': EmptyPropertiesComponent,
-        'modal-component': ModalComponent
+        'modal-component': ModalComponent,
+        'ctx-menu-component': CtxMenuComponent,
     },
     props: {
         formContainer: null,
@@ -108,52 +186,10 @@ const DiagramComponent = Vue.extend({
         eventHub.$on('onclick-task', (taskComponent) => {
             this.selectedTask = taskComponent.task;
         });
+        eventHub.$on('onremove-task', (task) => {
+            this.removeTask(task);
+        });
     },
-    events: {
-        'onclick-task': function (taskComponent) {
-            this.selectedTask = taskComponent.task;
-            // Raise event to parent component 
-            this.$emit('onclick-task-in-diagram', this.selectedTask);
-        },
-        'onclick-operationx': function (operationComponent) {
-            let self = this;
-            this.selectedTask = operationComponent.task;
-
-            if (self.currentComponent == 'property-description-component') {
-                self.currentComponent = 'empty-properties-component';
-            } else {
-                self.currentComponent = 'property-description-component';
-            }
-            if (self.currentForm) {
-                //self.currentForm.$destroy(); FIXME
-            }
-        },
-        'onclick-operation2': function (operationComponent) {
-            this.selectedTask = operationComponent.task;
-            let elem = document.getElementById(this.formContainer);
-            elem.innerHTML = '<div><h5>{{task.operation.name}}</h5><form-component :task="task"></form-component><property-description-component :task="task"/></div>';
-            if (self.currentForm) {
-                self.currentForm.$destroy();
-            }
-            self.currentForm = new Vue({
-                el: `#${this.formContainer}`,
-                components: {
-                    'form-component': slug2Component[operationComponent.task.operation.slug]
-                    || EmptyPropertiesComponent,
-                    'property-description-component': PropertyDescriptionComponent
-                },
-                destroyed() {
-                    // console.debug('form destroyed')
-                },
-                data() {
-                    return {
-                        task: operationComponent.task,
-                    }
-                }
-            });
-        }
-    },
-    template,
     mounted() {
 
         this.$root.$refs.toastr.defaultPosition = 'toast-bottom-full-width';
@@ -235,12 +271,15 @@ const DiagramComponent = Vue.extend({
                 self.$root.$refs.toastr.e('Error saving workflow');
             });
         },
+        /*
         loadWorkflow() {
             this.$store.dispatch('loadWorkflow');
         },
+        */
         changeWorkflowId(id) {
             this.$store.dispatch('changeWorkflowId', id);
         },
+        
         /*--*/
         getOperationFromId(id) {
             let operations = this.$store.getters.getOperations;
@@ -264,8 +303,6 @@ const DiagramComponent = Vue.extend({
                 self.instance.repaintEverything();
             });
             self._bindJsPlumbEvents();
-
-
 
         },
         selectElements(ev) {
@@ -309,7 +346,6 @@ const DiagramComponent = Vue.extend({
                                 self.selectedElements.push(task.id);
                             }
                             //console.debug (bounds.left, task.left)
-
                             //console.debug(task)
                         });
                     });
@@ -407,7 +443,6 @@ const DiagramComponent = Vue.extend({
                 left: ev.offsetX, top: ev.offsetY, z_index: ++self.currentZIndex, classes,
                 status: 'WAITING'
             });
-            //this.$emit('onclick-task-in-diagram', taskComponent);
         },
         allowDrop(ev) {
             ev.preventDefault();
@@ -434,7 +469,7 @@ const DiagramComponent = Vue.extend({
                         self.selectedTask.left = v;
                         self.instance.repaintEverything();
                         break
-                    case 'ArrowLeft':
+                    case 'ArrowLeft':load-workflow
                         v = parseInt(elem.style.left, 10) - inc;
                         elem.style.left = `${v}px`;
                         self.selectedTask.left = v;
@@ -571,7 +606,6 @@ const DiagramComponent = Vue.extend({
                     self.instance.repaintEverything();
                 })
             }
-            console.debug(this.selectedElements);
         },
         scrollToTask(taskId) {
             let elemTask = document.getElementById(taskId);
@@ -583,9 +617,7 @@ const DiagramComponent = Vue.extend({
             this.showExecutionModal = false;
         },
         execute() {
-            console.debug('Executing')
             this.showExecutionModal = false;
-            let url = `${standUrl}/jobs`;
 
             let cloned = JSON.parse(JSON.stringify(this.workflow));
             cloned.platform_id = 1; //FIXME
@@ -601,7 +633,7 @@ const DiagramComponent = Vue.extend({
             }
             let self = this;
             let headers = { 'X-Auth-Token': authToken };
-            Vue.http.post(url, body, { headers })
+            Vue.http.post(`${standUrl}/jobs`, body, { headers })
                 .then(function (response) {
                     self.$router.push({
                         name: 'job-detail',
@@ -616,7 +648,6 @@ const DiagramComponent = Vue.extend({
                 });
         },
         onClickExecute() {
-            console.debug('Executing', this.workflow);
             this.showExecutionModal = true;
         },
         _bindJsPlumbEvents() {
@@ -667,3 +698,5 @@ const DiagramComponent = Vue.extend({
 });
 
 export default DiagramComponent;
+
+</script>

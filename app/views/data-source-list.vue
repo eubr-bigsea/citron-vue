@@ -48,11 +48,11 @@
 
 <script>
     import Vue from 'vue';
-    import ListingMixin from '../mixins/listing-mixin';
-    import MomentMixin from '../mixins/moment-mixin';
+    import ListingMixin from '../components/mixins/listing-mixin';
+    import MomentMixin from '../components/mixins/moment-mixin';
     import {
         limoneroUrl
-    } from '../../config';
+    } from '../config';
 
     const DataSourceListComponent = Vue.extend({
         data() {

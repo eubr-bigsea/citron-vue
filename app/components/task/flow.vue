@@ -1,15 +1,10 @@
+<template>
+    <div class="hide" :id="flow.id"></div>
+</template>
+<script>
 import Vue from 'vue';
 
 const FlowComponent = Vue.extend({
-    beforeDestroy() {
-        try {
-            if (this.connection) {
-                //this.instance.detach(this.connection);
-            }
-        } catch (e) {
-            //silently
-        }
-    },
     props: {
         flow: null,
         instance: null
@@ -29,7 +24,8 @@ const FlowComponent = Vue.extend({
             }
         });
     },
-    template: '<div class="hide" :id="flow.id"></div>'
 });
 
 export default FlowComponent;
+
+</script>

@@ -14,7 +14,7 @@
                             <div class="input-group bottom-margin">
                                 <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
                                 <input id="login-username" type="text" class="form-control" name="username" 
-                                    value="" placeholder="username or email" v-model="login">
+                                    value="" placeholder="username or email" v-model="username">
                             </div>
 
                             <div class="input-group bottom-margin">
@@ -63,12 +63,13 @@
 
 <script>
     import Vue from 'vue';
+    import auth from '../auth/auth';
 
     const tahitiUrl = 'http://beta.ctweb.inweb.org.br/tahiti';
     const LoginComponent = Vue.extend({
         data() {
             return {
-                login: 'admin',
+                username: 'admin',
                 password: '123456',
                 remember: false
             }
@@ -78,7 +79,11 @@
         },
         methods: {
             authenticate(){
-                
+                let credentials = {
+                    email: this.username,
+                    password: this.password,
+                }
+                auth.login(this, credentials, 'home');
             }
         },
         watch: {

@@ -104,11 +104,13 @@ const mutations = {
         getOperations().then(function (data) {
             let groupedOperations = {};
             let ops = {};
+            let categories = []
             data.forEach((op) => {
                 ops[op.id] = op;
                 op.categories.forEach((cat) => {
                     if (cat.type === 'parent') {
                         if (!(cat.name in groupedOperations)) {
+                            categories.push(cat.name);
                             groupedOperations[cat.name] = [op];
                         } else {
                             groupedOperations[cat.name].push(op);
@@ -122,7 +124,9 @@ const mutations = {
             });
             //console.debug(state.workflow.flows)
             state.operations = data;
-            state.groupedOperations = groupedOperations;
+            state.groupedOperations = map((cat_name) => {
+                return [cat_name, groupedOperations[cat_name]];
+            }, categories.sort());
         }).catch(function (error) {
             state.errors.push(error);
         });
@@ -275,11 +279,13 @@ const diagramModuleStore = {
                 let operations = response.data;
                 let groupedOperations = {};
                 let lookupOperations = {}
+                let categories = [];
                 operations.forEach((op) => {
                     op.categories.forEach((cat) => {
                         if (cat.type === 'parent') {
                             if (!(cat.name in groupedOperations)) {
                                 groupedOperations[cat.name] = [op];
+                                categories.push(cat.name);
                             } else {
                                 groupedOperations[cat.name].push(op);
                             }
@@ -287,7 +293,10 @@ const diagramModuleStore = {
                     });
                     lookupOperations[op.id] = op;
                 });
-                //console.debug(groupedOperations);
+                categories.sort();
+                groupedOperations = categories.map((cat_name) => {
+                    return [cat_name, groupedOperations[cat_name]];
+                    });
                 return { operations, groupedOperations, lookupOperations };
             }).then((values) => {
                 commit('SET_OPERATIONS', values);

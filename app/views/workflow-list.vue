@@ -84,8 +84,8 @@
 <script>
     import Vue from 'vue';
     import moment from 'moment';
-    import DropdownComponent from '../ui/dropdown.vue';
-    import {standUrl, tahitiUrl, authToken, caipirinhaUrl} from '../../config';
+    import DropdownComponent from '../components/ui/dropdown.vue';
+    import {standUrl, tahitiUrl, authToken, caipirinhaUrl} from '../config';
 
     const fields = 'id, name, user_name, updated';
     const WorkflowListComponent = Vue.extend({

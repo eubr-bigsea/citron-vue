@@ -1,20 +1,30 @@
 <template>
     <div class="container-fluid">
         <div class="row xsmall-padding">
+            <!--
             <div class="col-md-12">
                 <h2>Job #{{job.id}} :: Workflow #{{job.workflow.id}} - {{job.workflow.name}}
                 </h2>
                 <router-link :to="{name: 'editor', params: {id: job.workflow.id }}"><span class="fa fa-edit"></span> Edit workflow</router-link>
                 <hr/>
             </div>
+            -->
             <div class="col-md-4">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="panel panel-primary">
                             <div class="panel-heading">
-                                Job
+                                Job #{{job.id}}
                             </div>
                             <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <p>
+                                            <strong>Workflow: </strong> 
+                                            <router-link :to="{name: 'editor', params: {id: job.workflow.id }}"><span class="fa fa-edit"></span>{{job.workflow.id}} - {{job.workflow.name}}</router-link>
+                                        </p>
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <div class="col-md-4">
                                         <p>
@@ -67,7 +77,7 @@
                                     <strong>Status:</strong> {{job.status}}
                                 </p>
                                 <p :visible="job.status_text !== ''">
-                                    <em>{{job.status_text}}</em>
+                                    <pre v-html="job.status_text"></pre>
                                 </p>
                                 <table class="table table-hover table-bordered table-condensed small">
                                     <tbody>
@@ -144,16 +154,20 @@
         text-decoration: none;
         color: inherit;
     }
+    pre {
+        height: 200px;
+        overflow: auto;
+    }
 </style>
 <script>
     import Vue from 'vue';
-    import DiagramComponent from '../diagram/diagram';
-    import MomentMixin from '../mixins/moment-mixin';
-    import eventHub from '../app/event-hub';
-    import store from '../vuex/store';
+    import DiagramComponent from '../components/diagram/diagram.vue';
+    import MomentMixin from '../components/mixins/moment-mixin';
+    import eventHub from '../components/app/event-hub';
+    import store from '../components/vuex/store';
     import io from 'socket.io-client';
 
-    import {standUrl, tahitiUrl, authToken, caipirinhaUrl, standNamespace, standSocketIOdPath} from '../../config';
+    import {standUrl, tahitiUrl, authToken, caipirinhaUrl, standNamespace, standSocketIOdPath} from '../config';
     const JobDetailComponent = Vue.extend({
         /* Life-cycle */
         store,
