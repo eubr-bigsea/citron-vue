@@ -321,14 +321,12 @@ li.dragging {
     opacity: 1;
     background-color: $color3;
 }
-.operation {
-    li {
-        list-style-type: none;
-        font-size: 9pt;
-        padding:5px 5px;
-        font-weight: bold;
+li .list-group-item{
+    list-style-type: none;
+    font-size: 9pt;
+    padding:5px 5px;
+    font-weight: bold;
 
-    }
 }
 /**/
 .glyphicon {

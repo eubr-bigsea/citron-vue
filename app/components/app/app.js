@@ -7,7 +7,7 @@ import store from '../vuex/store';
 import eventHub from './event-hub';
 import html2canvas from 'html2canvas';
 
-import DiagramComponent from '../diagram/diagram';
+import DiagramComponent from '../diagram/diagram.vue';
 import ToolbarComponent from '../toolbox/toolbox';
 //import LoadWorkflowComponent from '../load-workflow/load-workflow';
 

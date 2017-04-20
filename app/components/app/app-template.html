@@ -11,10 +11,10 @@
                             <div class="panel-content">
                                 <div id="menu-operations" style="height: calc(100vh - 134px); position: relative; overflow:hidden">
                                     <ul class="nav nav-list">
-                                        <li class="drop-menu-item" v-for="(operations, groupName) in groupedOperations">
-                                            <a v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ groupName }} </a>
+                                        <li class="drop-menu-item" v-for="group in groupedOperations">
+                                            <a v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ group[0] }} </a>
                                             <ul class="nav nav-list tree slide-up">
-                                                <div v-for="op in operations">
+                                                <div v-for="op in group[1]">
                                                     <toolbox-component :operation="op" />
                                                 </div>
                                             </ul>
@@ -43,7 +43,7 @@
                         <div class="panel-block" id="panel-properties">
                             <div id="properties-form" class="container" v-if="task">
                                 <div>
-                                    <h4>{{task.operation.name}}</h4>
+                                    <h4 v-if="task.id">{{task.operation.name}} ({{task.id}})</h4>
                                     <fieldset v-for="form in forms">
                                         <legend>{{form.name}}</legend>
                                         <div v-for="field in form.fields">
