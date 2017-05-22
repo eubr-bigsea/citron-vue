@@ -10,7 +10,7 @@ import html2canvas from 'html2canvas';
 import DiagramComponent from '../diagram/diagram.vue';
 import ToolbarComponent from '../toolbox/toolbox';
 //import LoadWorkflowComponent from '../load-workflow/load-workflow';
-
+import _ from 'lodash'
 
 import {
     EmptyPropertiesComponent,
@@ -107,49 +107,9 @@ const AppComponent = Vue.extend({
             title: 'Operations',
             username: '',
             passwd: '',
+            filterOp: '',
             //showModalLoadWorkflow: false
         }
-    },
-    xxevents: {
-        'update-operations': function(operations) {},
-        /*
-        'load-workflow': function() {
-            this.showModalLoadWorkflow = true;
-        },*/
-        'update-form-field-value': function(field, value) {
-            let filled = this.task.forms[field.name];
-            if (filled) {
-                filled.value = value;
-                filled.category = field.category;
-            } else {
-                let category = field.category;
-                this.task.forms[field.name] = { value, category };
-            }
-            //this.task.forms[field.name]['category'] = 
-        },
-        'onclick-task-in-diagram': function(task) {
-            // /* An task (operation instance) was clicked in the diagram */
-            // this.task = task;
-            // this.filledForm = task.forms;
-            // this.forms = task.operation.forms.sort((a, b) => {
-            //     return a.order - b.order;
-            // });
-            // // Reverse association between field and form. Used to retrieve category
-            // this.forms.forEach((f, i) => {
-            //     f.fields.forEach((field, j) => {
-            //         field.category = f.category;
-            //     });
-            // });
-        },
-        'onclear-selection': function() {
-            this.task = null;
-            this.filledForm = null;
-            this.forms = null;
-        },
-        'onselect-tasks-in-diagram': function(coords) {
-            this['onclear-selection']();
-        },
-
     },
     mounted() {
         this.$store.dispatch('connectWebSocket');
@@ -185,6 +145,9 @@ const AppComponent = Vue.extend({
         }
     },
     methods: {
+        filterOperations: _.debounce(function (e) {
+            this.loadOperations(this.filterOp);
+        }, 500),
         getValue(name) {
             return this.task && this.task.forms && this.task.forms[name] ? this.task.forms[name].value : null;
         },
@@ -194,12 +157,19 @@ const AppComponent = Vue.extend({
         },
         toggle(ev) {
             let ul = ev.target.parentElement.querySelector('ul.tree');
+            let icon = ev.target.querySelector('span');
             if (ul.classList.contains('slide-up')) {
                 ul.classList.remove('slide-up');
                 ul.classList.add('slide-down');
+                icon.classList.remove('fa-caret-right');
+                icon.classList.add('fa-caret-down');
+                ev.target.classList.add('opened');
             } else {
                 ul.classList.add('slide-up');
                 ul.classList.remove('slide-down');
+                icon.classList.remove('fa-caret-down');
+                icon.classList.add('fa-caret-right');
+                ev.target.classList.remove('opened');
             }
             ev.stopPropagation();
         },
@@ -213,8 +183,8 @@ const AppComponent = Vue.extend({
                 },
             });
         },
-        loadOperations() {
-            return this.$store.dispatch('loadOperations');
+        loadOperations(filterOp) {
+            return this.$store.dispatch('loadOperations', filterOp);
         }
     },
     store

@@ -108,7 +108,7 @@ const mutations = {
             data.forEach((op) => {
                 ops[op.id] = op;
                 op.categories.forEach((cat) => {
-                    if (cat.type === 'parent') {
+                    if (cat.type === 'group') {
                         if (!(cat.name in groupedOperations)) {
                             categories.push(cat.name);
                             groupedOperations[cat.name] = [op];
@@ -162,7 +162,7 @@ const mutations = {
             let workflow = response.data;
             workflow.tasks.forEach((t) => {
                 validTaskId.add(t.id);
-                t.operation = state.lookupOperations[t.operation.id];
+                t.operation = state.lookupOperations.get(t.operation.id)[0];
                 if (t.operation == null) {
                     state.errors.push(new StoreException("Invalid workflow", 'WF0001'));
                 } else {
@@ -268,39 +268,56 @@ const mutations = {
 
 }
 window.store = state;
+
+const groupBy = function(xs, keySelector) {
+  return xs.reduce(function(rv, x) {
+      var key = keySelector(x);
+      rv.set(key, rv.get(key) || []);
+      rv.get(key).push(x);
+      return rv;
+  }, new Map());
+};
+
 const diagramModuleStore = {
     mutations,
     state,
     actions: {
-        loadOperations({ commit, state }) {
+        loadOperations({ commit, state }, filterOp) {
             let url = `${tahitiUrl}/operations?platform=spark&enabled=true&token=123456&lang=${state.language}`;
-            //let url = `http://artemis.speed.dcc.ufmg.br:5000/operations?token=123456&lang=${state.language}`;
-            return Vue.http.get(url).then(function (response) {
-                let operations = response.data;
-                let groupedOperations = {};
-                let lookupOperations = {}
-                let categories = [];
-                operations.forEach((op) => {
-                    op.categories.forEach((cat) => {
-                        if (cat.type === 'parent') {
-                            if (!(cat.name in groupedOperations)) {
-                                groupedOperations[cat.name] = [op];
-                                categories.push(cat.name);
-                            } else {
-                                groupedOperations[cat.name].push(op);
-                            }
-                        }
+            const load = function(operations) {
+                let groupedOperations = [... groupBy(operations, (op) => {
+                    let groups = op.categories.filter((cat) => {
+                        return cat.type === 'group';
+                    })
+                    let subGroups = op.categories.filter((cat) => {
+                        return cat.type === 'subgroup';
+                    })
+                    return (groups.length ? groups[0].name :'') + "#" + (subGroups.length ? subGroups[0].name: '');
+                })];
+                groupedOperations.sort((a, b) => a[0].localeCompare(b[0]));
+
+                return [... groupBy(groupedOperations, (x) => x[0].split('#')[0])];
+            };
+            if (filterOp !== undefined) {
+                let groupedOperations = load(state.operations.filter((op) => {
+                    return op.name.search(new RegExp(filterOp, "i")) > -1;
+                }));
+                commit('SET_OPERATIONS', {operations: state.operations, 
+                    groupedOperations, lookupOperations: state.lookupOperations });
+            } else {
+                return Vue.http.get(url).then(function (response) {
+                    let operations = response.data.map((op) => {
+                        op.visible = true;
+                        return op;
                     });
-                    lookupOperations[op.id] = op;
+                    let lookupOperations = groupBy(operations, (op) => op.id);
+                    let groupedOperations = load(operations);
+
+                    return { operations, groupedOperations, lookupOperations };
+                }).then((values) => {
+                    commit('SET_OPERATIONS', values);
                 });
-                categories.sort();
-                groupedOperations = categories.map((cat_name) => {
-                    return [cat_name, groupedOperations[cat_name]];
-                    });
-                return { operations, groupedOperations, lookupOperations };
-            }).then((values) => {
-                commit('SET_OPERATIONS', values);
-            });
+            }
         },
 
         addTask({ commit, state }, task) {

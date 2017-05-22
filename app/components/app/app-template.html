@@ -9,13 +9,33 @@
                                 {{title}}
                             </div>
                             <div class="panel-content">
-                                <div id="menu-operations" style="height: calc(100vh - 134px); position: relative; overflow:hidden">
+                                <div style="padding: 5px">
+                                    <label>Search:</label>
+                                    <input class="form-control" v-model="filterOp" v-on:keyup="filterOperations"/>
+                                </div>
+                                <div id="menu-operations" style="height: calc(100vh - 204px); position: relative; overflow:hidden; padding-right:10px">
                                     <ul class="nav nav-list">
-                                        <li class="drop-menu-item" v-for="group in groupedOperations">
-                                            <a v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ group[0] }} </a>
+                                        <li class="drop-menu-item-2" v-for="group in groupedOperations">
+                                            <a v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ group[0] }}</a>
                                             <ul class="nav nav-list tree slide-up">
-                                                <div v-for="op in group[1]">
-                                                    <toolbox-component :operation="op" />
+                                                <div v-for="subgroup in group[1]">
+                                                    <div v-if="subgroup[0].split('#')[1].length">
+                                                         <ul class="nav nav-list">
+                                                            <li class="drop-menu-item-3">
+                                                                <a v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ subgroup[0].split('#')[1] }} </a>
+                                                                <ul class="nav nav-list tree slide-up">
+                                                                    <span v-for="op in subgroup[1]" :key="op.id">
+                                                                        <toolbox-component :operation="op" />
+                                                                    </span>
+                                                                </ul>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                    <div v-else>
+                                                        <span v-for="op in subgroup[1]">
+                                                            <toolbox-component :operation="op" />
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </ul>
                                         </li>
