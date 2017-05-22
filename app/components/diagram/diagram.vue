@@ -33,7 +33,8 @@
     <div class="lemonade-container" id="lemonade-container">
         <div class="lemonade" v-on:drop="drop" v-on:dragover="allowDrop" id="lemonade-diagram" v-on:click="diagramClick" :show-task-decoration="false">
             <task-component v-for="task of tasks" :task="task" :instance="instance" :key="task.id" 
-                :show-decoration="showTaskDecoration"></task-component>
+                :show-decoration="showTaskDecoration">
+                </task-component>
             <flow-component v-for="flow of flows" :flow="flow" :instance="instance"></flow-component>
             <div class="ghost-select"><span></span></div>
             <ctx-menu-component>
@@ -290,7 +291,7 @@ const DiagramComponent = Vue.extend({
         },
         init() {
             const self = this;
-            if (self.instance) {
+            if (self.instance && self.showToolbar) {
                 this.instance.reset();
             }
             self.instance = jsPlumb.getInstance({
@@ -636,7 +637,7 @@ const DiagramComponent = Vue.extend({
             Vue.http.post(`${standUrl}/jobs`, body, { headers })
                 .then(function (response) {
                     self.$router.push({
-                        name: 'job-detail',
+                        name: 'job-child-diagram',
                         params: { id: response.body.data.id }
                     });
                 }).catch((ex) => {

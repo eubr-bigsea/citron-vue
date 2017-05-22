@@ -71,4 +71,6 @@ Vue.config.errorHandler = function(err, vm) {
     console.debug('Erro no VUE', err, vm);
     return false;
 }
+Vue.filter('json', value => { return JSON.stringify(value, null, 2) } )
+
 export {router};

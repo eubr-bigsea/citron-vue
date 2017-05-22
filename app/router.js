@@ -6,12 +6,14 @@ import JobListView from './views/job-list.vue';
 import DataSourceListView from './views/data-source-list.vue';
 
 import JobDetailView from './views/job-detail.vue';
+import JobResultComponent from './views/job-result.vue';
 import WorkflowAddComponent from './views/workflow-add.vue';
 import LoginComponent from './views/login.vue';
 
 import AppComponent from './components/app/app';
 import eventHub from './components/app/event-hub';
 
+import DiagramComponent from './components/diagram/diagram.vue';
 
 const Dashboard = { template: '<div>Dashboard Page!!!!</div>' }
 
@@ -59,7 +61,18 @@ const routes = [{
         path: '/jobs/:id',
         component: JobDetailView,
         name: 'job-detail',
-        meta: { title: 'Job result' }
+        meta: { title: 'Job result' },
+        children: [
+            {
+                path: 'diagram',
+                name: 'job-child-diagram',
+                component: DiagramComponent
+            },
+            {
+                path: 'result/:visualizationId',
+                component: JobResultComponent,
+            }
+        ]
     },
 
 
@@ -103,7 +116,8 @@ const router = new VueRouter({
     mode: 'hash',
 });
 router.beforeEach(function(to, from, next) {
-    eventHub.$emit('route-change', to, from);
+    if (eventHub)
+        eventHub.$emit('route-change', to, from);
     if (to.meta.title) {
         document.title = to.meta.title;
     }
