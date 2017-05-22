@@ -34,7 +34,7 @@
                     <tbody>
                         <tr v-for="job in pageData.data">
                             <td class="text-center">
-                                <router-link :to="{name: 'job-detail', params: {id: job.id }}">{{job.id}}</router-link>
+                                <router-link :to="{name: 'job-child-diagram', params: {id: job.id }}">{{job.id}}</router-link>
                             </td>
                             <td class="text-center">{{job.status}}</td>
                             <td class="text-center">{{job.workflow_id}}</td>

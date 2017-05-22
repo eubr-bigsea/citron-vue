@@ -55,6 +55,11 @@
                                 Job results
                             </div>
                             <div class="panel-body">
+                                <div class="col-md-3 text-center result-item">
+                                    <span class="fa fa-flask fa-3x"></span>
+                                    <br/>
+                                    <a :href="'#jobs/' + job.id + '/diagram'" class="button result">Diagram</a>
+                                </div>
                                 <div class="col-md-3 text-center result-item" v-for="result in job.results">
                                     <a :href="computeLink(result)" class="button result">
                                         <span class="fa fa-3x" :class="getOperationIcon(result.operation.id)"></span>
@@ -94,7 +99,7 @@
                                                 </span>
                                                 <transition-group name="log" tag="p" v-else>
                                                     <p v-for="log in step.logs" v-bind:key="log" class="log-item">
-                                                    {{log.date || new Date()}} {{log.message}}
+                                                    {{log.date}} {{log.message}}
                                                     </p>
                                                 </transition-group>
                                             </td>
@@ -109,9 +114,11 @@
             <div class="col-md-8">
                 <div class="panel panel-primary">
                     <div class="panel-body">
-                        <diagram-component :render-from="job.workflow" :multiple-selection-enabled="false" 
-                            :show-task-decoration="true" :show-toolbar="false" 
-                            :draggable-tasks="draggableTasks" zoom=".8"></diagram-component>
+                        <router-view :key="$route.params.visualizationId"
+                                    :render-from="job.workflow" :multiple-selection-enabled="false" 
+                                    :show-task-decoration="true" :show-toolbar="false" 
+                                    :draggable-tasks="draggableTasks" zoom=".8">
+                        </router-view>
                     </div>
                 </div>
             </div>
@@ -185,9 +192,11 @@
                     let room = self.job.id;
                     console.debug('Disconnecting from room', room);
                     let socket = self.socket;
-                    socket.emit('leave', { room: room });
+                    if (socket){
+                        socket.emit('leave', { room: room });
+                        socket.close();
+                    }
                     //socket.emit('disconnect');
-                    socket.close();
                 }
             });
         },
@@ -205,7 +214,8 @@
         /* Methods */
         methods: {
             computeLink(result){
-                return `${caipirinhaUrl}/visualizations/${this.job.id}/${result.task.id}?token=${authToken}`;
+                //return `${caipirinhaUrl}/visualizations/${this.job.id}/${result.task.id}?token=${authToken}`;
+                return `#jobs/${this.job.id}/result/${result.task.id}`;
             },
             connectWebSocket(){
                 let self = this;
@@ -230,7 +240,8 @@
                 socket.on('connect_error', () => {
                     console.debug('Web socket server offline');
                 });
-                socket.on('update task', (msg) => {
+                socket.on('update task', (msg, callback) => {
+                    debugger
                     let self = this;
                     //self.selectTask(msg.id, msg.status.toLowerCase());
 
@@ -245,11 +256,12 @@
                         if (step){
                             step.status = msg.status;
                             step.logs.push({level: 'INFO', 
+                                date: msg.date,
                                 message: msg.message || msg.msg})
                         }
                         //self.job.workflow.tasks[inx].forms.color.value = 'green';
                     }
-                    console.debug('update task', msg)
+                    //console.debug('update task', msg)
                 });
                 socket.on('update job', (msg) => {
                     if (msg.id === self.job.id){
