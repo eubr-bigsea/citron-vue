@@ -79,6 +79,9 @@ li.dragging {
     font-size: 8pt;
     text-align: center;
     font-weight: bold;
+    .fa-grip {
+        display: none;
+    }
 }
 .diagram-toolbar {
         .add-margin {
@@ -365,4 +368,22 @@ li .list-group-item{
   opacity: 0;
   color: red;
   /*transform: translateY(5px);*/
+}
+/* \f142 is ellipsis-v */
+/* \202F is thin unbreakable space */
+.fa.fa-grip:before {
+    content: "\f142\202F\f142\202F\f142";
+}
+.drop-menu-item-2, .drop-menu-item-3 {
+    border-bottom: 1px solid #aaa;
+    li {
+        padding-left: 20px;
+    }
+}
+.list-group-item {
+    border: none !important;
+    border-bottom: 1px dotted #aaa !important;
+}
+.list-group-item:last-child, .list-group-item:first-child {
+    border-radius: 0 !important;
 }
