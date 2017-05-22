@@ -11,19 +11,20 @@
                             <div class="panel-content">
                                 <div style="padding: 5px">
                                     <label>Search:</label>
-                                    <input class="form-control" v-model="filterOp" v-on:keyup="filterOperations"/>
+                                    <input class="form-control" v-model="filterOp" v-on:keyup="filterOperations"
+                                        placeholder="Informe at least 3 letters to filter"/>
                                 </div>
                                 <div id="menu-operations" style="height: calc(100vh - 204px); position: relative; overflow:hidden; padding-right:10px">
                                     <ul class="nav nav-list">
                                         <li class="drop-menu-item-2" v-for="group in groupedOperations">
                                             <a v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ group[0] }}</a>
-                                            <ul class="nav nav-list tree slide-up">
+                                            <ul class="nav nav-list tree" :class="filtered ? 'slide-down': 'slide-up'">
                                                 <div v-for="subgroup in group[1]">
                                                     <div v-if="subgroup[0].split('#')[1].length">
                                                          <ul class="nav nav-list">
                                                             <li class="drop-menu-item-3">
                                                                 <a v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ subgroup[0].split('#')[1] }} </a>
-                                                                <ul class="nav nav-list tree slide-up">
+                                                                <ul class="nav nav-list tree" :class="filtered ? 'slide-down': 'slide-up'">
                                                                     <span v-for="op in subgroup[1]" :key="op.id">
                                                                         <toolbox-component :operation="op" />
                                                                     </span>

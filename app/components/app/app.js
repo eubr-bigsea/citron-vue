@@ -108,6 +108,7 @@ const AppComponent = Vue.extend({
             username: '',
             passwd: '',
             filterOp: '',
+            filtered: false,
             //showModalLoadWorkflow: false
         }
     },
@@ -146,6 +147,7 @@ const AppComponent = Vue.extend({
     },
     methods: {
         filterOperations: _.debounce(function (e) {
+            this.filtered = this.filterOp.length > 0;
             this.loadOperations(this.filterOp);
         }, 500),
         getValue(name) {
