@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node_modules/live-server/live-server.js"
+    "start": "node_modules/live-server/live-server.js",
+    "build": "rimraf dist && npm run build:client",
+    "build:client": "cross-env NODE_ENV=production webpack --config build/webpack.client.config.js --progress --hide-modules"
   },
   "keywords": [],
   "author": "",

@@ -2,7 +2,7 @@
     <div :class="classes" class="operation task" :title="task.operation.description" :data-operation-id="task.operation.id" :id="task.id"
         v-bind:style="{zIndex: task.z_index, top: task.top + 'px', left: task.left + 'px'}" v-on:click="click" @contextmenu.prevent="openMenu">
         <div :style="{backgroundColor: task.forms.color && task.forms.color.value ? task.forms.color.value.background: '#fff', color: task.forms.color && task.forms.color.value ? task.forms.color.value.foreground: '#222'}"
-            style="height:20px">
+            style="height:20px" class="title">
             <strong><span class="fa"  :class="task.operation.icon"></span> {{task.operation.name}}</strong>
         </div>
         <em>{{task.forms.comment ? task.forms.comment.value: ''}}</em>

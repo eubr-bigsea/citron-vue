@@ -7,27 +7,23 @@
             </div>
             <div class="col-md-7" v-if="showToolbar">
                 <div class="buttons-toolbar btn-group pull-right diagram-toolbar">
+
                     <button class="btn btn-success btn-sm" v-on:click="saveWorkflow"><span class="fa fa-save"></span> Save</button>
                     <button class="btn btn-primary btn-sm add-margin" v-on:click="onClickExecute"><span class="fa fa-play"></span> Execute</button>
-                    <!--
-                    <button class="btn btn-default btn-sm" v-on:click="load"><span class="fa fa-folder-open-o"></span></button>
-                    -->
 
-                    <button class="btn btn-default btn-sm" v-on:click="zoomIn" :disabled="!zoomInEnabled"><span class="fa fa-search-plus"></span> Zoom in</button>
-                    <button class="btn btn-default btn-sm add-margin" v-on:click="zoomOut" :disabled="!zoomOutEnabled"><span class="fa fa-search-minus"></span> Zoom out</button>
+                    <button class="btn btn-default btn-sm" v-on:click="align('left', 'min')" title="Align left"><span class="glyphicon glyphicon-object-align-left"></span></button>
+                    <button class="btn btn-default btn-sm" v-on:click="align('left', 'max')" title="Align right"><span class="glyphicon glyphicon-object-align-right"></span></button>
 
-                    <button class="btn btn-default btn-sm" v-on:click="align('left', 'min')" :disabled="!zoomInEnabled"><span class="fa fa-arrow-left"></span></button>
-                    <button class="btn btn-default btn-sm" v-on:click="align('left', 'max')" :disabled="!zoomInEnabled"><span class="fa fa-arrow-right"></span></button>
+                    <button class="btn btn-default btn-sm" v-on:click="align('top', 'min')" title="Align top"><span class="glyphicon glyphicon-object-align-top"></span></button>
+                    <button class="btn btn-default btn-sm add-margin" v-on:click="align('top', 'max')" title="Align bottom"><span class="glyphicon glyphicon-object-align-bottom"></span></button>
 
-                    <button class="btn btn-default btn-sm" v-on:click="align('top', 'min')" :disabled="!zoomOutEnabled"><span class="fa fa-arrow-up"></span></button>
-                    <button class="btn btn-default btn-sm add-margin" v-on:click="align('top', 'max')" :disabled="!zoomOutEnabled"><span class="fa fa-arrow-down"></span></button>
-
-                    <div class="pull-right">{{zoomPercent}}</div>
-                    <button class="btn btn-danger btn-sm add-margin pull-right" v-on:click="deleteSelected"><span class="fa fa-remove"></span> Remove selected</button>
+                    <drop-down-component :label="'Zoom ('  + zoomPercent + ')'" variant="btn-sm btn-default">
+                        <li><a href="#" v-on:click="zoomIn" :class="{disabled: !zoomInEnabled}"><span class="fa fa-search-plus"></span> Increase</a></li>
+                        <li><a href="#" v-on:click="zoomOut" :class="{disabled: !zoomOutEnabled}"><span class="fa fa-search-minus"></span> Decrease</a></li>
+                    </drop-down-component>
+                    
                 </div>
             </div>
-        </div>
-        <div class="buttons-toolbar btn-group pull-right diagram-toolbar" v-if="showToolbar">
         </div>
     </div>
     <div class="lemonade-container" id="lemonade-container">
@@ -92,6 +88,7 @@ import ModalComponent from '../modal/modal-component.js';
 import TaskComponent from '../task/task.vue';
 import FlowComponent from '../task/flow.vue';
 import CtxMenuComponent from '../ctx-menu/ctx-menu.vue';
+import DropDownComponent from '../ui/dropdown.vue';
 
 /*
 import highlight from 'highlight.js';
@@ -143,6 +140,7 @@ const DiagramComponent = Vue.extend({
         'empty-properties-component': EmptyPropertiesComponent,
         'modal-component': ModalComponent,
         'ctx-menu-component': CtxMenuComponent,
+        'drop-down-component': DropDownComponent,
     },
     props: {
         formContainer: null,
@@ -156,9 +154,7 @@ const DiagramComponent = Vue.extend({
         multipleSelectionEnabled: {
             default: true,
         },
-        zoom: {
-            default: 1.0
-        }
+        
     },
     watch: {
         draggableTasks() {
@@ -175,6 +171,7 @@ const DiagramComponent = Vue.extend({
             zoomInEnabled: true,
             zoomOutEnabled: true,
             selectedTask: null,
+            zoom: 1.0,
             selectedElements: []
         }
     },
@@ -575,9 +572,10 @@ const DiagramComponent = Vue.extend({
             }
             self.zoomOutEnabled = true;
             this.setZoom(self.zoom, self.instance, null, self.diagramElement);
-            return;
+            ev.preventDefault();
+            return false;
         },
-        zoomOut() {
+        zoomOut(ev) {
             let self = this;
             self.zoom -= .1;
             if (self.zoom < 0.8) {
@@ -585,7 +583,8 @@ const DiagramComponent = Vue.extend({
             }
             self.zoomInEnabled = true;
             this.setZoom(self.zoom, self.instance, null, self.diagramElement);
-            return;
+            ev.preventDefault();
+            return false;
         },
         align(pos, fn) {
             let self = this;

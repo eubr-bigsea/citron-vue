@@ -241,7 +241,6 @@
                     console.debug('Web socket server offline');
                 });
                 socket.on('update task', (msg, callback) => {
-                    debugger
                     let self = this;
                     //self.selectTask(msg.id, msg.status.toLowerCase());
 

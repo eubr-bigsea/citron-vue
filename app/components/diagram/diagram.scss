@@ -279,7 +279,11 @@ li.dragging {
             width: $elementWidth;
             z-index: 2;
             &.jsplumb-drag-selected {
-                border: 3px solid #d22 !important; 
+                box-shadow: -2px 1px 6px 0px #f28d00;
+            }
+            .title {
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
             }
         }
         &.operation:after {
@@ -386,4 +390,10 @@ li .list-group-item{
 }
 .list-group-item:last-child, .list-group-item:first-child {
     border-radius: 0 !important;
+}
+
+a.disabled {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.6;
 }

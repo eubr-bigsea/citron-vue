@@ -21,11 +21,9 @@
                             <th class="sortable primary text-center col-md-3" @click="sort('workflow_name')">
                                 Workflow <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'name'"></span>
                                 </th>
-                            <!--
                             <th class="sortable primary text-center col-md-3" @click="sort('user_name')">
                                 User <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'user_name'"></span>
                                 </th>
-                            -->
                             <th class="sortable primary text-center col-md-2" @click="sort('created')">
                                 Created <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'updated'"></span>
                                 </th>
@@ -41,9 +39,7 @@
                             <td>
                                 {{job.workflow_name}} <router-link :to="{name: 'editor', params: {id: job.workflow_id }}"><span class="fa fa-external-link-square"></span></router-link>
                             </td>
-                            <!--
                             <td>{{job.user_name}}</td>
-                            -->
                             <td class="text-center">{{ formatDate(job.created, 'DD-MM-YYYY HH:mm:ss') }}</td>
                         </tr>
                     </tbody>

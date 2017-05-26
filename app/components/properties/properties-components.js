@@ -54,7 +54,17 @@ const TextAreaComponent = Vue.extend({
     },
     props: { value: 0, field: null },
     template: '<div>' + baseLabel +
-    '<textarea class="form-control" @keyup="updated">{{value}}</textarea></div>',
+    '<textarea class="form-control" @keyup="updated" :value="value || field.default"></textarea></div>',
+
+});
+
+const CodeComponent = Vue.extend({
+    methods: {
+        updated: _.debounce(function (e) { eventHub.$emit('update-form-field-value', this.field, e.target.value); }, 500)
+    },
+    props: { value: 0, field: null },
+    template: '<div>' + baseLabel +
+    '<textarea class="form-control code" @keyup="updated" :value="value || field.default"></textarea></div>',
 
 });
 
@@ -387,6 +397,7 @@ export {
     RangeComponent,
     TextComponent,
     TextAreaComponent,
+    CodeComponent,
     ColorComponent,
     IndeterminatedCheckboxComponent,
     LookupComponent,

@@ -68,7 +68,9 @@
                                     <fieldset v-for="form in forms">
                                         <legend>{{form.name}}</legend>
                                         <div v-for="field in form.fields">
-                                            <component :is="field.suggested_widget + '-component'" :task="task" keep-alive :field="field" :value="getValue(field.name)"></component>
+                                            <keep-alive>
+                                                <component :is="field.suggested_widget + '-component'" :field="field" :value="getValue(field.name)"></component>
+                                            </keep-alive>
                                         </div>
                                     </fieldset>
                                 </div>
