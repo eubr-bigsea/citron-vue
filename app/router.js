@@ -4,6 +4,8 @@ import VueRouter from 'vue-router';
 import WorkflowListView from './views/workflow-list.vue';
 import JobListView from './views/job-list.vue';
 import DataSourceListView from './views/data-source-list.vue';
+import DataSourceDetailView from './views/data-source-detail.vue';
+import DataSourceUploadView from './views/data-source-upload.vue';
 
 import JobDetailView from './views/job-detail.vue';
 import JobResultComponent from './views/job-result.vue';
@@ -96,8 +98,14 @@ const routes = [{
         meta: { title: 'Data sources' }
     },
     {
+        path: '/data-source/add',
+        name: 'data-source-add',
+        component: DataSourceUploadView,
+        meta: { title: 'Upload data source' }
+    },
+    {
         path: '/data-source/:id',
-        component: DataSourceListView,
+        component: DataSourceDetailView,
         name: 'data-source-detail',
         meta: { title: 'Data sources' }
     },

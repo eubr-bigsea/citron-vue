@@ -38,7 +38,7 @@ Vue.http.interceptors.push((request, next) => {
     } else {
         Vue.prototype.$Progress.increase(100);
     }*/
-    document.querySelector('.page-overlay').style.visibility = 'visible';
+    //document.querySelector('.page-overlay').style.visibility = 'visible';
     requestCounter++;
     next((response) => {
         requestCounter--;

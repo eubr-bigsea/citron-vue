@@ -336,6 +336,15 @@
                         } else {
                             //console.debug(ports[inx].id, operation.id)
                         }
+                        options['scope'] = ports[inx].interfaces.map((i) => i.name).join(' ');
+                        options['dragOptions'] = {
+                            start: (event, ui) => {
+                                eventHub.$emit('onstart-flow', event.el._jsPlumb.scope);
+                            },
+                            stop: (event, ui) => {
+                                eventHub.$emit('onstop-flow', event.el._jsPlumb.scope);
+                            }
+                        };
 
                         let endpoint = self.instance.addEndpoint(elem, options);
                         //endpoint.bind('mouseover', this.endPointMouseOver);

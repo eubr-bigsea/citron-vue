@@ -245,12 +245,7 @@ const LookupComponent = Vue.extend({
     template: '<div>' + baseLabel +
     '<select class="form-control" v-model.lazy="selected" @change="updated"><option></option><option v-for="opt in options" :value="opt.key">{{opt.key}} - {{opt.value}}</option></select>' +
     '</div>',
-    xwatch: {
-        selected() {
-            console.debug('SElecionando ', this.selected)
-            eventHub.$emit('update-form-field-value', this.field, this.selected);
-        }
-    },
+    
 });
 const AttributeSelectorComponent = Vue.extend({
     components: {

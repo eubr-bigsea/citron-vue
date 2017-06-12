@@ -22,6 +22,7 @@
                         <li><a href="#" v-on:click="zoomOut" :class="{disabled: !zoomOutEnabled}"><span class="fa fa-search-minus"></span> Decrease</a></li>
                     </drop-down-component>
                     
+                    <button class="btn btn-success btn-sm" v-on:click="tsort"><span class="fa fa-save"></span> Teste</button>
                 </div>
             </div>
         </div>
@@ -186,6 +187,22 @@ const DiagramComponent = Vue.extend({
         });
         eventHub.$on('onremove-task', (task) => {
             this.removeTask(task);
+        });
+        eventHub.$on('onstart-flow', (interfaceName) => {
+            let endPoints = this.instance.selectEndpoints({scope: interfaceName});
+            endPoints.each((endPoint) => {
+                if (endPoint.isTarget){
+                    endPoint.element.classList.add('selected');
+                }
+            });
+        });
+        eventHub.$on('onstop-flow', (interfaceName) => {
+            let endPoints = this.instance.selectEndpoints({scope: interfaceName});
+            endPoints.each((endPoint) => {
+                if (endPoint.isTarget){
+                    endPoint.element.classList.remove('selected');
+                }
+            });
         });
     },
     mounted() {
@@ -678,15 +695,25 @@ const DiagramComponent = Vue.extend({
                     target_id, target_port,
                 });
             });
+            /*
+            self.instance.bind('beforeDrop', (info) => {
+              console.debug(info.sourceId !== info.targetId);
+              return info.sourceId !== info.targetId;
+            });
+            */
+
             self.instance.bind('connection', (info, originalEvent) => {
                 let con = info.connection;
                 var arr = self.instance.select({ source: con.sourceId, target: con.targetId });
                 if (false && arr.length > 1) { // @FIXME Review
                     // self.instance.detach(con);
+                //} else if (con.targetId === con.sourceId) {
+                //    self.instance.detach(con);
                 } else if (originalEvent) {
                     //self.instance.detach(con);
                     let [source_id, source_port] = info.sourceEndpoint.getUuid().split('/');
                     let [target_id, target_port] = info.targetEndpoint.getUuid().split('/');
+                    self.instance.detach(con);
                     self.addFlow({
                         source_id, source_port,
                         target_id, target_port,
@@ -694,6 +721,53 @@ const DiagramComponent = Vue.extend({
                 }
             });
         },
+
+        tsort() {
+            let tasks = {}, // hash: stringified id of the task => { id: id, _afters: lisf of ids }
+                sorted = [], // sorted list of IDs ( returned value )
+                visited = {}; // hash: id of already visited task => true
+
+            this.tasks.forEach((task) => { tasks[task.id] = {
+                afters: [], attributes: [], task: task
+            }});
+            this.flows.forEach((flow) => {
+                tasks[flow.source_id].afters.push(flow.target_id);
+            });
+
+            // 2. topological sort
+            Object.keys(tasks).forEach(function visit(taskId, ancestors) {
+                var task = tasks[taskId];
+
+                // if already exists, do nothing
+                if (visited[taskId]) return;
+
+                if (!Array.isArray(ancestors)) ancestors = [];
+
+                ancestors.push(taskId);
+
+                visited[taskId] = true;
+
+                task.afters.forEach(function (afterId) {
+                    if (ancestors.indexOf(afterId) >= 0)  // if already in ancestors, a closed chain exists.
+                        throw new Error('closed chain : ' + afterId + ' is in ' + id);
+
+                    visit(afterId.toString(), ancestors.map(function (v) { return v })); // recursive call
+                });
+
+                sorted.unshift(taskId);
+            });
+
+            let data_reader = function(attributes, params) {
+                
+            }; 
+            let projection = function(attributes, params) {
+                
+            };
+            console.debug(sorted);
+            sorted.forEach((k) => {
+                console.debug(tasks[k])
+            });
+        }
     },
 });
 
