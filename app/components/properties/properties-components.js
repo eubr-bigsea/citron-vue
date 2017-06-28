@@ -44,7 +44,7 @@ const TextComponent = Vue.extend({
     },
     props: { value: 0, field: null },
     template: '<div>' + baseLabel +
-    '<input type="text" maxlenght="100" class="form-control" :value="value" @input="updated" v-bind:required="field.required"/></div>',
+    '<input type="text" maxlenght="100" class="form-control" :value="value === null ? field.default: value" @input="updated" v-bind:required="field.required"/></div>',
 });
 
 
@@ -52,9 +52,14 @@ const TextAreaComponent = Vue.extend({
     methods: {
         updated: _.debounce(function (e) { eventHub.$emit('update-form-field-value', this.field, e.target.value); }, 500)
     },
-    props: { value: 0, field: null },
+    computed: {
+        normalizedValue: () => {
+            return this.field.value || this.field.default;
+        }
+    },
+    props: {value: '', field: null },
     template: '<div>' + baseLabel +
-    '<textarea class="form-control" @keyup="updated" :value="value || field.default"></textarea></div>',
+    '<textarea class="form-control" @keyup="updated" :value="value === null ? field.default: value"></textarea></div>',
 
 });
 
@@ -64,7 +69,7 @@ const CodeComponent = Vue.extend({
     },
     props: { value: 0, field: null },
     template: '<div>' + baseLabel +
-    '<textarea class="form-control code" @keyup="updated" :value="value || field.default"></textarea></div>',
+    '<textarea class="form-control code" @keyup="updated" :value="value === null ? field.default: value"></textarea></div>',
 
 });
 
@@ -131,12 +136,16 @@ const MultiSelectDropDownComponent = Vue.extend({
 });
 
 const DropDownComponent = Vue.extend({
+    mounted(){
+        eventHub.$emit('update-form-field-value', 
+            this.field, this.value || this.field.default);
+    },
     computed: {
         pairOptionValueList() {
             return JSON.parse(this.field.values);
         },
         selected() {
-            return this.value;
+            return this.value || this.field.default;
         }
     },
     methods: {
@@ -152,9 +161,15 @@ const DropDownComponent = Vue.extend({
             this.value = this.field['default'];
         }
     },
-    template: '<div>' + baseLabel +
-    '<select class="form-control" v-model="selected" @change="updated"><option></option><option v-for="opt in pairOptionValueList" :value="opt.key">{{opt.value}}</option></select>' +
-    '</div>',
+    template: `
+        <div>${baseLabel}
+            <select class="form-control" v-bind:data-field="field.name" v-model="selected" @change="updated">
+                <option v-if="!field.default"></option>
+                <option v-for="opt in pairOptionValueList" :value="opt.key">
+                    {{opt.value}}
+                </option>
+            </select>
+        </div>`,
 });
 
 const RangeComponent = Vue.extend({
@@ -251,7 +266,7 @@ const AttributeSelectorComponent = Vue.extend({
     components: {
         'v-select': vSelect
     },
-    data() {
+    xdata() {
         return {
             options: ['line (ASC)', 'line (DESC)', 'vehicle (ASC)', 'vehicle (DESC)', 'date_time (ASC)', 'date_time (DESC)', 'latitude (ASC)', 'latitude (DESC)', 'longitude (ASC)', 'longitude (DESC)', 'card_id (ASC)', 'card_id (DESC)', 'travel (ASC)', 'travel (DESC)', 'bus_origin (ASC)', 'bus_origin (DESC)', 'bus_destination (ASC)', 'bus_destination (DESC)']
         }
@@ -261,7 +276,7 @@ const AttributeSelectorComponent = Vue.extend({
             eventHub.$emit('update-form-field-value', this.field, val);
         }
     },
-    props: { value: "", field: null },
+    props: { value: "", field: null, suggestions: { required: true} },
     template: require('./projection-template.html')
 });
 

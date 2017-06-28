@@ -2,9 +2,8 @@
     <div>
         <div class="container-fluid">
             <div class="row small-padding">
-                <div id="appx">
-                    <div class="col-md-2">
-                        <div class="panel operation panel-primary panel-inverse">
+                    <div id="appx" class="not-selectable">
+                        <div class="panel operation panel-primary panel-inverse" ref="toolbox" id="toolbox">
                             <div class="panel-heading">
                                 {{title}}
                             </div>
@@ -21,7 +20,7 @@
                                             <ul class="nav nav-list tree" :class="filtered ? 'slide-down': 'slide-up'">
                                                 <div v-for="subgroup in group[1]">
                                                     <div v-if="subgroup[0].split('#')[1].length">
-                                                         <ul class="nav nav-list">
+                                                        <ul class="nav nav-list">
                                                             <li class="drop-menu-item-3">
                                                                 <a v-on:click="toggle"><span class="fa-caret-right fa"></span> {{ subgroup[0].split('#')[1] }} </a>
                                                                 <ul class="nav nav-list tree" :class="filtered ? 'slide-down': 'slide-up'">
@@ -44,9 +43,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-7">
-                        <div class="panel panel-primary panel-inverse">
+                        <div class="panel panel-primary panel-inverse" id="workflow" ref="workflow">
                             <div class="panel-heading">
                                 Workflow
                             </div>
@@ -54,35 +51,107 @@
                                 <diagram-component form-container="properties-form"></diagram-component>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="panel panel-inverse panel-primary lemonade-properties">
-                        <div class="panel-heading">
-                            Properties
+                        <div class="panel panel-inverse panel-primary lemonade-properties" ref="properties" id="properties">
+                            <div class="panel-heading">
+                                Properties
+                            </div>
+                            <div class="panel-block" id="panel-properties">
+                                <div class="property-description">
+                                    <dl>
+                                        <dt>{{task.operation.name}}  ({{task.id}})</dt>
+                                        <dd>{{task.operation.description}}</dd>
+                                    </dl>   
+                                </div>
+                                <div id="properties-form" class="container" v-if="task">
+                                    <div>
+                                        <fieldset v-for="form in forms">
+                                            <legend>{{form.name}}</legend>
+                                            <div v-for="field in form.fields">
+                                                <keep-alive>
+                                                    <component :is="field.suggested_widget + '-component'" :field="field" :value="getValue(field.name)" :suggestions="getSuggestions(task.id)">
+
+                                                    </component>
+                                                </keep-alive>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="panel-block" id="panel-properties">
-                            <div id="properties-form" class="container" v-if="task">
-                                <div>
-                                    <h4 v-if="task.id">{{task.operation.name}} ({{task.id}})</h4>
-                                    <fieldset v-for="form in forms">
-                                        <legend>{{form.name}}</legend>
-                                        <div v-for="field in form.fields">
-                                            <keep-alive>
-                                                <component :is="field.suggested_widget + '-component'" :field="field" :value="getValue(field.name)"></component>
-                                            </keep-alive>
+                        <div class="panel panel-inverse panel-primary"  id="deploy" ref="deploy">
+                            <div class="panel-heading">
+                                Deploy configuration
+                            </div>
+                            <div class="panel-content" style="padding: 5px 5px 10px 5px">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            Please, complete the required information for the deployment of the workflow:
                                         </div>
-                                    </fieldset>
+                                        <div class="col-md-12">
+                                            <label>Name:</label>
+                                            <input type="text" class="form-control" required/>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label>Authorization token:</label>
+                                            <input type="text" class="form-control" required/>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label>Description:</label>
+                                            <textarea class="form-control"></textarea>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>CPUs:</label>
+                                            <input type="text" class="form-control" required/>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>Memory:</label>
+                                            <input type="text" class="form-control" required/>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>Response time:</label>
+                                            <input type="text" class="form-control" required/>
+                                        </div>
+                                        
+                                        <div class="col-md-12">
+                                            <br/>
+                                            <label>Select how inputs will be deployed</label>
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="col-md-3 text-center">Operation</th>
+                                                        <th class="col-md-3 text-center">Input name</th>
+                                                        <th class="col-md-3 text-center">Comment</th>
+                                                        <th class="col-md-3 text-center">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!--
+                                                <tr v-for="ds in deployInfo.dataSources">
+                                                    <td class="text-center">{{ds.operation.name}}</td>
+                                                    <td><input class="form-control"/></td>
+                                                    <td>{{ds.forms.comment.value || '-'}}</td>
+                                                    <td>
+                                                        <select class="form-control">
+                                                            <option>Keep intact</option>
+                                                            <option>Discard</option>
+                                                            <option>Use as input for service</option>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                                -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <button class="btn btn-primary" xclick="execute"><span class="fa fa-play"></span> Execute</button>
+                                            <button class="btn btn-danger" @click="cancelDeploy">Cancel</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="panel panel-inverse panel-primary lemondade-property-help">
-                        <div class="panel-block">
-                             <property-description-component :task="task" />
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
         <div class="row hide">
@@ -103,36 +172,4 @@
             </div>
         </div>
     </div>
-    <!--
-    <div v-else>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-4"></div>
-
-                <div class="col-md-4">
-                    <section class="login-form">
-                        <form method="post" action="#" role="login">
-                            <div class="logo">
-                                <img src=""/>
-                                <strong>Lemonade</strong>
-                            </div>
-
-                            <br/>
-                            <input type="email" name="email" placeholder="Email" xrequired class="form-control input-lg" value="" v-model="username"/>
-                            <br/>
-                            <input type="password" class="form-control input-lg" id="password" placeholder="Password" xrequired="" v-model="passwd"/>
-                            
-                            
-                            <div class="pwstrength_viewport_progress"></div>
-                            
-                            <br/>
-                            <button type="submit" name="go" class="btn btn-lg btn-primary btn-block" @click.stop.prevent="doLogin">Sign in</button>
-                        </div>
-                        </form>
-                    </section>  
-                </div>
-                <div class="col-md-4"></div>
-            </div>
-        </div>
-    </div>
-    -->
+  

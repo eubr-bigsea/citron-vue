@@ -16,6 +16,6 @@ const ModalComponent = Vue.component('modal', {
 
     },
     template,
-    props: ['onOkClick', 'onCancelClick']
+    props: ['onOkClick', 'onCancelClick', 'model']
 })
 export default ModalComponent;

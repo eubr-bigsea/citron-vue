@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row small-padding">
             <div class="col-md-12">
-                <h2>Data source - {{dataSource.name}}</h2>
+                <h2>Data source</h2>
             </div>
             <div class="col-md-12">
                 <div class="panel panel-primary">
@@ -10,9 +10,38 @@
                         Basic information
                     </div>
                     <div class="panel-body">
-                            <div class="col-md-4">
-                                <label>Description:</label> {{dataSource.description}}<br/>
-                                <label>Format: </label> {{dataSource.format}}
+                            <div class="col-md-6">
+                                <label>Name: </label>
+                                <input type="text" class="form-control" v-model="dataSource.name"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Format: </label>
+                                <select v-model="dataSource.format" class="form-control">
+                                    <option></option>
+                                    <option value="CSV">CSV</option>
+                                    <option value="Parquet">Parquet</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 text-right">
+                                <div class="checkbox">
+                                    <label class="checkbox-inline"><input type="checkbox" value="" v-model="dataSource.enabled">Enabled</label>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <label>Description:</label>
+                                <textarea class="form-control" v-model="dataSource.description"></textarea>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Attribute delimiter (CSV only): </label>
+                                <input type="text" class="form-control"/>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Record delimiter (CSV only): </label>
+                                <input type="text" class="form-control"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Missing value representation:</label>
+                                <input type="text" class="form-control"/>
                             </div>
                             <div class="col-md-4">
                                 <label>Created: </label> {{dataSource.created}}<br/>
@@ -21,6 +50,9 @@
                             <div class="col-md-4">
                                 <label>Rows (est.): </label> {{dataSource.estimated_rows}}<br/>
                                 <label>Size (est.): </label> {{dataSource.estimated_size_in_mega_bytes}} MB
+                            </div>
+                            <div class="col-md-12">
+                                <button class="btn btn-primary"><span class="fa fa-save"></span> Save</button>
                             </div>
                         </div>
                 </div>

@@ -88,12 +88,11 @@
             ]
         ]
     }
-    const connectorType = ['Flowchart', 'Bezier', 'StateMachine'][0];
+    const connectorType = ['Flowchart', 'Bezier', 'StateMachine'][1];
     const connectorPaintStyle = {
         lineWidth: 1,
         radius: 8,
         strokeStyle: "#111",
-        connector: [connectorType, { curviness: 10 }],
     };
 
     const endPointPaintStyle = {
@@ -101,16 +100,15 @@
         radius: 8,
         height: 15,
         width: 15,
-        zIndex: 99
+        zIndex: 99 
     }
     const overlays = [
-        ["Arrow", { location: .75, width: 12, length: 15 }],
+        ["Arrow", { location: .75, width: 8, length: 15 }],
         //["Label", { padding: 10, location: .5, label: '[ <span class="fa fa-dot-circle-o"></span> ]', cssClass: "labelClass" }]
     ];
 
 
     const endPointOptionsInput = {
-        connector: connectorType,
         isSource: false,
         isTarget: true,
         cssClass: 'endpoint',
@@ -122,7 +120,7 @@
     };
 
     const endPointOptionsOutput = {
-        connector: connectorType,
+        connector: [connectorType, { curviness: 120, cornerRadius: 10, gap: 0 }],
         isSource: true,
         isTarget: false,
         cssClass: 'endpoint',
@@ -134,8 +132,6 @@
     };
 
     const connectionOptions = {
-        connector: connectorType,
-        //endpointStyle: endPointOptions,
         maxConnections: 1,
         endpoint: ['Dot', connectorPaintStyle],
         paintStyle: connectorPaintStyle,
@@ -313,15 +309,15 @@
                         let options = JSON.parse(JSON.stringify(portOptions)); // clone
 
                         lbls[0][1]['label'] = `<div class="has-${ports.length}-ports">${ports[inx].name}</div>`;
-                        options['anchors'] = anchor;
-                        options['overlays'] = lbls;
+                        options['anchors'] = anchor.slice();
+                        options['overlays'] = lbls.slice();
 
                         if (ports[inx].multiplicity !== 'ONE') {
                             if (portType === 'input') {
-                                options['paintStyle']['radius'] = 15;
-                                options['paintStyle']['width'] = 15;
+                                //options['paintStyle']['radius'] = 10;
+                                //options['paintStyle']['width'] = 10;
                                 options['endpoint'] = 'Dot';
-                                options['anchors'] = [0.5, -0.2, 0, -1]
+                                options['anchors'][1] = -0.15;
                             }
                         }
                         //options['endpoint'] = ports[inx].multiplicity !== 'ONE' ? 'Dot' : options['endpoint'];

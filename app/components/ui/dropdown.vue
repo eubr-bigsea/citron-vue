@@ -1,6 +1,9 @@
 <template>
     <div :class="['btn-group', open ? 'open' : '']">
-        <a type="button" :class="['btn', variant]" :href="link">{{label}}</a>
+        <a type="button" :class="['btn', variant]" :href="link">
+            <span :class="icon" v-if="icon"></span>
+            {{label}}
+        </a>
         <button type="button" :class="['btn', variant, 'dropdown-toggle']" data-toggle="dropdown" @click="toggle">
             <span class="caret"></span>
             <span class="sr-only">Toggle Dropdown</span>
@@ -34,6 +37,10 @@
             }
         },
         props: {
+            icon: {
+                type: String,
+                default: null,
+            },
             label: {
                 type: String,
                 default: 'Action'

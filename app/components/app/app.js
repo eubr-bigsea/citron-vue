@@ -40,6 +40,9 @@ const AppComponent = Vue.extend({
         groupedOperations: function() {
             return this.$store.getters.getGroupedOperations;
         },
+        workflow: function() {
+            return this.$store.getters.getWorkflow;
+        },
         language: 'en', //this.$store.getters.language,
         user: function() {
             return this.$store.getters.getUser;
@@ -47,35 +50,6 @@ const AppComponent = Vue.extend({
         errors() {
             return this.$store.getters.getErrors;
         },
-    },
-    created() {
-        this.$Progress.start();
-        eventHub.$on('onclick-task', (taskComponent) => {
-            let task = taskComponent.task;
-            /* An task (operation instance) was clicked in the diagram */
-            this.task = task;
-            this.filledForm = task.forms;
-            this.forms = task.operation.forms.sort((a, b) => {
-                return a.order - b.order;
-            });
-            // Reverse association between field and form. Used to retrieve category
-            this.forms.forEach((f, i) => {
-                f.fields.forEach((field, j) => {
-                    field.category = f.category;
-                });
-            });
-        });
-        eventHub.$on('update-form-field-value', (field, value) => {
-            let filled = this.task.forms[field.name];
-            if (filled) {
-                filled.value = value;
-                filled.category = field.category;
-            } else {
-                let category = field.category;
-                this.task.forms[field.name] = { value, category };
-            }
-            //this.task.forms[field.name]['category'] = 
-        });
     },
     components: {
         'toolbox-component': ToolbarComponent,
@@ -111,10 +85,60 @@ const AppComponent = Vue.extend({
             passwd: '',
             filterOp: '',
             filtered: false,
+            attributeSuggestion: {},
             //showModalLoadWorkflow: false
         }
     },
     mounted() {
+
+        this.$Progress.start();
+        let self = this;
+        eventHub.$on('onblur-selection', () => {
+            self.toggleProperties(false);
+        });
+        eventHub.$on('onshow-deploy', () => {
+
+            let self = this;
+            let ids = ['properties', 'workflow', 'toolbox', 'deploy'];
+            self.toggleProperties(false);
+            ids.forEach((elemId) => {
+                let elem = self.$refs[elemId] || document.getElementById(elemId);
+                elem.classList.add('deploy');
+
+            });
+        });
+        eventHub.$on('onclick-task', (taskComponent) => {
+            let task = taskComponent.task;
+            /* An task (operation instance) was clicked in the diagram */
+            this.task = task;
+            this.filledForm = task.forms;
+            this.forms = task.operation.forms.sort((a, b) => {
+                return a.order - b.order;
+            });
+            // Reverse association between field and form. Used to retrieve category
+            this.forms.forEach((f, i) => {
+                f.fields.forEach((field, j) => {
+                    field.category = f.category;
+                });
+            });
+            self.toggleProperties(true);
+            
+        });
+        eventHub.$on('update-form-field-value', (field, value) => {
+            let self = this;
+            let filled = this.task.forms[field.name];
+            if (filled) {
+                filled.value = value;
+                filled.category = field.category;
+            } else {
+                let category = field.category;
+                this.task.forms[field.name] = { value, category };
+            }
+            /* Attribute suggestion */
+            self.updateAttributeSuggestion();
+            
+        });
+
         this.$store.dispatch('connectWebSocket');
         if (true || this.user) {
             let elem = document.getElementById('menu-operations');
@@ -148,6 +172,63 @@ const AppComponent = Vue.extend({
         }
     },
     methods: {
+        _queryDataSource(id, callback) {
+            var attributes = null;
+            
+            id = parseInt(id);
+            if (TahitiAttributeSuggester.cached === undefined){
+                TahitiAttributeSuggester.cached = {};
+            }
+            if (TahitiAttributeSuggester.cached[id]) {
+                attributes = TahitiAttributeSuggester.cached[id];
+                callback(attributes);
+            } else {
+                var req=new XMLHttpRequest();
+                req.open("GET",  'http://beta.ctweb.inweb.org.br/limonero/datasources/' + id + '?token=123456&attributes_name=true');
+                req.onreadystatechange = function() {
+                    if (req.readyState == XMLHttpRequest.DONE) {
+                        if (callback) {
+                            var ds = JSON.parse(req.responseText);
+                            attributes = ds.attributes.map(function(attr) {return attr.name});
+                            TahitiAttributeSuggester.cached[id] = attributes;
+                            callback(attributes);
+                        }
+                    }
+                }
+                req.send({});
+            }
+        },
+        updateAttributeSuggestion(){
+            let self = this;
+            let attributeSuggestion = {};
+            TahitiAttributeSuggester.compute(self.workflow, this._queryDataSource, 
+                (result) => { 
+                    Object.keys(result).forEach(key => {
+                        attributeSuggestion[key] = result[key].uiPorts;
+                    });
+                    Object.assign(self.attributeSuggestion, attributeSuggestion);
+                });
+        },
+        getSuggestions(taskId){
+            if (TahitiAttributeSuggester.cached === undefined){
+                this.updateAttributeSuggestion();
+            }
+            if (this.attributeSuggestion[taskId]){
+                return Array.prototype.concat.apply([], 
+                    this.attributeSuggestion[taskId].inputs.map((item) => {return item.attributes;}));
+            } else {
+                return [];
+            }
+        },
+        toggleProperties(visibility){
+            // Bug in Vue. Second time (when go back to page), $refs does not work
+            let elem = this.$refs.properties || document.getElementById('properties');
+            if (visibility){
+                elem.classList.add('show');
+            } else {
+                elem.classList.remove('show');
+            }
+        },
         filterOperations: _.debounce(function (e) {
             this.filtered = this.filterOp.length > 0;
             this.loadOperations(this.filterOp);
@@ -189,6 +270,16 @@ const AppComponent = Vue.extend({
         },
         loadOperations(filterOp) {
             return this.$store.dispatch('loadOperations', filterOp);
+        },
+        cancelDeploy() {
+            let self = this;
+            let ids = ['properties', 'workflow', 'toolbox', 'deploy'];
+            ids.forEach((elemId) => {
+                let elem = self.$refs[elemId] || document.getElementById(elemId);
+                elem.classList.remove('deploy');
+
+            });
+            eventHub.$emit('oncancel-deploy');
         }
     },
     store

@@ -18,6 +18,8 @@ import UserCardComponent from './components/user-card/user-card.vue';
 import AppComponent from './components/app/app';
 import router from './router';
 
+import { standUrl, tahitiUrl, authToken } from './config';
+
 Vue.use(VueResource);
 Vue.use(VueProgressBar, {
     color: '#ed8',
@@ -55,8 +57,15 @@ Vue.config.async = false;
 /** */
 new Vue({
     el: '#app',
+    data: {
+        name: 'Lemonade Citron',
+        tahitiUrl
+    },
     mounted(){
          document.querySelector('.page-overlay').style.visibility = 'hidden';
+         let tahitiJs = document.createElement('script');
+         tahitiJs.src = `${tahitiUrl}/public/js/tahiti.js`;
+         document.getElementsByTagName('body')[0].appendChild(tahitiJs);
     },
     components: {
         'app-component': AppComponent,

@@ -1,7 +1,141 @@
 html {
     overflow-y: scroll;
 }
+.flex-container {
+    display: flex;
+    flex-direction: column;
+}
+#app-area {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+#app-area > footer {
+    flex: 1 100%;
+}
+#appx {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-grow: 5;
+}
+#appx > * {
+    margin: 0 2px;
+    align-items: stretch;
+    flex: 1 100%;
+}
+#workflow {
+    order: 1;
+    overflow: hidden;
+    flex-grow: 10;
+}
+#properties, #properties.deploy {
+    order: 2;
+    flex: 0 0 400px;
+    margin-right: -402px !important;
+    transition: all .5s;
+}
+#properties.show {
+    order: 2;
+    flex: 0 0 400px;
+    margin-right: 0px !important;
+    transition: all .5s;
+}
+#deploy {
+    z-index: 200;
+    background: #fff;
+    order: 2;
+    flex: 0 0 615px;
+    margin-right: -615px !important;
+    transition: all .5s;
+}
+#deploy.deploy {
+    order: 2;
+    flex: 1 1 10;
+    margin-right: 0px !important;
+    transition: all .5s;
+}
+#toolbox {
+    order: 0;
+    flex: 0 0 300px;
+}
+#toolbox.deploy {
+    order: 0;
+    flex: 0 0 300px;
+    margin-left: -300px !important;
+}
+.not-selectable {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+/*
+#toolbox, #workflow, #properties {
+    float: left;
+    margin-left: 4px;
+}*/
+#toolbox {
+    xwidth: calc(20% - 4px);
+    transition: all .5s;
+}
+#workflow {
+    xwidth: calc(80% - 8px);
+    xmargin-right: 4px;
+    transition: all .5s;
+}
+$paddingProperties: 400px;
+$paddingDeploy: 50%;
 
+#workflow.deploy {
+    xwidth: calc(70% - 8px);
+    transition: all .5s;
+}
+#xdeploy {
+    background: white;
+    xposition: absolute;
+    xwidth: $paddingDeploy;
+    right: - $paddingDeploy;
+    z-index: 100;
+    transition: all .5s;
+    padding-right: 4px;
+  }
+#xdeploy.show {
+    display: block;
+    margin-left: 0%;
+    xright: 0;
+    transition: all .5s;
+    xwidth: calc(30%);
+}
+#xproperties {
+    background: white;
+    padding-left: 5px !important;
+    position: absolute;
+    xwidth: $paddingProperties;
+    xright: - $paddingProperties;
+    z-index: 100;
+    transition: all .5s;
+    padding-right: 4px;
+    transition: all .5s;
+  }
+#properties.show {
+    xdisplay: block;
+    margin-left: 0%;
+    transition: all .5s;
+}
+#toolbox.slide {
+    width: 0 !important;
+    margin: 0; 
+    padding: 0;
+    overflow: hidden;
+    transition: all .5s;
+}
 .slide-up,
 .slide-down {
     max-height: 0;

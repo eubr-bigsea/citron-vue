@@ -18,13 +18,13 @@
                             <th class="sortable primary text-center col-md-1" @click="sort('name')">
                                  Name <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'name'"></span>
                                  </th>
-                            <th class="sortable primary text-center col-md-1" @click="sort('user_name')">
+                            <th class="sortable primary text-center col-md-2" @click="sort('user_name')">
                                  Owner <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'user_name'"></span>
                             </th>
                             <th class="primary text-center col-md-4">
                                 Description
                             </th>
-                            <th class="primary text-center col-md-2">
+                            <th class="primary text-center col-md-1">
                                 Permissions
                             </th>
                             <th class="primary text-center col-md-1">
