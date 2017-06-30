@@ -38,6 +38,12 @@
                     <user-card label="User information">
                         <li>
                             <div class="navbar-login">
+                            <div class="locale">
+                                <select v-model="locale" @change="$i18n.locale = locale">
+                                    <option value="en">English</option>
+                                    <option value="pt">Português</option>
+                                </select>
+                            </div>
                                 <div class="row">
                                     <div class="col-lg-4">
                                         <p class="text-center">

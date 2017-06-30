@@ -6,7 +6,9 @@ $defaultFontSize: 1.2rem;
     padding: 5px;
 }
 #panel-properties{
-    xheight: calc(100vh - 290px);
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
 }
 .lemonade-properties {
     xheight: calc(100vh - 233px);
@@ -14,7 +16,8 @@ $defaultFontSize: 1.2rem;
     #properties-form {
         background: white;
         z-index: 100;
-        zoom: .8;
+        flex: 1 0 auto;
+    zoom: .8;
         xheight: calc(100vh - 331px); width: 100%;
         padding: 5px;
 

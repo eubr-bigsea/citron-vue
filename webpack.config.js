@@ -40,8 +40,8 @@ module.exports = {
         ]
       },
       {
-          test: /\.scss$/,
-          loader: ExtractTextPlugin.extract('css!sass', {publicPath: '../'})
+          test: /\.s[a|c]ss$/,
+          loader: 'style!css!sass' /*ExtractTextPlugin.extract('css!sass', {publicPath: '../'})*/
       },
       { 
         test: /\.(jpe?g|gif|png|eot|svg|woff2|ttf|woff)(\?v=\d+\.\d+\.\d+)?$/,
@@ -49,6 +49,11 @@ module.exports = {
         exclude: '/node_modules/'
       }, // inline base64 URLs for <=10k images, direct URLs for the rest
     ]
+  },
+  vue: {
+    loaders: {
+        scss: 'style!css!sass'
+    }
   },
   plugins: [
       new ExtractTextPlugin('public/style.css', {

@@ -4,7 +4,7 @@
             <span :class="icon" v-if="icon"></span>
             {{label}}
         </a>
-        <button type="button" :class="['btn', variant, 'dropdown-toggle']" data-toggle="dropdown" @click="toggle">
+        <button type="button" :class="['btn', variant, 'dropdown-toggle']" data-toggle="dropdown" @click.stop="toggle">
             <span class="caret"></span>
             <span class="sr-only">Toggle Dropdown</span>
         </button>

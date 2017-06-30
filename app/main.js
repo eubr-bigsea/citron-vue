@@ -13,12 +13,16 @@ import './components/app/app.scss';
 import store from './components/vuex/store'
 
 import VueProgressBar from 'vue-progressbar'
+import VueI18n from 'vue-i18n'
 import Toastr from 'vue-toastr';
 import UserCardComponent from './components/user-card/user-card.vue';
 import AppComponent from './components/app/app';
 import router from './router';
 
 import { standUrl, tahitiUrl, authToken } from './config';
+import citron_messages from './i18n/messages';
+
+Vue.use(VueI18n)
 
 Vue.use(VueResource);
 Vue.use(VueProgressBar, {
@@ -33,6 +37,12 @@ Vue.use(VueProgressBar, {
     inverse: false
 })
 let requestCounter = 0;
+
+const i18n = new VueI18n({
+  locale: 'en', // set locale
+  fallbackLocale: 'en',
+  messages: citron_messages, // set locale messages
+})
 
 Vue.http.interceptors.push((request, next) => {
     /*if (requestCounter === 0){
@@ -56,10 +66,12 @@ Vue.config.async = false;
 
 /** */
 new Vue({
+    i18n,
     el: '#app',
     data: {
         name: 'Lemonade Citron',
-        tahitiUrl
+        tahitiUrl,
+        locale: 'en',
     },
     mounted(){
          document.querySelector('.page-overlay').style.visibility = 'hidden';
@@ -71,6 +83,12 @@ new Vue({
         'app-component': AppComponent,
         'toolbox-component': ToolboxComponent,
         'user-card': UserCardComponent
+    },
+    methods: {
+        locale(l) {
+            alert(l)
+            alert('ok')
+        }
     },
     router,
     store,

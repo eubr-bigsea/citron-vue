@@ -1,5 +1,5 @@
 <template>
-    <div :class="classes" class="operation task" :title="task.operation.description" :data-operation-id="task.operation.id" :id="task.id"
+    <div :class="classes" class="operation task" :title="task.operation.description + '\n' + ((task.forms.comment)? task.forms.comment.value || '': '')" :data-operation-id="task.operation.id" :id="task.id"
         v-bind:style="{zIndex: task.z_index, top: task.top + 'px', left: task.left + 'px'}" v-on:click="click" @contextmenu.prevent="openMenu">
         <div :style="{backgroundColor: task.forms.color && task.forms.color.value ? task.forms.color.value.background: '#fff', color: task.forms.color && task.forms.color.value ? task.forms.color.value.foreground: '#222'}"
             style="height:20px" class="title">
@@ -11,7 +11,7 @@
         </div>
         <div class="custom-context-menu" v-if="contextMenuOpened && !isComment" ref="right">
             <ul>
-                <li @click="remove()">Remove</li> 
+                <li @click.stop="remove()">Remove</li> 
                 <li v-for="item in contextMenuActions" @click="item.action(item.name)"> 
                     {{item.label}}
                 </li>

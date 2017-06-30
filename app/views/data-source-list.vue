@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row small-padding">
             <div class="col-md-12">
-                <h2>Data Sources</h2>
+                <h2>{{ $tc('titles.dataSource', 2) }}</h2>
             </div>
             <div class="col-md-12" v-if="dataSources.pagination && dataSources.pagination.total > 0">
                 <div class="pull-right">
@@ -13,24 +13,24 @@
                     <thead>
                         <tr>
                             <th class="sortable primary text-center col-md-1" @click="sort('id')">
-                                 Id <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'id'"></span>
+                                 {{ $tc('common.id') }} <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'id'"></span>
                                  </th>
                             <th class="sortable primary text-center col-md-1" @click="sort('name')">
-                                 Name <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'name'"></span>
+                                 {{ $tc('common.name') }} <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'name'"></span>
                                  </th>
                             <th class="sortable primary text-center col-md-2" @click="sort('user_name')">
-                                 Owner <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'user_name'"></span>
+                                 {{ $tc('common.owner') }} <span class="fa" :class="['fa-' + (this.asc === 'false' ? 'sort-up': 'sort-down')]" v-show="orderBy === 'user_name'"></span>
                             </th>
                             <th class="primary text-center col-md-4">
-                                Description
+                                {{ $tc('common.description') }}
                             </th>
                             <th class="primary text-center col-md-1">
-                                Permissions
+                                {{ $tc('common.permission', 2) }}
                             </th>
                             <th class="primary text-center col-md-1">
-                                Created
+                                {{ $tc('common.created') }}
                             </th>
-                            <th class="col-md-1 primary text-center">Actions</th>
+                            <th class="col-md-1 primary text-center">{{$tc('common.action', 2) }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -76,7 +76,7 @@
                 </nav>
             </div>
             <div v-else>
-                <p>No data sources found.</p>
+                <p>No {{ $tc('titles.dataSource', 2) }} found.</p>
             </div>
         </div>
     </div>

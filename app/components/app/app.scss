@@ -40,6 +40,8 @@ html {
     transition: all .5s;
 }
 #properties.show {
+    display: flex !important;
+    flex-direction: column;
     order: 2;
     flex: 0 0 400px;
     margin-right: 0px !important;

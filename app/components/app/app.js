@@ -37,19 +37,33 @@ from '../properties/properties-components.js';
 const AppComponent = Vue.extend({
     template,
     computed: {
-        groupedOperations: function() {
+        groupedOperations() {
             return this.$store.getters.getGroupedOperations;
         },
-        workflow: function() {
+        dataSources(){
+            return this.$store.getters.getWorkflow.tasks.filter((task) => {
+                return task.operation.categories.map((cat) => cat.type).indexOf('data source') > -1;
+            });
+        },
+        outputs(){
+            return this.$store.getters.getWorkflow.tasks.filter((task) => {
+                return task.operation.ports.filter((port) => {
+                    return port.type === 'OUTPUT' && port.interfaces.filter((itf) => {
+                        return itf.name === 'Data';
+                    }).length > 0;
+                }).length > 0;
+            });
+        },
+        workflow() {
             return this.$store.getters.getWorkflow;
         },
-        language: 'en', //this.$store.getters.language,
-        user: function() {
+        user() {
             return this.$store.getters.getUser;
         },
         errors() {
             return this.$store.getters.getErrors;
         },
+        language: 'en', //this.$store.getters.language,
     },
     components: {
         'toolbox-component': ToolbarComponent,
@@ -86,6 +100,7 @@ const AppComponent = Vue.extend({
             filterOp: '',
             filtered: false,
             attributeSuggestion: {},
+            showDeploy: false,
             //showModalLoadWorkflow: false
         }
     },
@@ -104,25 +119,41 @@ const AppComponent = Vue.extend({
             ids.forEach((elemId) => {
                 let elem = self.$refs[elemId] || document.getElementById(elemId);
                 elem.classList.add('deploy');
-
             });
+            self.workflow.deploy = self.workflow.deploy || 
+                {
+                    name: self.workflow.name,
+                    token: 'xpto',
+                    description: '',
+                    cpus: 1,
+                    memory: 0.5,
+                    responseTime: 60
+                };
+            self.showDeploy = true;
+            //self.$refs.deploy.querySelector('input').focus();
         });
         eventHub.$on('onclick-task', (taskComponent) => {
-            let task = taskComponent.task;
-            /* An task (operation instance) was clicked in the diagram */
-            this.task = task;
-            this.filledForm = task.forms;
-            this.forms = task.operation.forms.sort((a, b) => {
-                return a.order - b.order;
-            });
-            // Reverse association between field and form. Used to retrieve category
-            this.forms.forEach((f, i) => {
-                f.fields.forEach((field, j) => {
-                    field.category = f.category;
+            let callback = () => {
+                let task = taskComponent.task;
+                /* An task (operation instance) was clicked in the diagram */
+                self.task = task;
+                self.filledForm = task.forms;
+                self.forms = task.operation.forms.sort((a, b) => {
+                    return a.order - b.order;
                 });
-            });
-            self.toggleProperties(true);
-            
+                // Reverse association between field and form. Used to retrieve category
+                self.forms.forEach((f, i) => {
+                    f.fields.forEach((field, j) => {
+                        field.category = f.category;
+                    });
+                });
+                self.toggleProperties(true);
+            };
+            if (!TahitiAttributeSuggester.processed){
+                self.updateAttributeSuggestion(callback);
+            } else {
+                callback();
+            }
         });
         eventHub.$on('update-form-field-value', (field, value) => {
             let self = this;
@@ -134,9 +165,11 @@ const AppComponent = Vue.extend({
                 let category = field.category;
                 this.task.forms[field.name] = { value, category };
             }
-            /* Attribute suggestion */
             self.updateAttributeSuggestion();
             
+        });
+        eventHub.$on('add-flow', (field, value) => {
+            self.updateAttributeSuggestion();
         });
 
         this.$store.dispatch('connectWebSocket');
@@ -172,6 +205,13 @@ const AppComponent = Vue.extend({
         }
     },
     methods: {
+        selectTaskInDeploy(task, selected){
+            if (selected){
+                document.getElementById(task.id).classList.add('selected');
+            } else {
+                document.getElementById(task.id).classList.remove('selected');
+            }
+        },
         _queryDataSource(id, callback) {
             var attributes = null;
             
@@ -198,7 +238,7 @@ const AppComponent = Vue.extend({
                 req.send({});
             }
         },
-        updateAttributeSuggestion(){
+        updateAttributeSuggestion(callback){
             let self = this;
             let attributeSuggestion = {};
             TahitiAttributeSuggester.compute(self.workflow, this._queryDataSource, 
@@ -207,10 +247,14 @@ const AppComponent = Vue.extend({
                         attributeSuggestion[key] = result[key].uiPorts;
                     });
                     Object.assign(self.attributeSuggestion, attributeSuggestion);
+                    TahitiAttributeSuggester.processed = true;
+                    if (callback){
+                        callback();
+                    }
                 });
         },
         getSuggestions(taskId){
-            if (TahitiAttributeSuggester.cached === undefined){
+            if (TahitiAttributeSuggester.processed === undefined){
                 this.updateAttributeSuggestion();
             }
             if (this.attributeSuggestion[taskId]){

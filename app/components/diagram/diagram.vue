@@ -1,109 +1,104 @@
 <template>
     <div tabindex="0">
-    <div>
-        <div class="row" v-if="showToolbar && showToolbarInternal">
-            <div class="col-md-3" style="margin-left: 18px;padding-top:5px">
-                <input type="text" placeholder="Unnamed workflow" class="form-control" :value="workflow.name" @keyup="doChangeWorkflowName" />
-            </div>
-            <div class="col-md-8" v-if="showToolbar">
-                <div class="buttons-toolbar btn-group pull-right diagram-toolbar">
-
-                    <button class="btn btn-success btn-sm" v-on:click="saveWorkflow"><span class="fa fa-save"></span> Save</button>
-                    <button class="btn btn-primary btn-sm add-margin" v-on:click="onClickExecute"><span class="fa fa-play"></span> Execute</button>
-
-                    <button class="btn btn-default btn-sm" v-on:click="align('left', 'min')" title="Align left"><span class="glyphicon glyphicon-object-align-left"></span></button>
-                    <button class="btn btn-default btn-sm" v-on:click="align('left', 'max')" title="Align right"><span class="glyphicon glyphicon-object-align-right"></span></button>
-
-                    <button class="btn btn-default btn-sm" v-on:click="align('top', 'min')" title="Align top"><span class="glyphicon glyphicon-object-align-top"></span></button>
-                    <button class="btn btn-default btn-sm add-margin" v-on:click="align('top', 'max')" title="Align bottom"><span class="glyphicon glyphicon-object-align-bottom"></span></button>
-
-                    <drop-down-component :label="'Zoom ('  + zoomPercent + ')'" variant="btn-sm btn-default">
-                        <li v-for="z in [.6, .7, .8, .9, 1, 1.1, 1.2, 1.3, 1.4]">
-                            <a href="#" v-on:click="setZoomPercent($event, z)" :class="{disabled: zoomPercent === z}"><span class="fa fa-search-plus"></span> Zoom {{Math.round(z * 100)}}%</a>
-                        </li>
-                    </drop-down-component>
-
-                    <drop-down-component :label="'Tools'" :icon="'fa fa-gears'" variant="btn-sm btn-default">
-                        <li>
-                            <a href="#" v-on:click.prevent="tsort"><span class="fa fa-save"></span> T-Sort</a>
-                        </li>
-                        <li>
-                            <a href="#" v-on:click.prevent="saveAsImage"><span class="fa fa-download"></span> Save as image</a>
-                        </li>
-                        <li>
-                            <a href="#" v-on:click="deploy"><span class="fa fa-cloud-upload"></span> Generate deploy workflow</a>
-                        </li>
-                    </drop-down-component>
+        <div>
+            <div class="row" v-if="showToolbar && showToolbarInternal">
+                <div class="col-md-3" style="margin-left: 18px;padding-top:5px">
+                    <input type="text" placeholder="Unnamed workflow" class="form-control" :value="workflow.name" @keyup="doChangeWorkflowName" />
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="lemonade-container" id="lemonade-container">
-        <div class="lemonade" v-on:drop="drop" v-on:dragover="allowDrop" id="lemonade-diagram" v-on:click="diagramClick" :show-task-decoration="false" ref="diagram"
-             :style="{'pointer-events': showToolbarInternal && showToolbar ? 'auto': 'none'}">
-            <task-component v-for="task of tasks" :task="task" :instance="instance" :key="task.id" 
-                :show-decoration="showTaskDecoration || showTaskDecorationInternal">
-                </task-component>
-            <flow-component v-for="flow of flows" :flow="flow" :instance="instance"></flow-component>
-            <div class="ghost-select"><span></span></div>
-            <ctx-menu-component>
-                
-            </ctx-menu-component>
-        </div>
-    </div>
-    <modal-component v-if="showExecutionModal" @close="showExecutionModal = false">
-        <div slot="header">
-            <h4>Execution of workflow</h4>
-            Please, complete the required information for the execution of the workflow:
-        </div>
-        <div class="body" slot="body">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-md-6">
-                        <label>Cluster:</label>
-                        <select class="form-control">
-                            <option value="1">Default</option>
-                        </select>
-                    </div>
-                    <div class="col-md-12">
-                        <label>Missing required parameters:</label>
-                        <p>
-                        There is no missing required parameter
-                        </p>
+                <div class="col-md-8" v-if="showToolbar">
+                    <div class="buttons-toolbar btn-group pull-right diagram-toolbar">
+
+                        <button class="btn btn-success btn-sm" v-on:click="saveWorkflow"><span class="fa fa-save"></span> Save</button>
+                        <button class="btn btn-primary btn-sm add-margin" v-on:click="onClickExecute"><span class="fa fa-play"></span> Execute</button>
+
+                        <button class="btn btn-default btn-sm" v-on:click="align('left', 'min')" title="Align left"><span class="glyphicon glyphicon-object-align-left"></span></button>
+                        <button class="btn btn-default btn-sm" v-on:click="align('left', 'max')" title="Align right"><span class="glyphicon glyphicon-object-align-right"></span></button>
+
+                        <button class="btn btn-default btn-sm" v-on:click="align('top', 'min')" title="Align top"><span class="glyphicon glyphicon-object-align-top"></span></button>
+                        <button class="btn btn-default btn-sm add-margin" v-on:click="align('top', 'max')" title="Align bottom"><span class="glyphicon glyphicon-object-align-bottom"></span></button>
+
+                        <drop-down-component :label="'Zoom ('  + zoomPercent + ')'" variant="btn-sm btn-default">
+                            <li v-for="z in [.6, .7, .8, .9, 1, 1.1, 1.2, 1.3, 1.4]">
+                                <a href="#" v-on:click="setZoomPercent($event, z)" :class="{disabled: zoomPercent === z}"><span class="fa fa-search-plus"></span> Zoom {{Math.round(z * 100)}}%</a>
+                            </li>
+                        </drop-down-component>
+
+                        <drop-down-component :label="'Tools'" :icon="'fa fa-gears'" variant="btn-sm btn-default">
+                            <li>
+                                <a href="#" v-on:click.prevent="tsort"><span class="fa fa-save"></span> T-Sort</a>
+                            </li>
+                            <li>
+                                <a href="#" v-on:click.prevent="saveAsImage"><span class="fa fa-download"></span> Save as image</a>
+                            </li>
+                            <li>
+                                <a href="#" v-on:click="deploy"><span class="fa fa-cloud-upload"></span> Generate deploy workflow</a>
+                            </li>
+                        </drop-down-component>
                     </div>
                 </div>
             </div>
         </div>
-        <div slot="footer">
-            <button class="btn btn-primary" @click="execute"><span class="fa fa-play"></span> Execute</button>
-            <button class="btn btn-danger" @click="cancelExecute">Cancel</button>
+        <div class="lemonade-container" id="lemonade-container" :class="{'with-grid': showGrid}" >
+            <div class="lemonade" v-on:drop="drop" v-on:dragover="allowDrop" id="lemonade-diagram" 
+                v-on:click="diagramClick" :show-task-decoration="false" ref="diagram"
+                :style="{'pointer-events': showToolbarInternal && showToolbar ? 'auto': 'none'}">
+                <task-component v-for="task of tasks" :task="task" :instance="instance" :key="task.id" 
+                    :show-decoration="showTaskDecoration || showTaskDecorationInternal">
+                    </task-component>
+                <flow-component v-for="flow of flows" :flow="flow" :instance="instance"></flow-component>
+                <div class="ghost-select"><span></span></div>
+                <ctx-menu-component>
+                    
+                </ctx-menu-component>
+            </div>
         </div>
-    </modal-component>
-
-</div>
+        <modal-component v-if="showExecutionModal" @close="showExecutionModal = false">
+            <div slot="header">
+                <h4>Execution of workflow</h4>
+                Please, complete the required information for the execution of the workflow:
+            </div>
+            <div class="body" slot="body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Cluster:</label>
+                            <select class="form-control">
+                                <option value="1">Default</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label>Missing required parameters:</label>
+                            <p>
+                            There is no missing required parameter
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div slot="footer">
+                <button class="btn btn-primary" @click="execute"><span class="fa fa-play"></span> Execute</button>
+                <button class="btn btn-danger" @click="cancelExecute">Cancel</button>
+            </div>
+        </modal-component>
+    </div>
 </template>
 
 <script>
 import Vue from 'vue';
-import PerfectScrollbar from 'perfect-scrollbar';
-import PerfectScrollbarCss from 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
+import eventHub from '../app/event-hub';
 
 import lodash from 'lodash';
 
-import eventHub from '../app/event-hub';
-
-import {
-    CleanMissingComponent, DataReaderComponent, EmptyPropertiesComponent,
-    SplitComponent, PropertyDescriptionComponent
-}
-    from '../properties/properties-components.js';
-
+import PerfectScrollbar from 'perfect-scrollbar';
+import PerfectScrollbarCss from 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 import ModalComponent from '../modal/modal-component.js';
-import TaskComponent from '../task/task.vue';
-import FlowComponent from '../task/flow.vue';
 import CtxMenuComponent from '../ctx-menu/ctx-menu.vue';
 import DropDownComponent from '../ui/dropdown.vue';
+
 import html2canvas from 'html2canvas';
+
+import TaskComponent from '../task/task.vue';
+import FlowComponent from '../task/flow.vue';
 
 /*
 import highlight from 'highlight.js';
@@ -115,9 +110,6 @@ import { standUrl, tahitiUrl, authToken } from '../../config';
 
 const DiagramComponent = Vue.extend({
     computed: {
-        zoomPercent: function () {
-            return `${Math.round(100 * this.zoom, 0)}%`;
-        },
         flows() {
             if (this.renderFrom) {
                 if (this.renderFrom && this.renderFrom.flows) {
@@ -146,13 +138,14 @@ const DiagramComponent = Vue.extend({
             } else {
                 return this.$store.getters.getWorkflow;
             }
-        }
+        },
+        zoomPercent: function () {
+            return `${Math.round(100 * this.zoom, 0)}%`;
+        },
     },
     components: {
         'task-component': TaskComponent,
         'flow-component': FlowComponent,
-        'property-description-component': PropertyDescriptionComponent,
-        'empty-properties-component': EmptyPropertiesComponent,
         'modal-component': ModalComponent,
         'ctx-menu-component': CtxMenuComponent,
         'drop-down-component': DropDownComponent,
@@ -164,13 +157,17 @@ const DiagramComponent = Vue.extend({
         showToolbar: {
             default: true,
         },
+        showGrid: {
+            default: true,
+        },
         showTaskDecoration: false,
-        draggableTasks: true,
+        //draggableTasks: true,
         multipleSelectionEnabled: {
             default: true,
         },
         
     },
+    /*
     watch: {
         draggableTasks() {
             if (!this.draggableTasks) {
@@ -179,17 +176,20 @@ const DiagramComponent = Vue.extend({
                 this.instance.setDraggable(ids, this.draggableTasks);
             }
         }
-    },
+    },*/
     data() {
         return {
             showExecutionModal: false,
             showDeployModal: false,
+            deployInfo: {},
+
             zoomInEnabled: true,
             zoomOutEnabled: true,
-            selectedTask: null,
             zoom: 1.0,
+            
+            selectedTask: null,
             selectedElements: [],
-            deployInfo: {},
+
             showToolbarInternal: true,
             showTaskDecorationInternal: false,
         }
@@ -197,7 +197,6 @@ const DiagramComponent = Vue.extend({
     created() {
         if (this.$route.params.id) {
             this.changeWorkflowId(this.$route.params.id);
-            //this.loadWorkflow();
             this.init();
         }
         eventHub.$on('onclick-task', (taskComponent) => {
@@ -216,6 +215,7 @@ const DiagramComponent = Vue.extend({
             this.updateAttributeSuggestion();
         });
         eventHub.$on('onstart-flow', (interfaceName) => {
+            this.clearSelection(null);
             let sourceInterfaces = new Set(interfaceName.split(' '));
             let endPoints = this.instance.selectEndpoints();
             endPoints.each((endPoint) => {
@@ -239,7 +239,6 @@ const DiagramComponent = Vue.extend({
         });
     },
     mounted() {
-
         this.$root.$refs.toastr.defaultPosition = 'toast-bottom-full-width';
         this.currentZIndex = 10;
         this.init();
@@ -254,6 +253,12 @@ const DiagramComponent = Vue.extend({
         this.$el.addEventListener('keyup', this.keyboardAction, true);
         /* selection by dragging */
         self.diagramElement.addEventListener("mousedown", (ev) => {
+            let rightClick = (ev.which === 3)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+                    || (ev.button == 2); // IE, Opera 
+            
+            if (rightClick){
+                return;
+            }
             self.clearSelection(ev);
             let ghostSelect = document.getElementsByClassName('ghost-select');
             if (ghostSelect.length) {
@@ -280,7 +285,7 @@ const DiagramComponent = Vue.extend({
         deploy(ev){
             eventHub.$emit('onshow-deploy');
             this.oldZoom = this.zoom;
-            this.setZoomPercent(ev, 0.7);
+            this.setZoomPercent(ev, 0.85);
             this.showToolbarInternal = false;
             this.showTaskDecorationInternal = true;
             if (false){
@@ -323,62 +328,106 @@ const DiagramComponent = Vue.extend({
 
             Vue.nextTick(function () {
                 self.$store.dispatch('removeTask', task);
+                self.clearSelection();
             })
 
         },
         saveAsImage(){
             let self = this;
             html2canvas(this.$refs.diagram, {
-                onrendered: function(canvas) {
-                    let ctx = canvas.getContext('2d');
-                    let b64Start = 'data:image/svg+xml;base64,';
-                    
+                width: 3000, height: 3000, logging: false, allowTaint: false,
+                onclone: (clone) =>{
+                    let elem = clone.getElementById(this.$refs.diagram.id);
+                    elem.parentElement.style.height = '10000px';
+                    elem.style.transform = 'inherit';
+                    elem.parentElement.scrollTop = 0;
+                    console.debug(clone.querySelector('[xmlns]'));
                     /*
+                    elem.style.height = '10000px';
+                    elem.parentElement.parentElement.style.height = '10000px';
+                    elem.parentElement.parentElement.parentElement.style.height = '10000px';
+                    elem.style.background = 'red';*/
+                }}).then(
+                (canvas) => {
+                    //inversed, to get smallest
+                    let x0 = canvas.width, y0 = canvas.height, x1 = 0, y1 = 0; 
+                    self.tasks.forEach((task) => {
+                        let elem = document.getElementById(task.id);
+                        x0 = Math.min(task.left, x0);
+                        x1 = Math.max(task.left + elem.style.width, x1);
+                        y0 = Math.min(task.top, y0);
+                        y1 = Math.max(task.top  + elem.style.height, y1);
+                    });
+
+                    let targetCanvas = document.createElement('canvas');
+                    let targetCtx = targetCanvas.getContext('2d');
+                    let padding = 100;
+                    targetCanvas.width = x1 + 2 * padding;
+                    targetCanvas.height = y1 + 2 * padding;
+                    targetCtx.fillStyle = "white";
+                    targetCtx.fillRect(0, 0, targetCanvas.width, canvas.height);
+                   
+
+                    let ctx = canvas.getContext('2d');
                     let $flows = document.getElementsByClassName('jsplumb-connector');
                     for (var flow of $flows){
-                        let svg64 = btoa(flow.outerHTML);
-                        // prepend a "header"
-                        let image64 = b64Start + svg64;
+                        let xml = flow.innerHTML.replace(new RegExp('xmlns="http://www.w3.org/1999/xhtml" ', 'g'), '');
+                        xml = `<svg width="${flow.width.baseVal.value}" height="${flow.height.baseVal.value}" xmlns="http://www.w3.org/2000/svg">${xml}</svg>`;
+                        
+                        let DOMURL = window.URL || window.webkitURL || window;
                         let img = new Image();
-                        img.onload = () => {
-                            console.debug(flow.style.left, flow.style.top)
-                            ctx.drawImage(img, flow.style.left, flow.style.top);
-                        };
-                        // set it as the source of the img element
-                        img.src = image64;
-                    }*/
-                    let $endpoints = document.querySelectorAll('.jsplumb-endpoint > svg')
-                    for (var endpoint of $endpoints){
-                        let xml = new XMLSerializer().serializeToString(endpoint);
-                        let svg64 = btoa(xml);
-                        // prepend a "header"
-                        let image64 = b64Start + svg64;
-                        let img = new Image();
-                        document.body.appendChild(img);
-                        img.onload = (ev) => {
-                            console.debug(endpoint.style.left, flow.style.top)
-                            ctx.drawImage(ev.target, endpoint.style.left, endpoint.style.top);
-                        };
-                        // set it as the source of the img element
-                        img.src = image64;
+                        let svg = new Blob([xml], {type: 'image/svg+xml'});
+                        let url = DOMURL.createObjectURL(svg);
+                        let left = parseInt(flow.style.left);
+                        let top =  parseInt(flow.style.top);
+                        img.onload = function() {
+                            targetCtx.drawImage(img, left, top); 
+                            DOMURL.revokeObjectURL(url);
+                        }
+
+                        img.src = url;
                     }
-                    /*
-                    $endpoints = $('._jsPlumb_endpoint > svg', el);
-                    $endpoints.each(function() {
-                        $svg = $(this)
-                        offset = $svg.parent().position();
-                        svgStr = this.outerHTML;
-                        ctx.drawSvg(svgStr, offset.left, offset.top);
-                    });
-                    //# Convert canvas to Blob
-                    canvas.toBlob(function(blob) {
-                        //# Download Blob canvas
-                        saveAs(blob, 'teste.png')
-                    });
-                    */
-                    //document.body.appendChild(canvas);
-                }
-            });
+                    /**/
+                    let $endpoints = document.querySelectorAll('.jsplumb-endpoint > svg')
+                    let b64Start = 'data:image/svg+xml;base64,';
+                    for (var endpoint of $endpoints){
+                        let xml = endpoint.innerHTML.replace(new RegExp('xmlns="http://www.w3.org/1999/xhtml" ', 'g'), '');
+                        xml = `<svg width="25" height="25" xmlns="http://www.w3.org/2000/svg">${xml}</svg>`;
+                        
+                        let DOMURL = window.URL || window.webkitURL || window;
+                        let img = new Image();
+                        let svg = new Blob([xml], {type: 'image/svg+xml'});
+                        let url = DOMURL.createObjectURL(svg);
+                        let left = endpoint.parentElement.offsetLeft;
+                        let top =  endpoint.parentElement.offsetTop;
+                        img.onload = function() {
+                            targetCtx.drawImage(img, left, top); 
+                            DOMURL.revokeObjectURL(url);
+                        }
+
+                        img.src = url;
+                    }
+                    window.setTimeout(() => {
+                        //document.body.appendChild(canvas);
+                        //targetCtx.translate(-x0 + 50, -y0 + 50);
+                        
+
+                        targetCtx.drawImage(canvas, 0, 0);
+                        
+                        targetCtx.fillStyle = "black";
+                        targetCtx.font = "12pt Verdana";
+                        targetCtx.fillText(`${self.workflow.name}. Image generated at ${new Date()}`, 
+                            20, targetCanvas.height - 20);
+                        targetCtx.lineWidth = 4;
+                        targetCtx.strokeStyle="#000000";
+                        targetCtx.strokeRect(0, 0, targetCanvas.width, targetCanvas.height);
+                        //document.body.appendChild(targetCanvas);
+                        let link = document.createElement('a');
+                        link.setAttribute('download', `workflow_${self.workflow.id}.png`);
+                        link.setAttribute('href', targetCanvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+                        link.click();
+                    }, 1000);
+                });
         },
         clearTasks() {
             this.$store.dispatch('clearTasks');
@@ -513,7 +562,7 @@ const DiagramComponent = Vue.extend({
             }
         },
         clearSelection(ev) {
-            if (ev.target.taskName === 'path') {
+            if (ev && ev.target.taskName === 'path') {
                 // click on flow
                 return;
             }
@@ -839,169 +888,10 @@ const DiagramComponent = Vue.extend({
                         source_id, source_port,
                         target_id, target_port,
                     });
+                    eventHub.$emit('add-flow');
                 }
             });
         },
-        
-        updateAttributeSuggestion(){
-            let attributeSuggestion = {};
-            TahitiAttributeSuggester.compute(this.workflow, this._queryDataSource, 
-                (result) => { 
-                    Object.keys(result).forEach(key => {
-                        attributeSuggestion[key] = result[key].uiPorts;
-                    });
-                    eventHub.$emit('update-attribute-suggestion', attributeSuggestion);
-                });
-        },
-        tsort(ev) {
-            let tasksInfo = {}, // hash: stringified id of the task => { id: id, _targets: lisf of ids }
-                sorted = [], // sorted list of IDs ( returned value )
-                visited = {}; // hash: id of already visited task => true
-
-            this.tasks.forEach((task) => { 
-                task.uiPorts = {inputs: [], output: []};
-                tasksInfo[task.id] = {targets: [], task: task};
-            });
-            this.flows.forEach((flow) => {
-                tasksInfo[flow.source_id].targets.push({
-                    target: flow.target_id, 
-                    targetPortId: flow.target_port
-                });
-            });
-            // 2. topological sort
-            Object.keys(tasksInfo).forEach(function visit(taskId, ancestors) {
-                var task = tasksInfo[taskId];
-
-                // if already exists, do nothing
-                if (visited[taskId]) return;
-
-                if (!Array.isArray(ancestors)) ancestors = [];
-
-                ancestors.push(taskId);
-
-                visited[taskId] = true;
-
-                task.targets.forEach(function (after) {
-                    if (ancestors.indexOf(after) >= 0)  // if already in ancestors, a closed chain exists.
-                        throw new Error('closed chain : ' + after.target + ' is in ' + taskId);
-                    visit(after.target.toString(), ancestors.map(function (v) { return v })); // recursive call
-                });
-                sorted.unshift(taskId);
-            });
-            let cloneAndFlat = function(listOfAttrs){
-                return Array.prototype.concat.apply([], listOfAttrs.slice().map(
-                    function(item) {return item.attributes;}));
-            }
-            sorted.forEach((k) => {
-                switch(tasksInfo[k].task.operation.slug){
-                    case 'data-reader':
-                        tasksInfo[k].task.uiPorts.output = ['_a_','_b_', '_c_']
-                        break;
-                    case 'aggregation':
-                        tasksInfo[k].task.uiPorts.output = tasksInfo[k].task.forms.attributes.value.slice()
-                        Array.prototype.push.apply(tasksInfo[k].task.uiPorts.output, 
-                            tasksInfo[k].task.forms.function.value.map((v) => {return v.alias}));
-                        break;
-                    case 'apply-model':
-                        tasksInfo[k].task.uiPorts.output = cloneAndFlat(tasksInfo[k].task.uiPorts.inputs);
-                        tasksInfo[k].task.uiPorts.output.push(tasksInfo[k].task.forms.prediction.value);
-                        break
-                    case 'comment':
-                        return;
-                    case 'feature-indexer':
-                        tasksInfo[k].task.uiPorts.output = cloneAndFlat(tasksInfo[k].task.uiPorts.inputs);
-                        let aliases = [];
-                        if (tasksInfo[k].task.forms.alias.value){
-                            aliases = tasksInfo[k].task.forms.alias.value.split(',').map((v) => {return v.trim()});
-                        }
-                        if (tasksInfo[k].task.forms.attributes.value){
-                            while(tasksInfo[k].task.forms.attributes.value.length > aliases.length){
-                                let attr = tasksInfo[k].task.forms.attributes.value[aliases.length];
-                                aliases.push(`${attr}_indexed`)
-                            }
-                        }
-                        Array.prototype.push.apply(tasksInfo[k].task.uiPorts.output, aliases);
-                        break;
-                    case 'transformation':
-                    case 'feature-assembler':
-                        tasksInfo[k].task.uiPorts.output = cloneAndFlat(tasksInfo[k].task.uiPorts.inputs);
-                        tasksInfo[k].task.uiPorts.output.push(tasksInfo[k].task.forms.alias.value);
-                        break;
-                    case 'add-rows':
-                        /* Columns from first data set */
-                        let inputs = tasksInfo[k].task.uiPorts.inputs.filter(
-                            function(input) { 
-                                return parseInt(input.targetPortId) === 5; //hard coded id for 'input data 1' 
-                            }) || [];
-                        tasksInfo[k].task.uiPorts.output = cloneAndFlat(inputs);
-                        break;
-                    case 'add-columns':
-                    case 'join':
-                        /* Group attributes by name */
-                        let groupedFields = cloneAndFlat(tasksInfo[k].task.uiPorts.inputs).reduce((acc, val) => {
-                            (acc[val] = acc[val] || []).push(val);
-                            return acc;
-                        }, {});
-                        /* Change the name of duplicated attributes, suffixing a number */
-                        let result = [];
-                        for(var property in groupedFields) {
-                            if (groupedFields.hasOwnProperty(property)) {
-                                if (groupedFields[property].length > 1){
-                                    for(var i = 0; i < groupedFields[property].length - 1; i++){
-                                        result.push(property + i);
-                                    }
-                                } else {
-                                    result.push(property);
-                                }
-                            }
-                        }
-                        //tasksInfo[k].task.uiPorts.output = cloneAndFlat(tasksInfo[k].task.uiPorts.inputs);
-                        tasksInfo[k].task.uiPorts.output = result;
-                        break;
-                    case 'projection':
-                        tasksInfo[k].task.uiPorts.output = cloneAndFlat(tasksInfo[k].task.uiPorts.inputs);
-                        Array.prototype.push.apply(tasksInfo[k].task.uiPorts.output, tasksInfo[k].task.forms.attributes);
-                        break;
-                    case 'difference':
-                    case 'set-intersection':
-                    case 'clean-missing':
-                        /* It is not possible to know which attribute will be removed, so, keep them all */
-                    case 'split':
-                    case 'sample':
-                    case 'sort': 
-                    case 'remove-duplicated-rows':
-                    case 'filter-selection':
-                    case 'replace-value':
-                        tasksInfo[k].task.uiPorts.output = cloneAndFlat(tasksInfo[k].task.uiPorts.inputs);
-                        break;
-                    case 'classification-model':
-                        /*
-                        Array.prototype.push.apply(tasksInfo[k].task.uiPorts.output, 
-                            tasksInfo[k].task.forms.features.value);
-                        Array.prototype.push.apply(tasksInfo[k].task.uiPorts.output, 
-                            tasksInfo[k].task.forms.label.value);
-                        */
-                        break;
-
-                }
-                tasksInfo[k].targets.forEach((follow) => {
-                    tasksInfo[follow.target].task.uiPorts.inputs.push(
-                        {targetPortId: follow.targetPortId, 
-                            attributes: tasksInfo[k].task.uiPorts.output});
-                    /*console.debug(tasksInfo[k].task.operation.slug, '=>',
-                        tasks[follow].task.operation.slug, ': ', tasksInfo[k].task.uiPorts.output,
-                        tasks[follow].task.uiPorts.inputs);*/
-                });
-                /*
-                console.debug(`|${tasksInfo[k].task.operation.slug}|`, 
-                        Array.from(new Set(tasksInfo[k].task.uiPorts.inputs)),
-                        tasksInfo[k].task.uiPorts.inputs);
-                        */
-                console.debug(`|${tasksInfo[k].task.operation.slug}|`, 
-                        tasksInfo[k].task.uiPorts.inputs,
-                        tasksInfo[k].task.uiPorts.output);
-            });
-        }
     },
 });
 

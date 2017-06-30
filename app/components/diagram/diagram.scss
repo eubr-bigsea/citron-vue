@@ -22,13 +22,13 @@ $elementHeight: 45px;
 
 .has-2-ports {
         text-align: center;
-        width: $elementWidth / 2;
+        max-width: $elementWidth / 2;
 }
 .has-3-ports {
         margin: 10px 0;
         padding: 0px 5px;
         text-align: center;
-        width: $elementWidth / 3;
+        max-width: $elementWidth / 3;
         font-size:.8em;
 }
 
@@ -96,7 +96,6 @@ li.dragging {
     width:100%; 
 }
 #lemonade-diagram {
-    background-image: url(grid1.png);
     width: 2000px;
     height: 4000px;
     .ghost-active {
@@ -117,6 +116,10 @@ li.dragging {
         cursor: default !important;
     }
 }
+.with-grid {
+    background-image: url(grid1.png);
+}
+
 #lemonade, .lemonade {
     position: relative;
     margin-top: 0px;
@@ -130,11 +133,13 @@ li.dragging {
     -ms-user-select: none;             /* Internet Explorer/Edge */
     user-select: none;                     /* Non-prefixed version, currently
                                                                 not supported by any browser */
+
     .task {
         border-width: 1px;
         font-family: Verdana;
         font-size: 7pt;
         background: white;
+        opacity: 1;
         
         &.completed {
             border: none;
@@ -214,11 +219,12 @@ li.dragging {
                     display: none;
             }
             em {
-                    vertical-align: top !important;
-                    bottom: inherit;
-                    margin-top: 3px;
-                    font-size: 10pt !important;
-                    top: 5%;
+                font-family: Verdana !important;
+                vertical-align: top !important;
+                bottom: inherit;
+                margin-top: 3px;
+                font-size: 8pt !important;
+                top: 5%;
             }
             em:before {
                     font: normal normal normal 14px/1 FontAwesome;
@@ -261,7 +267,8 @@ li.dragging {
             top: 55%;
             padding: 0 5px;
             position: absolute;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-style: normal;
+            font-family: Verdana,Tahoma, Geneva, sans-serif;
             font-size: 6pt !important;
         }
         &.operation {
@@ -315,7 +322,7 @@ li.dragging {
 }
 .endpoint-label {
     color: $color5;
-    background: $color6;
+    background: /*$color6*/ transparent;
     font-size: 8pt;
     &.input {
         margin-top: -20px;

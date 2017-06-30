@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row small-padding">
             <div class="col-md-12">
-                <h2>Data source</h2>
+                <h2>{{$tc('titles.dataSource', 2)}}</h2>
             </div>
             <div class="col-md-12">
                 <div class="panel panel-primary">
@@ -11,48 +11,33 @@
                     </div>
                     <div class="panel-body">
                             <div class="col-md-6">
-                                <label>Name: </label>
+                                <label>{{$tc('common.name')}}: </label>
                                 <input type="text" class="form-control" v-model="dataSource.name"/>
                             </div>
                             <div class="col-md-3">
-                                <label>Format: </label>
-                                <select v-model="dataSource.format" class="form-control">
-                                    <option></option>
-                                    <option value="CSV">CSV</option>
-                                    <option value="Parquet">Parquet</option>
+                                <label>{{$tc('common.format')}}: </label>
+                                <select class="form-control" v-model="dataSource.format">
+                                    <option v-for="fmt in formats" v-bind:value="fmt">{{fmt}}</option>
                                 </select>
                             </div>
                             <div class="col-md-3 text-right">
-                                <div class="checkbox">
-                                    <label class="checkbox-inline"><input type="checkbox" value="" v-model="dataSource.enabled">Enabled</label>
-                                </div>
+                                <small>{{ $t('common.enabled', {gender: 'male'}) }}</small>
+                                <switches v-model="dataSource.enabled" type-bold="true" theme="bootstrap" color="primary"></switches>
                             </div>
                             <div class="col-md-12">
-                                <label>Description:</label>
+                                <label>{{$tc('common.description')}}:</label>
                                 <textarea class="form-control" v-model="dataSource.description"></textarea>
                             </div>
                             <div class="col-md-3">
                                 <label>Attribute delimiter (CSV only): </label>
-                                <input type="text" class="form-control"/>
+                                <input type="text" class="form-control" style="width: 60px" v-model="dataSource.attribute_delimiter"/>
                             </div>
                             <div class="col-md-3">
                                 <label>Record delimiter (CSV only): </label>
-                                <input type="text" class="form-control"/>
-                            </div>
-                            <div class="col-md-6">
-                                <label>Missing value representation:</label>
-                                <input type="text" class="form-control"/>
-                            </div>
-                            <div class="col-md-4">
-                                <label>Created: </label> {{dataSource.created}}<br/>
-                                <label>Owner: </label> {{dataSource.user_name}} (id: {{dataSource.user_id}})
-                            </div>
-                            <div class="col-md-4">
-                                <label>Rows (est.): </label> {{dataSource.estimated_rows}}<br/>
-                                <label>Size (est.): </label> {{dataSource.estimated_size_in_mega_bytes}} MB
+                                <input type="text" class="form-control" style="width: 60px" v-model="dataSource.record_delimiter"/>
                             </div>
                             <div class="col-md-12">
-                                <button class="btn btn-primary"><span class="fa fa-save"></span> Save</button>
+                                <button class="btn btn-primary" @click.stop="save"><span class="fa fa-save"></span> {{$tc('actions.save')}}</button>
                             </div>
                         </div>
                 </div>
@@ -60,37 +45,45 @@
             <div class="col-md-12">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
-                        Attributes
+                        {{$tc('common.attribute', 2)}}
                     </div>
                     <div class="panel-body">
                         <table class="table table-bordered table-stripped" v-if="dataSource.attributes && dataSource.attributes.length > 0">
                             <thead>
                                 <tr>
-                                    <th class="primary text-center">Name</th>
-                                    <th class="primary text-center">Type</th>
-                                    <th class="primary text-center">Nullable</th>
-                                    <th class="primary text-center">Size</th>
-                                    <th class="primary text-center">Precision</th>
-                                    <th class="primary text-center">Scale</th>
-                                    <th class="primary text-center">Is feature?</th>
-                                    <th class="primary text-center">Is label</th>
+                                    <th class="primary text-center">{{$tc('common.name')}}</th>
+                                    <th class="primary text-center">{{$tc('common.type')}}</th>
+                                    <th class="primary text-center">{{$tc('common.nullable')}}</th>
+                                    <th class="primary text-center">{{$tc('common.size')}}</th>
+                                    <th class="primary text-center">{{$tc('common.precision')}}</th>
+                                    <th class="primary text-center">{{$tc('common.scale')}}</th>
+                                    <th class="primary text-center">{{$tc('dataSourceDetail.missingRepresentation')}}</th>
+                                    <th class="primary text-center"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="attr in dataSource.attributes">
-                                    <td>{{attr.name}}</td>
-                                    <td>{{attr.type}}</td>
-                                    <td>{{attr.nullable}}</td>
-                                    <td>{{attr.size}}</td>
-                                    <td>{{attr.precision}}</td>
-                                    <td>{{attr.scale}}</td>
-                                    <td>{{attr.feature}}</td>
-                                    <td>{{attr.label}}</td>
+                                <tr v-for="(attr, index) in dataSource.attributes" track-by="attr.id">
+                                    <td><input v-model="attr.name" class="form-control"/></td>
+                                    <td>
+                                        <select class="form-control" v-model="attr.type">
+                                            <option v-for="dt in dataTypes" v-bind:value="dt">{{dt}}</option>
+                                        </select>
+                                    </td>
+                                    <td><switches v-model="attr.nullable" type-bold="true" theme="bootstrap" color="primary"></switches></td>
+                                    <td class="col-xs-1"><input type="number" class="form-control" maxlenght="2" v-model="attr.size" min="0"/></td>
+                                    <td class="col-xs-1"><input type="number" class="form-control" maxlenght="2" v-model="attr.precision" min="0"/></td>
+                                    <td class="col-xs-1"><input type="number" class="form-control" maxlenght="2" v-model="attr.scale" min="0"/></td>
+                                    <td><input class="form-control" v-model="attr.missing_representation" maxlength="200"/></td>
+                                    <td>
+                                        <button class="btn btn-xs" v-show="index !== 0"><span class="fa fa-chevron-up"></span></button>
+                                        <button class="btn btn-xs" v-show="index !== dataSource.attributes.length -1"><span class="fa fa-chevron-down"></span></button>
+                                        <button class="btn btn-xs"><span class="fa fa-remove"></span></button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                         <div v-else>
-                            No attributes defined.
+                           {{ $t("dataSourceDetail.noAttributes") }}
                         </div>
                     </div>
                 </div>
@@ -98,16 +91,16 @@
             <div class="col-md-12">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
-                        Permissions
+                        {{ $tc("common.permission", 2) }}
                     </div>
                     <div class="panel-body">
                         <table class="table table-bordered table-stripped" v-if="dataSource.permissions && dataSource.permissions.length > 0">
                             <thead>
                                 <tr>
-                                    <th class="primary col-md-1 text-center">User Id</th>
-                                    <th class="primary text-center">User name</th>
-                                    <th class="primary text-center">Login</th>
-                                    <th class="primary text-center">Permission</th>
+                                    <th class="primary col-md-1 text-center">{{ $t("common.userId") }}</th>
+                                    <th class="primary text-center">{{ $t("common.userName") }}</th>
+                                    <th class="primary text-center">{{ $t("common.userLogin") }}</th>
+                                    <th class="primary text-center">{{ $tc("common.permission", 1) }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -120,7 +113,7 @@
                             </tbody>
                         </table>
                         <div v-else>
-                            No permissions defined.
+                            {{ $t("dataSourceDetail.noPermissions") }}
                         </div>
                     </div>
                 </div>
@@ -129,21 +122,31 @@
     </div>
 </template>
 <style>
+    .vue-switcher--bold div {
+        top: 0 !important;
+    }
 </style>
 <script>
     import Vue from 'vue';
     import {standUrl, tahitiUrl, authToken, caipirinhaUrl, limoneroUrl} from '../config';
+    import Switches from 'vue-switches';
     const DataSourceDetailComponent = Vue.extend({
         store,
         mounted: function () {
             this.performLoad()
         },
         components: {
+            Switches
         },
         /* Data */
         data() {
             return {
-                dataSource: {}
+                dataSource: {},
+                dataTypes: ['CHARACTER', 'DOUBLE', 'DECIMAL', 'DATE',
+                            'DATETIME', 'FLOAT','INTEGER', 'LONG',
+                            'TEXT', 'TIME', 'TIMESTAMP', 'VECTOR'],
+                formats: ['XML_FILE','NETCDF4','HDF5','SHAPEFILE','TEXT',
+                        'CUSTOM','JSON','CSV','PICKLE']
             };
         },
         /* Methods */
@@ -159,6 +162,19 @@
                     self.dataSource = response.body;
                 })
             },
+            save() {
+                let self = this;
+                let url = `${limoneroUrl}/datasources/${this.dataSource.id}?token=${authToken}`;
+                let headers = {};
+                
+                return Vue.http.patch(url, self.dataSource, headers).then(
+                    (error) => {
+                        console.debug(error);
+                    },
+                    (response) =>{
+                        self.dataSource = response.body;
+                    });
+            }
         },
         mixins: [],
     });
