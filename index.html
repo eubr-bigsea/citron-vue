@@ -30,10 +30,16 @@
                     <li class="nav-item">
                         <router-link to="/jobs/list" active-class="active"><span class="fa fa-tasks"></span> Jobs</router-link>
                     </li>
-                    <li class="nav-item">
-                        <router-link to="/data-source/list" active-class="active"><span class="fa fa-database"></span> Data sources</router-link>
-                    </li>
                 </ul>
+                <dropdown-menu :label="$tc('titles.dataSource', 2)" icon="fa fa-database">
+                    <li>
+                        <router-link to="/data-source/list" active-class="active"><span class="fa fa-database"></span> Manage</router-link>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <router-link to="/privacy-policy/list" active-class="active"><span class="fa fa-lock"></span> Privacy policies</router-link>
+                    </li>
+                </dropdown-menu>
                 <ul class="nav navbar-nav navbar-right">
                     <user-card label="User information">
                         <li>

@@ -12,6 +12,7 @@ import ToolbarComponent from '../toolbox/toolbox';
 //import LoadWorkflowComponent from '../load-workflow/load-workflow';
 import _ from 'lodash'
 
+import {standUrl, tahitiUrl, authToken, caipirinhaUrl, limoneroUrl} from '../../config';
 import {
     EmptyPropertiesComponent,
     PropertyDescriptionComponent,
@@ -101,6 +102,9 @@ const AppComponent = Vue.extend({
             filtered: false,
             attributeSuggestion: {},
             showDeploy: false,
+            context: {
+                LIMONERO_URL: limoneroUrl,
+            }
             //showModalLoadWorkflow: false
         }
     },
@@ -213,8 +217,9 @@ const AppComponent = Vue.extend({
             }
         },
         _queryDataSource(id, callback) {
-            var attributes = null;
-            
+            let attributes = null;
+            let self = this;
+
             id = parseInt(id);
             if (TahitiAttributeSuggester.cached === undefined){
                 TahitiAttributeSuggester.cached = {};
@@ -223,19 +228,20 @@ const AppComponent = Vue.extend({
                 attributes = TahitiAttributeSuggester.cached[id];
                 callback(attributes);
             } else {
-                var req=new XMLHttpRequest();
-                req.open("GET",  'http://beta.ctweb.inweb.org.br/limonero/datasources/' + id + '?token=123456&attributes_name=true');
-                req.onreadystatechange = function() {
-                    if (req.readyState == XMLHttpRequest.DONE) {
-                        if (callback) {
-                            var ds = JSON.parse(req.responseText);
-                            attributes = ds.attributes.map(function(attr) {return attr.name});
-                            TahitiAttributeSuggester.cached[id] = attributes;
-                            callback(attributes);
-                        }
+                let url = `${limoneroUrl}/datasources/${id}`;
+                let headers = {'X-Auth-Token': authToken};
+                Vue.http.get(url, {params: {attributes_name: true}, headers}).then(
+                    (response) =>{
+                        let ds = response.body;
+                        attributes = ds.attributes.map(function(attr) {return attr.name});
+                        TahitiAttributeSuggester.cached[id] = attributes;
+                        callback(attributes);
+                    },
+                    (error) => {
+                        self.$root.$refs.toastr.w('At least one data source is invalid in workflow');
+                        callback([]);
                     }
-                }
-                req.send({});
+                );
             }
         },
         updateAttributeSuggestion(callback){

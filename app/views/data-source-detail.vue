@@ -14,15 +14,19 @@
                                 <label>{{$tc('common.name')}}: </label>
                                 <input type="text" class="form-control" v-model="dataSource.name"/>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label>{{$tc('common.format')}}: </label>
                                 <select class="form-control" v-model="dataSource.format">
                                     <option v-for="fmt in formats" v-bind:value="fmt">{{fmt}}</option>
                                 </select>
                             </div>
-                            <div class="col-md-3 text-right">
+                            <div class="col-md-2 text-right">
                                 <small>{{ $t('common.enabled', {gender: 'male'}) }}</small>
                                 <switches v-model="dataSource.enabled" type-bold="true" theme="bootstrap" color="primary"></switches>
+                            </div>
+                            <div class="col-md-2 text-right">
+                                <small>{{ $t('dataSource.privacyAware') }}</small>
+                                <switches v-model="dataSource.privacy_aware" type-bold="true" theme="bootstrap" color="primary"></switches>
                             </div>
                             <div class="col-md-12">
                                 <label>{{$tc('common.description')}}:</label>
@@ -36,8 +40,13 @@
                                 <label>Record delimiter (CSV only): </label>
                                 <input type="text" class="form-control" style="width: 60px" v-model="dataSource.record_delimiter"/>
                             </div>
-                            <div class="col-md-12">
+                             <div class="col-md-3">
+                                <label>Text delimiter (CSV only): </label>
+                                <input type="text" class="form-control" style="width: 60px" v-model="dataSource.text_delimiter"/>
+                            </div>
+                            <div class="col-md-12 margin-top-10">
                                 <button class="btn btn-primary" @click.stop="save"><span class="fa fa-save"></span> {{$tc('actions.save')}}</button>
+                                <router-link :to="{name: 'data-source-list'}" class="btn btn-default">{{$tc('actions.cancel')}}</router-link>
                             </div>
                         </div>
                 </div>
@@ -57,7 +66,7 @@
                                     <th class="primary text-center">{{$tc('common.size')}}</th>
                                     <th class="primary text-center">{{$tc('common.precision')}}</th>
                                     <th class="primary text-center">{{$tc('common.scale')}}</th>
-                                    <th class="primary text-center">{{$tc('dataSourceDetail.missingRepresentation')}}</th>
+                                    <th class="primary text-center">{{$tc('dataSource.missingRepresentation')}}</th>
                                     <th class="primary text-center"></th>
                                 </tr>
                             </thead>
@@ -83,7 +92,7 @@
                             </tbody>
                         </table>
                         <div v-else>
-                           {{ $t("dataSourceDetail.noAttributes") }}
+                           {{ $t("dataSource.noAttributes") }}
                         </div>
                     </div>
                 </div>
@@ -113,7 +122,7 @@
                             </tbody>
                         </table>
                         <div v-else>
-                            {{ $t("dataSourceDetail.noPermissions") }}
+                            {{ $t("dataSource.noPermissions") }}
                         </div>
                     </div>
                 </div>
@@ -125,12 +134,15 @@
     .vue-switcher--bold div {
         top: 0 !important;
     }
+    .margin-top-10 {
+        margin-top: 10px;
+    }
 </style>
 <script>
     import Vue from 'vue';
     import {standUrl, tahitiUrl, authToken, caipirinhaUrl, limoneroUrl} from '../config';
     import Switches from 'vue-switches';
-    const DataSourceDetailComponent = Vue.extend({
+    const dataSourceComponent = Vue.extend({
         store,
         mounted: function () {
             this.performLoad()
@@ -168,15 +180,16 @@
                 let headers = {};
                 
                 return Vue.http.patch(url, self.dataSource, headers).then(
-                    (error) => {
-                        console.debug(error);
-                    },
                     (response) =>{
-                        self.dataSource = response.body;
+                        //self.dataSource = response.body;
+                        self.$root.$refs.toastr.s('Success');
+                    },
+                    (error) => {
+                       self.$root.$refs.toastr.e(error);
                     });
             }
         },
         mixins: [],
     });
-    export default DataSourceDetailComponent;
+    export default dataSourceComponent;
 </script>

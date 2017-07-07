@@ -3,11 +3,11 @@
         <div class="row small-padding">
             <div class="col-md-12">
                 <h2>{{ $tc('titles.dataSource', 2) }}</h2>
-            </div>
-            <div class="col-md-12" v-if="dataSources.pagination && dataSources.pagination.total > 0">
                 <div class="pull-right">
                     <a href="#/data-source/add" class="btn btn-primary" role="button"><span class="fa fa-plus"></span> Upload a new data set</a>
                 </div>
+            </div>
+            <div class="col-md-12" v-if="dataSources.pagination && dataSources.pagination.total > 0">
 
                 <table class="table table-striped table-bordered">
                     <thead>
@@ -48,7 +48,7 @@
                             <td class="text-center">
                                 <dropdown-component variant="btn-default" label="Edit" :link="resolve( {name: 'data-source-detail', params: {id: ds.id }})">
                                     <li>
-                                        <a href="" title="Remove" @click.prevent="remove(ws.id)">
+                                        <a href="" title="Remove" @click.prevent="remove(ds.id)">
                                             <span class="fa fa-trash-o"></span>
                                             </span> Remove
                                         </a>
@@ -57,6 +57,17 @@
                                         <a href="" title="Execute" @click="">
                                             <span class="fa fa-play-circle-o"></span> Execute
                                         </a>
+                                    </li>
+                                    <li class="divider" v-if="ds.privacy_aware"></li>
+                                    <li>
+                                        <a href="" title="Execute" @click.prevent="infer(ds.id)">
+                                            <span class="fa fa-bug"></span> Infer schema
+                                        </a>
+                                    </li>
+                                    <li v-if="ds.privacy_aware">
+                                        <router-link :to="{name: 'data-source-privacy', params: { id: ds.id }}">
+                                            <span class="fa fa-lock"></span> Privacy
+                                        </router-link>
                                     </li>
                                 </dropdown-component>
                             </td>
@@ -88,7 +99,7 @@
     import MomentMixin from '../components/mixins/moment-mixin';
     import DropdownComponent from '../components/ui/dropdown.vue';
     import {
-        limoneroUrl
+        limoneroUrl, authToken
     } from '../config';
 
     const DataSourceListComponent = Vue.extend({
@@ -122,6 +133,19 @@
                 ev.stopPropagation();
                 return false;
             },
+            infer(id){
+                let self = this;
+                let headers = {'X-Auth-Token': authToken};
+                let params = {use_header: true, quote_char: '"'}
+                let url = `${limoneroUrl}/datasources/infer-schema/${id}`
+                Vue.http.post(url, params, {headers}).then(
+                    (response) =>{
+                        self.$root.$refs.toastr.s('Success');
+                    },
+                    (error) => {
+                       self.$root.$refs.toastr.e(error);
+                    });
+            },
             load(params) {
                 let self = this;
                 this.$store.dispatch('updatePageParameters', {
@@ -130,7 +154,7 @@
                 });
                 let url = `${limoneroUrl}/datasources?enabled=true&simple=true`;
                 let headers = {
-                    'X-Auth-Token': '123456'
+                    'X-Auth-Token': authToken
                 }
                 Vue.http.get(url, {
                     params,

@@ -1,7 +1,11 @@
 const citron_messages = {
   en: {
     actions: {
-        save: 'Save'
+        save: 'Save',
+        cancel: 'Cancel',
+        delete: 'Delete',
+        edit: 'Edit',
+        add: 'Add new {type}',
     },
     common: {
         action: 'Action | Actions',
@@ -23,13 +27,26 @@ const citron_messages = {
         userLogin: 'User login',
         userName: 'User name',
     },
-    titles: {
-        dataSource: 'Data source | Data sources',
+    messages: {
+        confirmRemove: 'Are you sure you want to remove this record?',
     },
-    dataSourceDetail: {
+    titles: {
+        action: 'Action | Actions',
+        dataSource: 'Data source | Data sources',
+        globalPrivacyPolicy: 'Global privacy policy|Global privacy policies',
+    },
+    privacy: {
+        anonymizationTechnique: 'Anonymization technique',
+        privacyType: 'Privacy type',
+        hierarchy: 'Hierarchy',
+        attributePrivacyGroup: 'Attribute privacy group',
+    },
+    dataSource: {
+      missingRepresentation: 'Missing representation',
       noPermissions: 'No permissions defined',
       noAttributes: 'No attributes defined',
-      missingRepresentation: 'Missing representation'
+      privacy: 'Privacy',
+      privacyAware: 'Privacy aware',
     }
   },
   pt: {
@@ -54,7 +71,7 @@ const citron_messages = {
     titles: {
         dataSource: 'Fonte de dados | Fontes de dados',
     },
-    dataSourceDetail: {
+    dataSource: {
       permission: 'Permissão | Permissões',
       noPermissions: 'Nenhuma permissão definida',
       noAttributes: 'Nenhum atributo definida',

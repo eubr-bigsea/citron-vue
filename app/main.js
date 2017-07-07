@@ -10,6 +10,7 @@ import jsPlumb from 'jsplumb';
 import './components/diagram/diagram.scss';
 import "bootstrap-sass/assets/stylesheets/_bootstrap.scss";
 import './components/app/app.scss';
+import DropdownMenuComponent from './components/ui/dropdown-menu.vue';
 import store from './components/vuex/store'
 
 import VueProgressBar from 'vue-progressbar'
@@ -82,7 +83,8 @@ new Vue({
     components: {
         'app-component': AppComponent,
         'toolbox-component': ToolboxComponent,
-        'user-card': UserCardComponent
+        'user-card': UserCardComponent,
+        'dropdown-menu': DropdownMenuComponent,
     },
     methods: {
         locale(l) {

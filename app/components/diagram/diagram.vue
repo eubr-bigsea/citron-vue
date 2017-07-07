@@ -857,7 +857,7 @@ const DiagramComponent = Vue.extend({
                 let target = info.originalTargetEndpoint.getUuid();
 
                 self.removeFlow(source + '-' + target);
-
+                
                 let [source_id, source_port] = info.newSourceEndpoint.getUuid().split('/');
                 let [target_id, target_port] = info.newTargetEndpoint.getUuid().split('/');
                 self.addFlow({
@@ -883,10 +883,13 @@ const DiagramComponent = Vue.extend({
                     //self.instance.detach(con);
                     let [source_id, source_port] = info.sourceEndpoint.getUuid().split('/');
                     let [target_id, target_port] = info.targetEndpoint.getUuid().split('/');
+                    let source_port_name = '';
+                    let target_port_name = '';
                     self.instance.detach(con);
                     self.addFlow({
-                        source_id, source_port,
+                        source_id, source_port, 
                         target_id, target_port,
+                        source_port_name, target_port_name
                     });
                     eventHub.$emit('add-flow');
                 }

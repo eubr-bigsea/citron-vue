@@ -77,17 +77,16 @@ const CheckboxComponent = Vue.extend({
     methods: {
         updated(e) {
             eventHub.$emit('update-form-field-value', this.field, 
-                this.checked ? '1' : '0');
+                ! this.checked ? '1' : '0');
         }
     },
     computed: {
-        xchecked(){
+        checked(){
             return this.value === 1 || this.value === '1';
         },
     },
     data(){
         return {
-            checked: '0',
             id: '',
         };
     },
@@ -98,8 +97,12 @@ const CheckboxComponent = Vue.extend({
         this.id = `check_${this._uid}`;
     },
     props: { value: 0, field: null},
-    template: '<div class="checkbox"><input type="checkbox" v-model="checked" @change="updated" value="1" :id="id" data-algo="true"/> ' +
-    '<label :for="id">{{field.label}}</label> <span class="fa fa-question-circle-o pull-right" :title="field.help"></span></div>'
+    template: `
+        <div class="checkbox"> 
+            <input type="checkbox" v-model="checked" @change="updated" value="1" :id="id" data-algo="true"/>
+            <label :for="id">{{field.label}}</label>
+            <span class="fa fa-question-circle-o pull-right" :title="field.help"></span>
+        </div>`,
 });
 
 const IndeterminatedCheckboxComponent = Vue.extend({
@@ -237,19 +240,36 @@ const LookupComponent = Vue.extend({
         updated(e) {
             this.selected = e.target.value;
             eventHub.$emit('update-form-field-value', this.field, e.target.value);
+        },
+        replacer(tpl, data) {
+            var re = /\$\{([^\)]+)?\}/g, match;
+            while(match = re.exec(tpl)) {
+                tpl = tpl.replace(match[0], data[match[1]])
+                re.lastIndex = 0;
+            }
+            return tpl;
         }
     },
-    props: { value: null, field: null },
+    props: { value: null, field: null, context: {}},
     data() {
         return {
-            selected: null,
             options: [],
+        }
+    },
+    computed: {
+        selected() {
+            return this.value || this.field.default;
         }
     },
     mounted() {
         if (this.field.values_url) {
+            
             let self = this;
-            this.$http.get(this.field.values_url).then(function (response) {
+            let url = self.field.values_url;
+            if (url.startsWith('`')){
+                url = self.replacer(url.substring(1, url.length -1), self.context);
+            }
+            self.$http.get(url).then(function (response) {
                 self.selected = self.value;
                 this.options = response.data.map((v) => {
                     return { "key": v.id, "value": v.name };
@@ -257,9 +277,14 @@ const LookupComponent = Vue.extend({
             });
         }
     },
-    template: '<div>' + baseLabel +
-    '<select class="form-control" v-model.lazy="selected" @change="updated"><option></option><option v-for="opt in options" :value="opt.key">{{opt.key}} - {{opt.value}}</option></select>' +
-    '</div>',
+    template: 
+    `<div>
+        ${baseLabel}
+        <select class="form-control" v-model.lazy="selected" @change="updated">
+            <option></option>
+            <option v-for="opt in options" :value="opt.key">{{opt.key}} - {{opt.value}}</option>
+        </select>
+    </div>`,
     
 });
 const AttributeSelectorComponent = Vue.extend({

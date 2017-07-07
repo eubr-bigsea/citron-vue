@@ -6,11 +6,15 @@ import JobListView from './views/job-list.vue';
 import DataSourceListView from './views/data-source-list.vue';
 import DataSourceDetailView from './views/data-source-detail.vue';
 import DataSourceUploadView from './views/data-source-upload.vue';
+import DataSourcePrivacyView from './views/data-source-privacy.vue';
+
 
 import JobDetailView from './views/job-detail.vue';
 import JobResultComponent from './views/job-result.vue';
 import WorkflowAddComponent from './views/workflow-add.vue';
 import LoginComponent from './views/login.vue';
+
+import PrivacyPolicyListComponent from './views/privacy-policy-list.vue';
 
 import AppComponent from './components/app/app';
 import eventHub from './components/app/event-hub';
@@ -110,11 +114,23 @@ const routes = [{
         meta: { title: 'Data sources' }
     },
     {
+        path: '/data-source/:id/privacy',
+        component: DataSourcePrivacyView,
+        name: 'data-source-privacy',
+        meta: { title: 'Data sources' }
+    },
+    {
         path: '/data-source/list/:page',
         component: DataSourceListView,
         name: 'data-source-page',
         query: { sort: 'id' },
         meta: { title: 'Data sources' }
+    },
+    {
+        path: '/privacy-policy/list',
+        component: PrivacyPolicyListComponent,
+        name: 'privacy-policy-list',
+        meta: { title: 'Private policies' }
     },
     { path: '*', redirect: '/login' }
 ]

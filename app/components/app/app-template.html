@@ -68,8 +68,9 @@
                                             <legend>{{form.name}}</legend>
                                             <div v-for="field in form.fields">
                                                 <keep-alive>
-                                                    <component :is="field.suggested_widget + '-component'" :field="field" :value="getValue(field.name)" :suggestions="getSuggestions(task.id)">
-
+                                                    <component :is="field.suggested_widget + '-component'" :field="field" 
+                                                        :value="getValue(field.name)" 
+                                                        :suggestions="getSuggestions(task.id)" :context="context">
                                                     </component>
                                                 </keep-alive>
                                             </div>
