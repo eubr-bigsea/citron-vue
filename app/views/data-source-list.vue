@@ -152,7 +152,7 @@
                     page: 'data-source-list',
                     params
                 });
-                let url = `${limoneroUrl}/datasources?enabled=true&simple=true`;
+                let url = `${limoneroUrl}/datasources?enabled=true&simple=true&size=100`;
                 let headers = {
                     'X-Auth-Token': authToken
                 }

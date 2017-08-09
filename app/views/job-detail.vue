@@ -9,59 +9,44 @@
                 <hr/>
             </div>
             -->
-            <div class="col-md-4">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">
-                                Job #{{job.id}}
+            <div class="col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-body">
+                        <div class="pull-left">
+                            <router-link :to="{name: 'editor', params: {id: job.workflow.id }}"><span class="fa fa-edit"></span>{{job.workflow.id}} - {{job.workflow.name}}</router-link>
+                        </div>
+                        <div class="pull-right">
+                            Job #{{job.id}} 
+                        </div>
+                        <router-view :key="$route.params.visualizationId"
+                                    :render-from="job.workflow" :multiple-selection-enabled="false" 
+                                    :show-task-decoration="true" :show-toolbar="false" 
+                                    :draggable-tasks="draggableTasks" :initialZoom=".8">
+                        </router-view>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Started:</strong> {{formatDate(job.started, 'DD-MM-YYYY HH:mm:ss') || '-'}}
                             </div>
-                            <div class="panel-body">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <p>
-                                            <strong>Workflow: </strong> 
-                                            <router-link :to="{name: 'editor', params: {id: job.workflow.id }}"><span class="fa fa-edit"></span>{{job.workflow.id}} - {{job.workflow.name}}</router-link>
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <p>
-                                            <strong>User:</strong> {{job.user.id}} - {{job.user.name}}
-                                        </p>
-                                        <p>
-                                        <strong>Cluster: </strong> {{job.cluster.id}} - {{job.cluster.name}}
-                                        </p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p>
-                                            <strong>Created:</strong> {{formatDate(job.created, 'DD-MM-YYYY HH:mm:ss')}}
-                                        </p>
-                                        <p>
-                                            <strong>Started:</strong> {{formatDate(job.started, 'DD-MM-YYYY HH:mm:ss') || '-'}}
-                                        </p>
-                                        <p>
-                                            <strong>Finished:</strong> {{formatDate(job.finished, 'DD-MM-YYYY HH:mm:ss') || '-'}}
-                                        </p>
-                                    </div>
-                                </div>
+                            <div class="col-md-6 text-right">
+                                <strong>Finished:</strong> {{formatDate(job.finished, 'DD-MM-YYYY HH:mm:ss') || '-'}}
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-12" v-if="job.results">
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">
-                                Job results
-                            </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-primary results">
                             <div class="panel-body">
-                                <div class="col-md-3 text-center result-item">
+                                <h4>Visualizations:</h4>
+                                <a class="text-center result-item button result" :href="'#jobs/' + job.id + '/diagram'">
                                     <span class="fa fa-flask fa-3x"></span>
                                     <br/>
-                                    <a :href="'#jobs/' + job.id + '/diagram'" class="button result">Diagram</a>
-                                </div>
-                                <div class="col-md-3 text-center result-item" v-for="result in job.results">
-                                    <a :href="computeLink(result)" class="button result">
+                                    Diagram
+                                </a>
+                                <div class="clearfix">
+                                    <a class="text-center result-item button result" v-for="result in job.results" :href="computeLink(result)" >
                                         <span class="fa fa-3x" :class="getOperationIcon(result.operation.id)"></span>
                                         <br/>
                                         {{result.title}}<br/>
@@ -69,59 +54,40 @@
                                         </div>
                                     </a>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="panel panel-primary panel-diagram">
-                            <div class="panel-heading">
-                                Job messages output
-                            </div>
-                            <div class="panel-body  overflow">
+                                <h4>Outputs:</h4>
                                 <p>
                                     <strong>Status:</strong> {{job.status}}
                                 </p>
                                 <p :visible="job.status_text !== ''">
                                     <pre v-html="job.status_text"></pre>
                                 </p>
-                                <table class="table table-hover table-bordered table-condensed small">
-                                    <tbody>
-                                        <tr class="task-status" v-for="step in job.steps" :id="'log-' + step.task.id" @mouseover="selectTask(step.task.id)" @mouseout="deselectTask(step.task.id)">
-                                            <td class="col-md-2 text-center">
-                                                {{step.status}}
-                                            </td>
-                                            <td class="col-md-2 text-center">
-                                                {{getOperationName(step.operation.id)}}
-                                            </td>
-                                            <td class="col-md-7">
-                                                <span v-if="step.logs.length === 0">
-                                                    No log information
-                                                </span>
-                                                <transition-group name="log" tag="p" v-else>
-                                                    <p v-for="log in step.logs" v-bind:key="log" class="log-item">
-                                                    {{log.date}} {{log.message}}
-                                                    </p>
+                                <div class="log-result">
+                                    <div class="task-status" v-for="step in job.steps" :id="'log-' + step.task.id" @mouseover="selectTask(step.task.id)" @mouseout="deselectTask(step.task.id)" v-if="step.operation.id !==25">
+                                        <div class="pull-left"><strong>{{getOperationName(step.operation.id)}}</strong></div>
+                                        <div class="pull-right">{{step.status}}</div>
+                                        <div style="clear:both">
+                                            <div v-if="step.logs.length === 0">
+                                                No log information
+                                            </div>
+                                            <div v-else>
+                                                <transition-group name="log" tag="div">
+                                                    <div v-for="log in step.logs" v-bind:key="log" class="log-item">
+                                                    {{log.date}}
+                                                    <img :src="'data:image/png;base64,' + log.message" v-if="log.type == 'IMAGE'"/>
+                                                    <span v-html="log.message" v-else></span>
+                                                    </div>
+                                                    
                                                 </transition-group>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-8">
-                <div class="panel panel-primary">
-                    <div class="panel-body">
-                        <router-view :key="$route.params.visualizationId"
-                                    :render-from="job.workflow" :multiple-selection-enabled="false" 
-                                    :show-task-decoration="true" :show-toolbar="false" 
-                                    :draggable-tasks="draggableTasks" zoom=".8">
-                        </router-view>
-                    </div>
-                </div>
-            </div>
+            
         </div>
     </div>
 </template>
@@ -146,9 +112,13 @@
     .overflow {
         overflow: auto;
     }
-    div.result-item {
+    .result-item {
+        display: block;
+        float: left;
         padding: 5px; 
         margin-left: 5px;
+        min-height: 100px;
+        min-width: 80px;
         background-color: #f9f9f9;
         border: 1px solid #aaa;
     }
@@ -159,11 +129,25 @@
     }
     a.result:hover, a.result:visited, a.result:link, a.result:active{
         text-decoration: none;
-        color: inherit;
     }
     pre {
-        height: 200px;
+        height: 100px;
         overflow: auto;
+    }
+    div.log-result {
+        font-family: Courier New, Courier, monospace;
+    }
+    div.log-result strong {
+        text-decoration: underline
+    }
+    div.log-result > div {
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+        border-bottom: 1px dashed #888;
+    }
+    div.panel {
+        height: 90vh;
+        overflow: auto
     }
 </style>
 <script>
@@ -247,7 +231,6 @@
                     let inx = self.job.workflow.tasks.findIndex(
                         (n, inx, arr) => n.id === msg.id);
                     
-                    console.debug('Found', inx, msg.id)
                     if (inx > -1) {
                         let task = self.job.workflow.tasks[inx];
                         task.status = msg.status;
@@ -256,6 +239,7 @@
                             step.status = msg.status;
                             step.logs.push({level: 'INFO', 
                                 date: msg.date,
+                                type: msg.type,
                                 message: msg.message || msg.msg})
                         }
                         //self.job.workflow.tasks[inx].forms.color.value = 'green';
@@ -265,6 +249,7 @@
                 socket.on('update job', (msg) => {
                     if (msg.id === self.job.id){
                         self.job.status = msg.status;
+                        self.job.finished = msg.finished;
                         if (msg.message){
                             let finalMsg = msg.message.replace(/&/g, '&amp;')
                               .replace(/"/g, '&quot;')

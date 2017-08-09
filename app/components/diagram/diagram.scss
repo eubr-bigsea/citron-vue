@@ -230,6 +230,9 @@ li.dragging {
                     font: normal normal normal 14px/1 FontAwesome;
                     content: "\f08d     ";
             }
+            div.title {
+                background: transparent !important;
+            }
             background:#ffffa5;
             overflow-y: auto;
             border: none !important; 

@@ -1,8 +1,0 @@
-<div>
-    <p>{{field.label}} <span class="fa fa-asterisk" v-show="field.required"></span> 
-        <span class="fa fa-question-circle-o pull-right" :title="field.help"></span></p>
-    <div>
-    <v-select multiple :value.sync="value" :options="suggestions"
-            :on-change="updated" :taggable="true"></v-select>
-    </div>
-</div>

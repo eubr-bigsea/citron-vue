@@ -1,8 +1,5 @@
 import Vue from 'vue';
 import VueResource from 'vue-resource';
-
-
-
 import ToolboxComponent from './components/toolbox/toolbox';
 
 import jsPlumb from 'jsplumb';
@@ -24,7 +21,6 @@ import { standUrl, tahitiUrl, authToken } from './config';
 import citron_messages from './i18n/messages';
 
 Vue.use(VueI18n)
-
 Vue.use(VueResource);
 Vue.use(VueProgressBar, {
     color: '#ed8',

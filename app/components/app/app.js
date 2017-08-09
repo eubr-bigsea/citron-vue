@@ -31,7 +31,8 @@ import {
     PercentageComponent,
     ExpressionComponent,
     AttributeFunctionComponent,
-    MultiSelectDropDownComponent
+    MultiSelectDropDownComponent,
+    Select2Component,
 }
 from '../properties/properties-components.js';
 
@@ -87,7 +88,8 @@ const AppComponent = Vue.extend({
         'percentage-component': PercentageComponent,
         'expression-component': ExpressionComponent,
         'attribute-function-component': AttributeFunctionComponent,
-        'multi-select-dropdown-component': MultiSelectDropDownComponent
+        'multi-select-dropdown-component': MultiSelectDropDownComponent,
+        'select2-component': Select2Component
     },
     data() {
         return {
@@ -259,13 +261,25 @@ const AppComponent = Vue.extend({
                     }
                 });
         },
+        _caseInsensitiveComparator(a, b){
+            if (! a || ! b) {
+                return -1;
+            } else {
+                return a.toLowerCase().localeCompare(b.toLowerCase());
+            }
+        },
+        _unique(data) {
+            var filterItems = function(value, index){ return this.indexOf(value) == index };
+            return data.filter(filterItems, data);
+        },
         getSuggestions(taskId){
             if (TahitiAttributeSuggester.processed === undefined){
                 this.updateAttributeSuggestion();
             }
             if (this.attributeSuggestion[taskId]){
-                return Array.prototype.concat.apply([], 
-                    this.attributeSuggestion[taskId].inputs.map((item) => {return item.attributes;}));
+                return this._unique(Array.prototype.concat.apply([], 
+                    this.attributeSuggestion[taskId].inputs.map(
+                (item) => {return item.attributes;}))).sort(this._caseInsensitiveComparator);
             } else {
                 return [];
             }

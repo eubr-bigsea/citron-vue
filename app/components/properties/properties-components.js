@@ -17,6 +17,17 @@ const fieldIsRequiredSymbol = '<span class="fa fa-asterisk" v-show="field.requir
 const baseLabel = '<p>{{field.label}} ' + fieldIsRequiredSymbol +
     '<span class="fa fa-question-circle-o pull-right" :title="field.help"></span></p>';
 
+const projectionTemplate = `
+<div>
+    <p>{{field.label}} <span class="fa fa-asterisk" v-show="field.required"></span> 
+        <span class="fa fa-question-circle-o pull-right" :title="field.help"></span></p>
+    <div>
+    <v-select multiple :value.sync="value" :options="suggestions"
+        :on-change="updated" :taggable="true"></v-select>
+    </div>
+</div>
+`
+
 const DecimalComponent = Vue.extend({
     methods: {
         updated(e) {
@@ -24,8 +35,10 @@ const DecimalComponent = Vue.extend({
         }
     },
     props: { value: 0, field: null },
-    template: '<div>' + baseLabel +
-    '<input type="number" maxlenght="10" step="0.01" class="form-control" :value="value" @input="updated" pattern="\\d*\\.\\d{2}"/></div>',
+    template: `
+    <div>${baseLabel}
+        <input type="number" maxlenght="10" step="0.01" class="form-control" :value="value === null ? field['default']: value" @input="updated" pattern="\\d*\\.\\d{2}"/>
+    </div>`,
 });
 const IntegerComponent = Vue.extend({
     methods: {
@@ -34,8 +47,11 @@ const IntegerComponent = Vue.extend({
         }
     },
     props: { value: 0, field: null },
-    template: '<div>' + baseLabel +
-    '<input type="number" maxlenght="10" class="form-control" :value="value" pattern="\\d*" @input="updated"/></div>',
+    template: `
+        <div>${baseLabel}
+            <input type="number" maxlenght="10" class="form-control" :value="value === null ? field['default']: value" pattern="\\d*" @input="updated"/>
+        </div>
+    `,
 });
 
 const TextComponent = Vue.extend({
@@ -82,7 +98,10 @@ const CheckboxComponent = Vue.extend({
     },
     computed: {
         checked(){
-            return this.value === 1 || this.value === '1';
+            return (this.value === 1 || this.value === '1')
+                || (!this.value && 
+                    (this.field['default'] === 1 || 
+                        this.field['default'] === '1'));
         },
     },
     data(){
@@ -135,7 +154,7 @@ const MultiSelectDropDownComponent = Vue.extend({
         }
     },
     props: { value: "", field: null },
-    template: require('./projection-template.html')
+    template: projectionTemplate,
 });
 
 const DropDownComponent = Vue.extend({
@@ -242,9 +261,12 @@ const LookupComponent = Vue.extend({
             eventHub.$emit('update-form-field-value', this.field, e.target.value);
         },
         replacer(tpl, data) {
-            var re = /\$\{([^\)]+)?\}/g, match;
+            let re = /(\$\{(.+)\})/g;
+            let match = null;
             while(match = re.exec(tpl)) {
-                tpl = tpl.replace(match[0], data[match[1]])
+                if (data[match[2]]){
+                    tpl = tpl.replace(match[1], data[match[2]])
+                }
                 re.lastIndex = 0;
             }
             return tpl;
@@ -263,17 +285,21 @@ const LookupComponent = Vue.extend({
     },
     mounted() {
         if (this.field.values_url) {
-            
             let self = this;
             let url = self.field.values_url;
             if (url.startsWith('`')){
                 url = self.replacer(url.substring(1, url.length -1), self.context);
             }
-            self.$http.get(url).then(function (response) {
+            self.$http.get(url, {headers: {'X-Auth-Token': '123456'}}).then(function (response) {
                 self.selected = self.value;
-                this.options = response.data.map((v) => {
+                let data = response.data.data || response.data
+                this.options = data.map((v) => {
                     return { "key": v.id, "value": v.name };
                 });
+            });
+        } else {
+            JSON.parse(this.field.values).forEach((opt) => {
+                this.options.push(opt);
             });
         }
     },
@@ -291,19 +317,42 @@ const AttributeSelectorComponent = Vue.extend({
     components: {
         'v-select': vSelect
     },
-    xdata() {
-        return {
-            options: ['line (ASC)', 'line (DESC)', 'vehicle (ASC)', 'vehicle (DESC)', 'date_time (ASC)', 'date_time (DESC)', 'latitude (ASC)', 'latitude (DESC)', 'longitude (ASC)', 'longitude (DESC)', 'card_id (ASC)', 'card_id (DESC)', 'travel (ASC)', 'travel (DESC)', 'bus_origin (ASC)', 'bus_origin (DESC)', 'bus_destination (ASC)', 'bus_destination (DESC)']
-        }
-    },
     methods: {
         updated(val) {
             eventHub.$emit('update-form-field-value', this.field, val);
         }
     },
     props: { value: "", field: null, suggestions: { required: true} },
-    template: require('./projection-template.html')
+    template: projectionTemplate
 });
+
+const Select2Component = Vue.extend({
+    components: {
+        'v-select': vSelect
+    },
+    methods: {
+        updated(val) {
+            eventHub.$emit('update-form-field-value', this.field, val);
+        }
+    },
+    computed: {
+        suggestions() {
+            let obj = JSON.parse(this.field.values);
+            return obj;
+        }
+    },
+    props: { value: "", field: null, },
+    template: `
+    <div>
+        <p>{{field.label}} <span class="fa fa-asterisk" v-show="field.required"></span> 
+            <span class="fa fa-question-circle-o pull-right" :title="field.help"></span></p>
+        <div>
+        <v-select :value.sync="value" :options="suggestions" label="key" 
+            :on-change="updated" :taggable="true"></v-select>
+        </div>
+    </div>`
+});
+
 
 const AttributeFunctionComponent = Vue.extend({
     computed: {
@@ -388,7 +437,7 @@ const SortSelectorComponent = Vue.extend({
         'value',
         'field'
     ],
-    template: require('./projection-template.html')
+    template: projectionTemplate
 });
 
 const ExpressionComponent = Vue.extend({
@@ -441,5 +490,6 @@ export {
     SortSelectorComponent,
     ExpressionComponent,
     AttributeFunctionComponent,
-    MultiSelectDropDownComponent
+    MultiSelectDropDownComponent,
+    Select2Component
 };

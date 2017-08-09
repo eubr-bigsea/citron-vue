@@ -165,7 +165,9 @@ const DiagramComponent = Vue.extend({
         multipleSelectionEnabled: {
             default: true,
         },
-        
+        initialZoom: {
+            default: 1.0
+        }
     },
     /*
     watch: {
@@ -185,7 +187,7 @@ const DiagramComponent = Vue.extend({
 
             zoomInEnabled: true,
             zoomOutEnabled: true,
-            zoom: 1.0,
+            zoom: this.initialZoom,
             
             selectedTask: null,
             selectedElements: [],
@@ -829,8 +831,10 @@ const DiagramComponent = Vue.extend({
                 }).catch((ex) => {
                     if (ex.body) {
                         self.$root.$refs.toastr.e(ex.body.message);
+                    } else if(ex.status === 0){
+                        self.$root.$refs.toastr.e(`Error connecting to the backend (connection refused).`);
                     } else {
-                        debugger
+                        self.$root.$refs.toastr.e(`Unhandled error: ${JSON.stringify(ex)}`);
                     }
                 });
         },

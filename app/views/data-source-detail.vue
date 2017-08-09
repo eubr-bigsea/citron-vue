@@ -60,6 +60,7 @@
                         <table class="table table-bordered table-stripped" v-if="dataSource.attributes && dataSource.attributes.length > 0">
                             <thead>
                                 <tr>
+                                    <th class="primary text-center">#</th>
                                     <th class="primary text-center">{{$tc('common.name')}}</th>
                                     <th class="primary text-center">{{$tc('common.type')}}</th>
                                     <th class="primary text-center">{{$tc('common.nullable')}}</th>
@@ -72,6 +73,7 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(attr, index) in dataSource.attributes" track-by="attr.id">
+                                    <td>{{index + 1}}</td>
                                     <td><input v-model="attr.name" class="form-control"/></td>
                                     <td>
                                         <select class="form-control" v-model="attr.type">
