@@ -10,26 +10,29 @@
             </div>
             -->
             <div class="col-md-6">
-                <div class="panel panel-primary">
+                <div class="panel panel-primary results">
                     <div class="panel-body">
                         <div class="pull-left">
-                            <router-link :to="{name: 'editor', params: {id: job.workflow.id }}"><span class="fa fa-edit"></span>{{job.workflow.id}} - {{job.workflow.name}}</router-link>
+                            <router-link class="btn btn-success btn-xs" :to="{name: 'editor', params: {id: job.workflow.id }}"><span class="fa fa-arrow-left"></span></router-link>
+                            <strong>{{job.workflow.id}} - {{job.workflow.name}}</strong>
                         </div>
                         <div class="pull-right">
                             Job #{{job.id}} 
                         </div>
-                        <router-view :key="$route.params.visualizationId"
-                                    :render-from="job.workflow" :multiple-selection-enabled="false" 
-                                    :show-task-decoration="true" :show-toolbar="false" 
-                                    :draggable-tasks="draggableTasks" :initialZoom=".8">
-                        </router-view>
-                        <div class="row">
+                        <div class="row clearfix2">
                             <div class="col-md-6">
                                 <strong>Started:</strong> {{formatDate(job.started, 'DD-MM-YYYY HH:mm:ss') || '-'}}
                             </div>
                             <div class="col-md-6 text-right">
                                 <strong>Finished:</strong> {{formatDate(job.finished, 'DD-MM-YYYY HH:mm:ss') || '-'}}
                             </div>
+                        </div>
+                        <div class="clearfix2">
+                            <router-view :key="$route.params.visualizationId" class="clearfix"
+                                    :render-from="job.workflow" :multiple-selection-enabled="false" 
+                                    :show-task-decoration="true" :show-toolbar="false" 
+                                    :draggable-tasks="draggableTasks" :initialZoom=".8">
+                            </router-view>
                         </div>
                     </div>
                 </div>
@@ -92,6 +95,7 @@
     </div>
 </template>
 <style>
+    .clearfix2{ clear: both}
     table.small {
         font-size:.9em;
         cursor: pointer;
@@ -119,6 +123,7 @@
         margin-left: 5px;
         min-height: 100px;
         min-width: 80px;
+        max-width: 160px;
         background-color: #f9f9f9;
         border: 1px solid #aaa;
     }
@@ -145,7 +150,7 @@
         padding-bottom: 5px;
         border-bottom: 1px dashed #888;
     }
-    div.panel {
+    div.panel.results {
         height: 90vh;
         overflow: auto
     }

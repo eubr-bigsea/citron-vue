@@ -20,11 +20,15 @@
                                     <option v-for="fmt in formats" v-bind:value="fmt">{{fmt}}</option>
                                 </select>
                             </div>
-                            <div class="col-md-2 text-right">
+                            <div class="col-md-1 text-center">
                                 <small>{{ $t('common.enabled', {gender: 'male'}) }}</small>
                                 <switches v-model="dataSource.enabled" type-bold="true" theme="bootstrap" color="primary"></switches>
                             </div>
-                            <div class="col-md-2 text-right">
+                            <div class="col-md-1 text-center">
+                                <small>Public</small><br/>
+                                <switches v-model="dataSource.is_public" type-bold="true" theme="bootstrap" color="primary"></switches>
+                            </div>
+                            <div class="col-md-1 text-center">
                                 <small>{{ $t('dataSource.privacyAware') }}</small>
                                 <switches v-model="dataSource.privacy_aware" type-bold="true" theme="bootstrap" color="primary"></switches>
                             </div>

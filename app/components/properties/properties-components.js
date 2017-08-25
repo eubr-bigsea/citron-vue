@@ -37,7 +37,7 @@ const DecimalComponent = Vue.extend({
     props: { value: 0, field: null },
     template: `
     <div>${baseLabel}
-        <input type="number" maxlenght="10" step="0.01" class="form-control" :value="value === null ? field['default']: value" @input="updated" pattern="\\d*\\.\\d{2}"/>
+        <input type="number" maxlenght="10" step="0.01" class="form-control input-sm" :value="value === null ? field['default']: value" @input="updated" pattern="\\d*\\.\\d{2}"/>
     </div>`,
 });
 const IntegerComponent = Vue.extend({
@@ -49,7 +49,7 @@ const IntegerComponent = Vue.extend({
     props: { value: 0, field: null },
     template: `
         <div>${baseLabel}
-            <input type="number" maxlenght="10" class="form-control" :value="value === null ? field['default']: value" pattern="\\d*" @input="updated"/>
+            <input type="number" maxlenght="10" class="form-control input-sm" :value="value === null ? field['default']: value" pattern="\\d*" @input="updated"/>
         </div>
     `,
 });
@@ -60,7 +60,7 @@ const TextComponent = Vue.extend({
     },
     props: { value: 0, field: null },
     template: '<div>' + baseLabel +
-    '<input type="text" maxlenght="100" class="form-control" :value="value === null ? field.default: value" @input="updated" v-bind:required="field.required"/></div>',
+    '<input type="text" maxlenght="100" class="form-control input-sm" :value="value === null ? field.default: value" @input="updated" v-bind:required="field.required"/></div>',
 });
 
 
@@ -75,7 +75,7 @@ const TextAreaComponent = Vue.extend({
     },
     props: {value: '', field: null },
     template: '<div>' + baseLabel +
-    '<textarea class="form-control" @keyup="updated" :value="value === null ? field.default: value"></textarea></div>',
+    '<textarea class="form-control input-sm" @keyup="updated" :value="value === null ? field.default: value"></textarea></div>',
 
 });
 
@@ -85,7 +85,7 @@ const CodeComponent = Vue.extend({
     },
     props: { value: 0, field: null },
     template: '<div>' + baseLabel +
-    '<textarea class="form-control code" @keyup="updated" :value="value === null ? field.default: value"></textarea></div>',
+    '<textarea class="form-control input-sm code" @keyup="updated" :value="value === null ? field.default: value"></textarea></div>',
 
 });
 
@@ -185,7 +185,7 @@ const DropDownComponent = Vue.extend({
     },
     template: `
         <div>${baseLabel}
-            <select class="form-control" v-bind:data-field="field.name" v-model="selected" @change="updated">
+            <select class="form-control input-sm" v-bind:data-field="field.name" v-model="selected" @change="updated">
                 <option v-if="!field.default"></option>
                 <option v-for="opt in pairOptionValueList" :value="opt.key">
                     {{opt.value}}
@@ -211,7 +211,7 @@ const RangeComponent = Vue.extend({
         field: Object
     },
     template: '<div>' + baseLabel +
-    '<input type="range" class="form-control" :value="value" @input="updated" min="1" max="99"/>' +
+    '<input type="range" class="form-control input-sm" :value="value" @input="updated" min="1" max="99"/>' +
     '<span class="tag tag-pill tag-info">{{value}}% - {{100-value}}%</span>' +
     '</div>',
 });
@@ -233,7 +233,7 @@ const PercentageComponent = Vue.extend({
         field: Object
     },
     template: '<div>' + baseLabel +
-    '<input type="" class="form-control" :value="value" @input="updated" min=".1" max="99.9" step="0.1"/>' +
+    '<input type="" class="form-control input-sm" :value="value" @input="updated" min=".1" max="99.9" step="0.1"/>' +
     '<span class="tag tag-pill tag-info">{{value}}%</span>' +
     '</div>',
 });
@@ -306,7 +306,7 @@ const LookupComponent = Vue.extend({
     template: 
     `<div>
         ${baseLabel}
-        <select class="form-control" v-model.lazy="selected" @change="updated">
+        <select class="form-control input-sm" v-model.lazy="selected" @change="updated">
             <option></option>
             <option v-for="opt in options" :value="opt.key">{{opt.key}} - {{opt.value}}</option>
         </select>

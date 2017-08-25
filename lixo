@@ -1,0 +1,83 @@
+    connection.execute("""UPDATE operation_form_field
+        SET required = 0, `order`= 3
+        WHERE id = 188""")
+
+    connection.execute("""
+        UPDATE operation_form_field
+        SET name = 'y_title', `order`= 11
+        WHERE id = 189
+        """)
+    connection.execute("""UPDATE operation_form_field
+        SET `order`= 1,
+          name = 'x_axis_attribute'
+        WHERE id = 190
+        """)
+    connection.execute("""UPDATE operation_form_field
+            SET `order`= 4 , name = 'column_names',
+            `order`= 2 , suggested_widget = 'attribute-selector'
+            WHERE id = 191""")
+
+    connection.execute("""
+        UPDATE operation_form_field
+        SET name = 'x_title', `order`= 10
+        WHERE id = 198""")
+
+    connection.execute("""
+        UPDATE operation_form_field
+        SET name = 'x_format', `order`= 12
+        WHERE id = 199""")
+    #
+    connection.execute("""
+        UPDATE operation_form_field_translation
+        SET name = 'y_title', `order`= 11
+        WHERE id = 189
+        """)
+    connection.execute("""UPDATE operation_form_field_translation
+        SET `order`= 1,
+          label = 'X-axis title'
+        WHERE id = 190
+        """)
+    connection.execute("""UPDATE operation_form_field_translation
+            SET `order`= 4 , name = 'column_names',
+            `order`= 2 , suggested_widget = 'attribute-selector'
+            WHERE id = 191""")
+
+    connection.execute("""
+        UPDATE operation_form_field
+        SET name = 'x_title', `order`= 10
+        WHERE id = 198""")
+
+    connection.execute("""
+        UPDATE operation_form_field_translation
+        SET name = 'x_format', `order`= 12
+        WHERE id = 199""")
+    #
+
+
+connection.execute("""UPDATE operation_form_field
+        SET required = 1, `order`= 1
+        WHERE id = 188""")
+
+    connection.execute("""
+            UPDATE operation_form_field
+            SET name = 'labels', `order`= 2
+            WHERE id = 189
+            """)
+    connection.execute("""UPDATE operation_form_field
+            SET `order`= 3, name = 'id_attribute'
+            WHERE id = 190
+            """)
+
+    connection.execute("""UPDATE operation_form_field
+            SET `order`= 4 , name = 'column_names'
+            WHERE id = 191""")
+
+    connection.execute("""
+        UPDATE operation_form_field
+        SET name = 'column_names', `order`= 1
+        WHERE id = 198""")
+
+    connection.execute("""
+        UPDATE operation_form_field
+        SET name = 'title', `order`= 2
+        WHERE id = 199""")

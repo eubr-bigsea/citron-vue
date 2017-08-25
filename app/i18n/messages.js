@@ -1,11 +1,12 @@
 const citron_messages = {
   en: {
     actions: {
-        save: 'Save',
+        add: 'Add new {type}',
         cancel: 'Cancel',
         delete: 'Delete',
         edit: 'Edit',
-        add: 'Add new {type}',
+        save: 'Save',
+        show: 'Show',
     },
     common: {
         action: 'Action | Actions',
@@ -22,6 +23,7 @@ const citron_messages = {
         precision: 'Precision',
         scale: 'Scale',
         size: 'Size',
+        title: 'Title',
         type: 'Type | Types',
         userId: 'User id',
         userLogin: 'User login',
@@ -33,6 +35,7 @@ const citron_messages = {
     titles: {
         action: 'Action | Actions',
         dataSource: 'Data source | Data sources',
+        dashboard: 'Dashboard | Dashboards',
         globalPrivacyPolicy: 'Global privacy policy|Global privacy policies',
     },
     privacy: {

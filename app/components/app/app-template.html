@@ -57,10 +57,8 @@
                             </div>
                             <div class="panel-block" id="panel-properties">
                                 <div class="property-description">
-                                    <dl>
-                                        <dt>{{task.operation.name}}  ({{task.id}})</dt>
-                                        <dd>{{task.operation.description}}</dd>
-                                    </dl>   
+                                    <p><strong>{{task.operation.name}}  ({{task.id}})</strong></p>
+                                    {{task.operation.description}}
                                 </div>
                                 <div id="properties-form" class="container" v-if="task">
                                     <div>

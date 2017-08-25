@@ -1,0 +1,153 @@
+Bugs
+====
+
+Registro de usuário
+
+-> Após preencher  os dados e submeter:
+
+TypeError: Cannot read property 'catch' of undefined
+    at r.sessionAuthenticated (lemonade-ember-e3f556e….js:3)
+    at r.n [as sessionAuthenticated] (vendor-1ec24c3….js:12)
+    at r.<anonymous> (vendor-1ec24c3….js:62)
+    at h.join (vendor-1ec24c3….js:4)
+    at Function.u.join (vendor-1ec24c3….js:9)
+    at r.<anonymous> (vendor-1ec24c3….js:9)
+    at Object.d [as sendEvent] (vendor-1ec24c3….js:8)
+    at r.trigger (vendor-1ec24c3….js:11)
+    at r.<anonymous> (vendor-1ec24c3….js:62)
+    at Object.d [as sendEvent] (vendor-1ec24c3….js:8)
+
+Não redirecionou para a tela principal, mas o usuário foi criado. Refresh atualiza a tela.
+
+-> Faltam rótulos para campos "Sobrenome" e "Confirmação de senha"
+
+Tela de entrada
+
+Melhoria: Caso não haja nenhum workflow ou nenhum tenha sido editado recentemente, não mostrar a tabela e mostrar uma mensagem.
+
+
+Execução de Workflows:
+-> Nenhum erro reportado pelo Stand está sendo tratado na interface.
+
+Stand
+======
+OK JobResult: Falta columa content
+OK Cluster: Tem que criar um inicial
+Reavaliar record_workflow (há algum uso?)
+Pra quê serve queue queue_app_1?
+OK Problema com websocket (namespace vazio é o certo)
+Como definir o TTL para salas?
+
+Tahiti
+======
+OK Limitar o log do Tahiti
+OK Carregar a lista de operações
+
+Limonero
+========
+Apontar para o serviço correto para buscar a lista de data sources :()
+
+Juicer
+======
+Não finaliza se usa spark remoto
+
+
+Caipirinha
+===========
+Migration para visualization types
+EvaluationModelOperationReport: multiclass, regression?
+	areaUnderROC e areaUnderPR dá para usar RDD. Matriz de confusão
+	Accuracy, Precision, Recall, F-Score, AUC, Average Log Loss, Training Log Loss
+
+
+
+
+hdfs_base = 'hdfs://spark01.ctweb.inweb.org.br/lemonade/emaas/outputCSV'
+
+java_import(sc._gateway.jvm, 
+    "PolygonMatching20.MatchingGeoPolygon20")
+java_import(sc._gateway.jvm, 
+	'PolygonDependencies.InputTypes')
+m = sc._gateway.jvm.PolygonMatching20.MatchingGeoPolygon20()
+
+d1 = '{}/squares_pref_curitiba3.csv'.format(hdfs_base)
+d2 = '{}/outputCSV/osm_curitiba3.csv'.format(hdfs_base)
+
+polygons = m.generateDataFrames(d1, d2, 'CSV', 
+    spark._jsparkSession)
+data_set = m.run(polygons, 0.7, 0.7, 6, spark._jsparkSession)
+
+out1 = DataFrame(data_set, spark)
+
+
+java_import(sc._gateway.jvm, "LineDependencies.GeoObject")
+k =  ReflectionUtil.classForName('LineDependencies.GeoObject')
+x =  sc._gateway.jvm.org.apache.spark.sql.Encoders.javaSerialization(k)
+
+d1 = '{}/squares_pref_curitiba.csv'.format(hdfs_base)
+df = sqlContext.read.csv(d1, header=True, sep=";")
+ds = spark._jsparkSession.createDataset(df._jdf, x)
+
+
+===========================================
+vgcreate docker-data-2 /dev/sdb1
+lvcreate -l 100%FREE -n docker-data-2 docker-2
+mkfs.ext4 /dev/docker-data-2/docker-2
+
+----------------------------
+# from py4j.java_gateway import java_import
+# java_import(sc._gateway.jvm, "LineMatching20.MatchingRoutesV2")
+from pyspark.sql.dataframe import DataFrame
+MatchingRoutesV2 = sc._gateway.jvm.LineMatching20.MatchingRoutesV2()
+
+
+hdfs_base = 'hdfs://spark01.ctweb.inweb.org.br:9000/lemonade/emaas/outputCSV'
+shape = hdfs_base + '/shapes.csv'
+bus_gps = hdfs_base + '/gps_data_2016_10_30.csv'
+
+df_gps = spark.read.text(bus_gps)
+df_shape = spark.read.text(shape)
+
+routes = MatchingRoutesV2.generateDataFrames(df_shape._jdf, df_gps._jdf, 1, spark._jsparkSession)
+result = MatchingRoutesV2.run(routes, 1, spark._jsparkSession)
+df = result.toDF()
+
+df_py = DataFrame(df, spark)
+-----------------------
+java_import(sc._gateway.jvm, 
+    "PolygonMatching20.MatchingGeoPolygon20")
+
+m = sc._gateway.jvm.PolygonMatching20.MatchingGeoPolygon20()
+
+d1 = '{}/squares_pref_curitiba3.csv'.format(hdfs_base)
+d2 = '{}/outputCSV/osm_curitiba3.csv'.format(hdfs_base)
+
+polygons = m.generateDataFrames(d1, d2, 'CSV', 
+    spark._jsparkSession)
+data_set = m.run(polygons, 0.7, 0.7, 6, spark._jsparkSession)
+
+out1 = DataFrame(data_set, spark)
+
+
+===============================================
+Limonero => Como definir as regras? Há apenas que a base é protegida. Talvez criar uma tabela com a proteção para cada campo. Talvez ter algo como uma chave para liberar a base de dados para processamento e/ou visualização. Liberar após alguma transformação.
+
+Tahiti => As operações têm que indicar o risco de vazamento de acordo com os parâmetros. Ou o juicer tem que saber de alguma forma. Talvez usar os scripts.
+
+Juicer => Tratar essas proteções. 
+PoC=> Usar operações de ETL (projeção, filtro, ordenação, adicionar colunas, join, agregação)
+
+Como mostrar que o código protege realmente?
+
+
+===================
+Migration:
+OK = Models na URL para values_; deve ser storages
+OK = Ver porque BEST não é o default
+ = Gerar código apenas, sem executar (requer API)
+ = I18n
+ = Toda saída models tem que levar também a avaliação
+ = Evaluate model tem que sair o modelo também
+ = Alertar em caso de diferentes coisas sendo comparadas ao salvar?
+ = Criar classe para transportar modelo + avaliação
+ = Perceptron não tem setLabelCol

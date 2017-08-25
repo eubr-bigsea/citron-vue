@@ -3,6 +3,12 @@ import VueRouter from 'vue-router';
 
 import WorkflowListView from './views/workflow-list.vue';
 import JobListView from './views/job-list.vue';
+
+import DashboardListView from './views/dashboard-list.vue';
+import DashboardDetailView from './views/dashboard-detail.vue';
+import DashboardShowView from './views/dashboard-show.vue';
+
+
 import DataSourceListView from './views/data-source-list.vue';
 import DataSourceDetailView from './views/data-source-detail.vue';
 import DataSourceUploadView from './views/data-source-upload.vue';
@@ -88,13 +94,33 @@ const routes = [{
         name: 'login',
         meta: { title: 'Login' }
     },
+    /* Dashboard */
     {
-        path: '/dashboard',
-        component: Dashboard,
-        name: 'dashboard',
+        path: '/dashboards/list',
+        name: 'dashboard-list',
+        component: DashboardListView,
         meta: { title: 'Dashboard' }
     },
-
+    {
+        path: '/dashboards/:id',
+        component: DashboardDetailView,
+        name: 'dashboard-detail',
+        meta: { title: 'Dashboard' }
+    },
+    {
+        path: '/dashboards/show/:id',
+        component: DashboardShowView,
+        name: 'dashboard-show',
+        meta: { title: 'Dashboard' }
+    },
+    {
+        path: '/dashboards/list/:page',
+        component: DashboardListView,
+        name: 'dashboard-page',
+        query: { sort: 'id' },
+        meta: { title: 'Dashboard' }
+    },
+    /* Data source */
     {
         path: '/data-source/list',
         name: 'data-source-list',
