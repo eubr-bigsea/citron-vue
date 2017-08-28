@@ -62,8 +62,12 @@
                 self.data = self.visualization.data || [];
                 self.labels = self.visualization.labels || [];
                 self.title = self.visualization.title;
-
+                
                 if (self.type === 'line-chart' || self.type === 'area-chart') {
+                     self.visualization['data'].forEach((item) =>{
+                        item['key'] = item['id'];
+                        item['area'] = false;
+                    }); 
                     nv.addGraph(() => {
                         let chart = (self.type === 'line-chart')
                             ? nv.models.lineChart() 
@@ -133,6 +137,7 @@
                             .labelFormat((d) => {
                                 return d3.format(self.visualization.x.format)(d)
                             })
+                            .title(self.visualization.x.title || '')
                             .donut(self.type === 'donut-chart')
                             .donutRatio(0.5);
                         d3.select(self.$refs.d3Chart.querySelector('svg'))

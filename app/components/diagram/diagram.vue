@@ -818,7 +818,8 @@ const DiagramComponent = Vue.extend({
             let body = {
                 workflow: cloned,
                 cluster: { id: 1 },
-                user: { id: 13, login: 'war', name: 'Sun Tzu' }
+                user: { id: 1, login: 'waltersf@gmail.com', 
+                    name: 'Walter dos Santos Filho' }
             }
             let self = this;
             let headers = { 'X-Auth-Token': authToken };

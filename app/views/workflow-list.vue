@@ -14,7 +14,13 @@
                 </select>
                 </p>
             </div>
-            <div class="col-md-9 pull-right text-right">
+            <div class="col-md-6">
+                <label>Name</label>
+                <p>
+                    <input type="text" class="form-control" ref="workflowName" v-model="name"/>
+                </p>
+            </div>
+            <div class="col-md-3 pull-right text-right">
                 <a href="#/workflows/add" class="btn btn-primary" role="button"><span class="fa fa-plus"></span> Add workflow</a>
             </div>
             <hr/>
@@ -95,6 +101,7 @@
                 platform: 'spark',
                 asc: 'true',
                 orderBy: 'name',
+                name: '%%%'
             }
         },
         components: {
@@ -107,6 +114,7 @@
         },
         mounted: function () {
             this.performLoad();
+            this.$refs.workflowName.focus();
         },
         methods: {
             resolve(route){
