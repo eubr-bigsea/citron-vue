@@ -23,12 +23,14 @@ import {
     DropDownComponent,
     RangeComponent,
     TextComponent,
+    TagComponent,
     TextAreaComponent,
     ColorComponent,
     IndeterminatedCheckboxComponent,
     LookupComponent,
     AttributeSelectorComponent,
     PercentageComponent,
+    MultipleExpressionsComponent,
     ExpressionComponent,
     AttributeFunctionComponent,
     MultiSelectDropDownComponent,
@@ -87,9 +89,11 @@ const AppComponent = Vue.extend({
         'textarea-component': TextAreaComponent,
         'percentage-component': PercentageComponent,
         'expression-component': ExpressionComponent,
+        'multiple-expressions-component': MultipleExpressionsComponent,
         'attribute-function-component': AttributeFunctionComponent,
         'multi-select-dropdown-component': MultiSelectDropDownComponent,
-        'select2-component': Select2Component
+        'select2-component': Select2Component,
+        'tag-component': TagComponent
     },
     data() {
         return {
@@ -179,6 +183,7 @@ const AppComponent = Vue.extend({
         });
 
         this.$store.dispatch('connectWebSocket');
+        
         if (true || this.user) {
             let elem = document.getElementById('menu-operations');
             PerfectScrollbar.initialize(elem, {
@@ -287,10 +292,12 @@ const AppComponent = Vue.extend({
         toggleProperties(visibility){
             // Bug in Vue. Second time (when go back to page), $refs does not work
             let elem = this.$refs.properties || document.getElementById('properties');
-            if (visibility){
-                elem.classList.add('show');
-            } else {
-                elem.classList.remove('show');
+            if (elem) {
+                if (visibility){
+                    elem.classList.add('show');
+                } else {
+                    elem.classList.remove('show');
+                }
             }
         },
         filterOperations: _.debounce(function (e) {

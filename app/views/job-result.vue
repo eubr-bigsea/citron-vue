@@ -18,6 +18,9 @@
         <div v-else-if="type === 'evaluate-model'" style="width: 100%;overflow: auto">
             <div v-html="data"></div>
         </div>
+        <div v-else-if="type === 'html'" style="width: 100%;overflow: auto">
+                <div v-html="html"></div>
+            </div>
         <div ref="d3Chart" style="width: 100%; height: 300px;" 
                 v-else-if="svgChart">
             <svg></svg>
@@ -62,6 +65,7 @@
                 self.data = self.visualization.data || [];
                 self.labels = self.visualization.labels || [];
                 self.title = self.visualization.title;
+                self.html = self.visualization.html;
                 
                 if (self.type === 'line-chart' || self.type === 'area-chart') {
                      self.visualization['data'].forEach((item) =>{

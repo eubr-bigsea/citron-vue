@@ -1,23 +1,33 @@
 <template>
-    <div :class="classes" class="operation task" :title="task.operation.description + '\n' + ((task.forms.comment)? task.forms.comment.value || '': '')" :data-operation-id="task.operation.id" :id="task.id"
-        v-bind:style="{zIndex: task.z_index, top: task.top + 'px', left: task.left + 'px'}" v-on:click="click" @contextmenu.prevent="openMenu">
+    <div :class="classes" class="operation task" :title="task.operation.description + '\n' + ((task.forms.comment)? task.forms.comment.value || '': '')" 
+        :data-operation-id="task.operation.id" :id="task.id" ref="task"
+        v-bind:style="{zIndex: task.z_index, top: task.top + 'px', left: task.left + 'px'}" 
+        v-on:click="click" @contextmenu.prevent="openMenu"
+        >
         <div :style="{backgroundColor: task.forms.color && task.forms.color.value ? task.forms.color.value.background: '#fff', color: task.forms.color && task.forms.color.value ? task.forms.color.value.foreground: '#222'}"
             style="height:20px" class="title">
             <strong><span class="fa"  :class="task.operation.icon"></span> {{task.operation.name}}</strong>
         </div>
         <em>{{task.forms.comment ? task.forms.comment.value: ''}}</em>
-        <div v-if="showDecoration" class="decor" :class="task.status? task.status.toLowerCase(): ''">
+        <div v-if="!isComment && showDecoration" class="right-decor" :class="task.status? task.status.toLowerCase(): ''">
             <span class="fa fa-check-circle fa-2x"></span>
+        </div>
+        <div v-if="!isComment && task.step && task.step.status" class="right-decor" :class="task.step? task.step.status.toLowerCase(): ''">
+            <span class="fa fa-check-circle fa-2x"></span>
+        </div>
+        <div v-if="inGroup" class="bottom-right-decor">
+            <span class="fa fa-object-group fa-2x"></span>
         </div>
         <div class="custom-context-menu" v-if="contextMenuOpened && !isComment" ref="right">
             <ul>
-                <li @click.stop="remove()">Remove</li> 
+                <li @click.stop="remove()">Remove</li>
+                <li @click.stop="showResults()">Results</li>
                 <li v-for="item in contextMenuActions" @click="item.action(item.name)"> 
                     {{item.label}}
                 </li>
             </ul>
         </div>
-        </div>
+    </div>
 </template>
 
 </template>
@@ -88,11 +98,44 @@
             ]
         ]
     }
-    const connectorType = ['Flowchart', 'Bezier', 'StateMachine'][1];
+    const anchors2 = {
+        input: [
+            [
+                [0, 0.5, -1, 0],
+            ],
+            [
+                [0, 0.2, -1, 0],
+                [0, 0.8, -1, 0]
+            ],
+            [
+                [0, 0.2, -1, 0],
+                [0, 0.5, -1, 0],
+                [0, 0.8, -1, 0]
+            ]
+        ],
+        output: [
+            [
+                [1, 0.5, 1, 0],
+            ],
+            [
+                [1, 0.2, 1, 0],
+                [1, 0.8, 1, 0]
+            ],
+            [
+                [1, 0.2, 1, 0],
+                [1, 0.5, 1, 0],
+                [1, 0.8, 1, 0]
+            ]
+        ]
+    }
+    const connectorType = ['Flowchart', 'Bezier', 'StateMachine'][0];
     const connectorPaintStyle = {
         lineWidth: 1,
         radius: 8,
         strokeStyle: "#111",
+        stroke: "#111",
+        outlineColor: 'white',
+        outlineWidth: 2,
     };
 
     const endPointPaintStyle = {
@@ -100,7 +143,7 @@
         radius: 8,
         height: 15,
         width: 15,
-        zIndex: 99 
+        zIndex: 99,
     }
     const overlays = [
         ["Arrow", { location: .75, width: 8, length: 15 }],
@@ -116,11 +159,11 @@
         connectorOverlays: overlays,
         endpoint: "Dot",
         maxConnections: 1,
-        connectorStyle: connectorPaintStyle,
-    };
+        fill: '#222'
+    };  
 
     const endPointOptionsOutput = {
-        connector: [connectorType, { curviness: 120, cornerRadius: 10, gap: 0 }],
+        connector: [connectorType, { gap: 0, proximityLimit: 180, curviness: 75, margin:20, cornerRadius: 5, stub: [30, 30], midpoint: .5  }, ],
         isSource: true,
         isTarget: false,
         cssClass: 'endpoint',
@@ -129,6 +172,7 @@
         endpoint: "Rectangle",
         maxConnections: 1,
         connectorStyle: connectorPaintStyle,
+        fill: '#faa'
     };
 
     const connectionOptions = {
@@ -143,6 +187,10 @@
             'classes': function () {
                 return (this.task.status ? this.task.status.toLowerCase() : '') +
                     (this.isComment ? ' comment ' : '') + 'test';
+            },
+            inGroup: function(){
+                let elem = this.$refs.task;
+                return elem && elem._jsPlumbGroup && elem._jsPlumbGroup.id;
             }
         },
         methods: {
@@ -191,7 +239,6 @@
                     e.classList.remove('selected');
                 });
                 if (ev.ctrlKey) {
-                    //this.classList.add('many-selected');
                     self.instance.addToDragSelection(this);
                 } else if (elem.classList.contains('jsplumb-drag-selected')) {
                     //nothing
@@ -206,23 +253,17 @@
                 eventHub.$emit('onclick-task', self);
                 ev.stopPropagation();
             },
-            endPointMouseOver(endpoint) {
-                console.debug('highlight')
-            },
-            endPointMouseOut(endpoint) {
-                console.debug('Out highlight')
-            },
             getForeColor(backgroundColor) {
                 if (backgroundColor) {
                     let d = document.createElement("div");
                     d.style.color = backgroundColor.value;
-                    //document.body.appendChild(d)
-                    //Color in RGB 
-                    console.debug(window.getComputedStyle(d).color)
-                    //let r, g, b = 
                 } else {
                     return "#222";
                 }
+            },
+            showResults(){
+                this.contextMenuOpened = false;
+                console.debug(this.task.step)
             },
             remove(){
                 this.contextMenuOpened = false;
@@ -277,24 +318,11 @@
                 ["Label", { cssClass: "endpoint-label", label: "", id: "lbl", padding: 20 }]
             ];
 
-            let elem = document.getElementById(taskId);
+            let elem = this.$refs.task;
             if (this.task.operation.slug === 'comment') {
                 elem.classList.add('comment');
                 this.isComment = true;
             }
-            let dataOutputs = operation.ports.filter((p) => {
-                let dataInterface = p.interfaces.filter(
-                    (i) => i.name === 'Data').length > 0;
-                return (p.type === 'OUTPUT') && dataInterface;
-            });
-            dataOutputs.forEach((dataOut) => {
-                self.contextMenuActions.push({
-                    label: `Get sample data for ${dataOut.name}`,
-                    action: self.sampleData,
-                    name: dataOut.name
-                });
-            });
-
             [
                 [inputs, 'input', endPointOptionsInput],
                 [outputs, 'output', endPointOptionsOutput]
@@ -314,14 +342,10 @@
 
                         if (ports[inx].multiplicity !== 'ONE') {
                             if (portType === 'input') {
-                                //options['paintStyle']['radius'] = 10;
-                                //options['paintStyle']['width'] = 10;
                                 options['endpoint'] = 'Dot';
                                 options['anchors'][1] = -0.15;
                             }
                         }
-                        //options['endpoint'] = ports[inx].multiplicity !== 'ONE' ? 'Dot' : options['endpoint'];
-
                         options['uuid'] = `${taskId}/${ports[inx].id}`;
                         if (ports[inx].multiplicity !== 'ONE') {
                             options['maxConnections'] = 100;
@@ -329,8 +353,6 @@
                         }
                         if (ports[inx].interfaces.length && ports[inx].interfaces[0].color) {
                             options['paintStyle']['fillStyle'] = ports[inx].interfaces[0].color;
-                        } else {
-                            //console.debug(ports[inx].id, operation.id)
                         }
                         options['scope'] = ports[inx].interfaces.map((i) => i.name).join(' ');
                         options['dragOptions'] = {
@@ -341,22 +363,21 @@
                                 eventHub.$emit('onstop-flow', event.el._jsPlumb.scope);
                             }
                         };
-
+                        options.paintStyle.fill = options.paintStyle.fillStyle;
                         let endpoint = self.instance.addEndpoint(elem, options);
-                        //endpoint.bind('mouseover', this.endPointMouseOver);
-                        //endpoint.bind('mouseout', this.endPointMouseOut);
                         endpoint.canvas.style.zIndex = zIndex - 1;
-                        //endpoint.getOverlay('lbl').canvas.style.zIndex = zIndex - 1;
                         endpoint._portId = ports[inx].id;
                     });
                 }
             });
 
             self.instance.draggable(elem, {
+                lineWidth: 3,
                 containment: "parent",
                 grid: [1, 1],
                 drag() {
-                    let elem = document.getElementById(self.task.id);
+                    // let elem = document.getElementById(self.task.id);
+                    let elem = self.$refs.task;
                     self.task.left = elem.offsetLeft;
                     self.task.top = elem.offsetTop;
                 }

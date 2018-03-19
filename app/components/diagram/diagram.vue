@@ -2,54 +2,64 @@
     <div tabindex="0">
         <div>
             <div class="row" v-if="showToolbar && showToolbarInternal">
-                <div class="col-md-3" style="margin-left: 18px;padding-top:5px">
-                    <input type="text" placeholder="Unnamed workflow" class="form-control" :value="workflow.name" @keyup="doChangeWorkflowName" />
-                </div>
-                <div class="col-md-8" v-if="showToolbar">
+                <div class="col-md-4" v-if="showToolbar" style="margin-left: 18px;">
                     <div class="buttons-toolbar btn-group pull-right diagram-toolbar">
-
-                        <button class="btn btn-success btn-sm" v-on:click="saveWorkflow"><span class="fa fa-save"></span> Save</button>
-                        <button class="btn btn-primary btn-sm add-margin" v-on:click="onClickExecute"><span class="fa fa-play"></span> Execute</button>
-
+                        <p>
+                            <button class="btn btn-success btn-sm" v-on:click="saveWorkflow"><span class="fa fa-save"></span> Save</button>
+                            <button class="btn btn-primary btn-sm add-margin" v-on:click="onClickExecute"><span class="fa fa-play"></span> Execute</button>
+                            <drop-down-component :label="zoomPercent" variant="btn-sm btn-default">
+                                <li v-for="z in [.6, .7, .8, .9, 1, 1.1, 1.2, 1.3, 1.4]">
+                                    <a href="#" v-on:click="setZoomPercent($event, z)" :class="{disabled: zoomPercent === z}"><span :class="'fa fa-search' + (z < 1.0 ? '-minus' : '-plus')"></span> Zoom {{Math.round(z * 100)}}%</a>
+                                </li>
+                            </drop-down-component>
+                            <drop-down-component :label="'Tools'" :icon="'fa fa-gears'" variant="btn-sm btn-default">
+                                <li>
+                                    <a href="#" v-on:click.prevent="tsort"><span class="fa fa-save"></span> T-Sort</a>
+                                </li>
+                                <li>
+                                    <a href="#" v-on:click.prevent="saveAsImage"><span class="fa fa-download"></span> Save as image</a>
+                                </li>
+                                <li>
+                                    <a href="#" v-on:click="deploy"><span class="fa fa-cloud-upload"></span> Generate deploy workflow</a>
+                                </li>
+                        </drop-down-component>
+                    </p>
+                    <p>
+                        
                         <button class="btn btn-default btn-sm" v-on:click="align('left', 'min')" title="Align left"><span class="glyphicon glyphicon-object-align-left"></span></button>
                         <button class="btn btn-default btn-sm" v-on:click="align('left', 'max')" title="Align right"><span class="glyphicon glyphicon-object-align-right"></span></button>
-
                         <button class="btn btn-default btn-sm" v-on:click="align('top', 'min')" title="Align top"><span class="glyphicon glyphicon-object-align-top"></span></button>
                         <button class="btn btn-default btn-sm add-margin" v-on:click="align('top', 'max')" title="Align bottom"><span class="glyphicon glyphicon-object-align-bottom"></span></button>
 
-                        <drop-down-component :label="'Zoom ('  + zoomPercent + ')'" variant="btn-sm btn-default">
-                            <li v-for="z in [.6, .7, .8, .9, 1, 1.1, 1.2, 1.3, 1.4]">
-                                <a href="#" v-on:click="setZoomPercent($event, z)" :class="{disabled: zoomPercent === z}"><span class="fa fa-search-plus"></span> Zoom {{Math.round(z * 100)}}%</a>
-                            </li>
-                        </drop-down-component>
+                        <button class="btn btn-default btn-sm" v-on:click="distribute('horizontal', 'left')" title="Distribute horizontally"><span class="fa fa-arrows-h"></span></button>
+                        <button class="btn btn-default btn-sm add-margin" v-on:click="distribute('vertical', 'top')" title="Distribute vertically"><span class="fa fa-arrows-v"></span></button>
 
-                        <drop-down-component :label="'Tools'" :icon="'fa fa-gears'" variant="btn-sm btn-default">
-                            <li>
-                                <a href="#" v-on:click.prevent="tsort"><span class="fa fa-save"></span> T-Sort</a>
-                            </li>
-                            <li>
-                                <a href="#" v-on:click.prevent="saveAsImage"><span class="fa fa-download"></span> Save as image</a>
-                            </li>
-                            <li>
-                                <a href="#" v-on:click="deploy"><span class="fa fa-cloud-upload"></span> Generate deploy workflow</a>
-                            </li>
-                        </drop-down-component>
+                        <button class="btn btn-default btn-sm add-margin" v-on:click="addGroup" title="Add Group"><span class="fa fa-object-group"></span></button>
+                    </p>    
                     </div>
+                </div>
+                <div class="col-md-4" style="margin-left:0px;padding-top:5px">
+                    <input type="text" placeholder="Unnamed workflow" class="form-control" :value="workflow.name" @keyup="doChangeWorkflowName" />
+                    <label type="checkbox"><input type="checkbox" value="1" v-model="workflow.is_public"/> Public</label>
+                    <label type="checkbox"><input type="checkbox" value="1" v-model="workflow.is_template"/> Template</label>
                 </div>
             </div>
         </div>
         <div class="lemonade-container" id="lemonade-container" :class="{'with-grid': showGrid}" >
-            <div class="lemonade" v-on:drop="drop" v-on:dragover="allowDrop" id="lemonade-diagram" 
-                v-on:click="diagramClick" :show-task-decoration="false" ref="diagram"
-                :style="{'pointer-events': showToolbarInternal && showToolbar ? 'auto': 'none'}">
-                <task-component v-for="task of tasks" :task="task" :instance="instance" :key="task.id" 
+            <div class="lemonade" v-on:drop="drop" v-on:dragover="allowDrop" id="lemonade-diagram"
+                v-on:click="diagramClick" :show-task-decoration="true" ref="diagram"
+                :style="{'pointer-events': showToolbarInternal && showToolbar ? 'auto': 'auto'}">
+                <task-component v-for="task of tasks" :task="task" :instance="instance" :key="task.id"
                     :show-decoration="showTaskDecoration || showTaskDecorationInternal">
                     </task-component>
                 <flow-component v-for="flow of flows" :flow="flow" :instance="instance"></flow-component>
                 <div class="ghost-select"><span></span></div>
                 <ctx-menu-component>
-                    
                 </ctx-menu-component>
+
+                <div v-for="group in groups">
+                    <group-component :group="group" :instance="instance"/>
+                </div>
             </div>
         </div>
         <modal-component v-if="showExecutionModal" @close="showExecutionModal = false">
@@ -60,10 +70,16 @@
             <div class="body" slot="body">
                 <div class="container-fluid">
                     <div class="row">
+                        <div class="col-md-12">
+                            <label>Job name (optional):</label>
+                            <input type="text" class="form-control" v-model="name"/>
+                        </div>
                         <div class="col-md-6">
                             <label>Cluster:</label>
-                            <select class="form-control">
-                                <option value="1">Default</option>
+                            <select v-model="cluster" class="form-control">
+                                <option v-for="option in clusters" v-bind:value="option.id">
+                                  {{ option.name }}
+                                </option>
                             </select>
                         </div>
                         <div class="col-md-12">
@@ -80,6 +96,7 @@
                 <button class="btn btn-danger" @click="cancelExecute">Cancel</button>
             </div>
         </modal-component>
+
     </div>
 </template>
 
@@ -89,6 +106,7 @@ import eventHub from '../app/event-hub';
 
 import lodash from 'lodash';
 
+import ResizerComponent from 'vue-resize-handle/bidirectional';
 import PerfectScrollbar from 'perfect-scrollbar';
 import PerfectScrollbarCss from 'perfect-scrollbar/dist/css/perfect-scrollbar.css';
 import ModalComponent from '../modal/modal-component.js';
@@ -108,6 +126,75 @@ import solarizedDark from 'highlight.js/styles/solarized-dark.css';
 
 import { standUrl, tahitiUrl, authToken } from '../../config';
 
+const GroupComponent = Vue.extend({
+
+    components: {
+        "resizer": ResizerComponent,
+    },
+    mounted(){
+        let self = this;
+        let el = self.$refs.container;
+        if (el){
+            self.instance.addGroup({
+                anchor: "Continuous",
+                constrain: false,
+                el: el,
+                endpoint:[ "Rectangle", { width:10, height:10 } ],
+                ghost: true,
+                id: this.group.id,
+                orphan: true,
+                proxied: true,
+                revert: false,
+            });
+        }
+    },
+    props: {
+        instance: null,
+        group: null,
+    },
+    data(){
+        return {
+            collapsed: false,
+            style: {
+                height: 400,
+                width: 400,
+            },
+        }
+    },
+    methods: {
+        expand(){
+            this.instance.expandGroup(this.group.id);
+            this.collapsed = false;
+        },
+        collapse(){
+            this.instance.collapseGroup(this.group.id);
+            this.collapsed = true;
+        },
+        resizeEnd(size, component){
+            let self = this;
+            self.$refs.container._katavorioDrag.setEnabled(true);
+        },
+        resizeStart(size, component){
+            let self = this;
+            self.$refs.container._katavorioDrag.setEnabled(false);
+            console.info('Started')
+        }
+    },
+    template: `
+        <div v:id="'lem-group-' + group.id" ref="container" :style="{width:style.width+'px', height: style.height + 'px'}">
+                <resizer :size.sync="style" v-on:resize-start="resizeStart" v-on:resize-end="resizeEnd"></resizer>
+            <div class="header">
+                <div>
+                    <b>Group {{group.id}}</b>
+                </div>
+                <div class="command">
+                    <button class="btn btn-sm" v-on:click="collapse()" v-show="!collapsed"><span class="fa fa-sort-down"></span></button>
+                    <button class="btn btn-sm" v-on:click="expand()" v-show="collapsed"><span class="fa fa-sort-up"></span></button>
+                </div>
+            </div>
+        </div>
+        `
+});
 const DiagramComponent = Vue.extend({
     computed: {
         flows() {
@@ -132,7 +219,11 @@ const DiagramComponent = Vue.extend({
                 return this.$store.getters.getTasks;
             }
         },
+        groups(){
+            return this.$store.getters.getGroups;
+        },
         workflow() {
+
             if (this.renderFrom) {
                 return this.renderFrom;
             } else {
@@ -149,6 +240,7 @@ const DiagramComponent = Vue.extend({
         'modal-component': ModalComponent,
         'ctx-menu-component': CtxMenuComponent,
         'drop-down-component': DropDownComponent,
+        'group-component': GroupComponent,
     },
     props: {
         formContainer: null,
@@ -188,12 +280,15 @@ const DiagramComponent = Vue.extend({
             zoomInEnabled: true,
             zoomOutEnabled: true,
             zoom: this.initialZoom,
-            
+
             selectedTask: null,
             selectedElements: [],
 
             showToolbarInternal: true,
             showTaskDecorationInternal: false,
+            clusters: [],
+            cluster: null,
+            name: '',
         }
     },
     created() {
@@ -255,35 +350,59 @@ const DiagramComponent = Vue.extend({
         this.$el.addEventListener('keyup', this.keyboardAction, true);
         /* selection by dragging */
         self.diagramElement.addEventListener("mousedown", (ev) => {
-            let rightClick = (ev.which === 3)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
-                    || (ev.button == 2); // IE, Opera 
-            
-            if (rightClick){
-                return;
-            }
-            self.clearSelection(ev);
-            let ghostSelect = document.getElementsByClassName('ghost-select');
-            if (ghostSelect.length) {
-                Array.prototype.slice.call(ghostSelect, 0).forEach((elem) => {
-                    elem.classList.add("ghost-active");
-                    elem.style.left = ev.offsetY + 'px';
-                    elem.style.top = ev.offsetX + 'px';
-                    elem.style.width = '0px';
-                    elem.style.height = '0px';
-                    // console.debug('Initial', ev.offsetX, ev.offsetY)
-                })
-            } else {
-                console.error('ghost-select element not found!')
-            }
-            self.initialW = ev.offsetX;
-            self.initialH = ev.offsetY;
+            if (self.$refs.diagram === ev.target) {
+                let rightClick = (ev.which === 3)  // Gecko (Firefox), WebKit (Safari/Chrome) & Opera
+                        || (ev.button == 2); // IE, Opera
 
-            document.addEventListener("mouseup", self.selectElements);
-            document.addEventListener("mousemove", self.openSelector);
-            
+                if (rightClick){
+                    return;
+                }
+                self.clearSelection(ev);
+                let ghostSelect = document.getElementsByClassName('ghost-select');
+                if (ghostSelect.length) {
+                    Array.prototype.slice.call(ghostSelect, 0).forEach((elem) => {
+                        elem.classList.add("ghost-active");
+                        elem.style.left = ev.offsetY + 'px';
+                        elem.style.top = ev.offsetX + 'px';
+                        elem.style.width = '0px';
+                        elem.style.height = '0px';
+                        // console.debug('Initial', ev.offsetX, ev.offsetY)
+                    })
+                } else {
+                    console.error('ghost-select element not found!')
+                }
+                self.initialW = ev.offsetX;
+                self.initialH = ev.offsetY;
+                document.addEventListener("mouseup", self.selectElements);
+                document.addEventListener("mousemove", self.openSelector);
+            }
         });
     },
     methods: {
+        addGroup(){
+            let self = this;
+            let group = {}
+            self.$store.dispatch('addGroup', group)
+            /*
+            if (self.instance.getGroups().length === 0){
+                let el = document.createElement('div');
+                el.setAttribute('id', 'lemon-group-1');
+                el.style.cssText = "width: 200px; height: 400px; border: 2px solid #222; position:absolute";
+                self.instance.getContainer().appendChild(el);
+
+                self.instance.addGroup({
+                    el: el,
+                    constrain: false,
+                    revert: false,
+                    orphan: true
+                    //id: el.getAttribute('id'),
+                });
+            }
+            */
+
+            return false;
+
+        },
         deploy(ev){
             eventHub.$emit('onshow-deploy');
             this.oldZoom = this.zoom;
@@ -317,20 +436,24 @@ const DiagramComponent = Vue.extend({
         addTask(task) {
             this.$store.dispatch('addTask', task)
         },
+
         removeTask(task) {
             let self = this;
-            this.instance.detachAllConnections(task.id);
+            
+            //this.instance.detachAllConnections(task.id);
+            this.instance.deleteConnectionsForElement(task.id);
             this.instance.removeAllEndpoints(task.id);
-            this.instance.detach(task.id);
+            //this.instance.detach(task.id);
             let elem = document.getElementById(task.id)
-            //elem.parentNode.removeChild(elem);
+            elem.parentNode.removeChild(elem);
 
-            console.debug(this.instance.getConnections());
+            //console.debug(this.instance.getConnections());
             this.instance.repaintEverything();
 
             Vue.nextTick(function () {
                 self.$store.dispatch('removeTask', task);
                 self.clearSelection();
+                self.instance.repaintEverything();
             })
 
         },
@@ -343,16 +466,10 @@ const DiagramComponent = Vue.extend({
                     elem.parentElement.style.height = '10000px';
                     elem.style.transform = 'inherit';
                     elem.parentElement.scrollTop = 0;
-                    console.debug(clone.querySelector('[xmlns]'));
-                    /*
-                    elem.style.height = '10000px';
-                    elem.parentElement.parentElement.style.height = '10000px';
-                    elem.parentElement.parentElement.parentElement.style.height = '10000px';
-                    elem.style.background = 'red';*/
                 }}).then(
                 (canvas) => {
                     //inversed, to get smallest
-                    let x0 = canvas.width, y0 = canvas.height, x1 = 0, y1 = 0; 
+                    let x0 = canvas.width, y0 = canvas.height, x1 = 0, y1 = 0;
                     self.tasks.forEach((task) => {
                         let elem = document.getElementById(task.id);
                         x0 = Math.min(task.left, x0);
@@ -368,14 +485,14 @@ const DiagramComponent = Vue.extend({
                     targetCanvas.height = y1 + 2 * padding;
                     targetCtx.fillStyle = "white";
                     targetCtx.fillRect(0, 0, targetCanvas.width, canvas.height);
-                   
+
 
                     let ctx = canvas.getContext('2d');
-                    let $flows = document.getElementsByClassName('jsplumb-connector');
+                    let $flows = document.getElementsByClassName('jtk-connector'); //'jsplumb-connector'
                     for (var flow of $flows){
                         let xml = flow.innerHTML.replace(new RegExp('xmlns="http://www.w3.org/1999/xhtml" ', 'g'), '');
                         xml = `<svg width="${flow.width.baseVal.value}" height="${flow.height.baseVal.value}" xmlns="http://www.w3.org/2000/svg">${xml}</svg>`;
-                        
+                        console.debug(xml)
                         let DOMURL = window.URL || window.webkitURL || window;
                         let img = new Image();
                         let svg = new Blob([xml], {type: 'image/svg+xml'});
@@ -383,19 +500,19 @@ const DiagramComponent = Vue.extend({
                         let left = parseInt(flow.style.left);
                         let top =  parseInt(flow.style.top);
                         img.onload = function() {
-                            targetCtx.drawImage(img, left, top); 
+                            targetCtx.drawImage(img, left, top);
                             DOMURL.revokeObjectURL(url);
                         }
 
                         img.src = url;
                     }
                     /**/
-                    let $endpoints = document.querySelectorAll('.jsplumb-endpoint > svg')
+                    let $endpoints = document.querySelectorAll('.jtk-endpoint > svg')
                     let b64Start = 'data:image/svg+xml;base64,';
                     for (var endpoint of $endpoints){
                         let xml = endpoint.innerHTML.replace(new RegExp('xmlns="http://www.w3.org/1999/xhtml" ', 'g'), '');
                         xml = `<svg width="25" height="25" xmlns="http://www.w3.org/2000/svg">${xml}</svg>`;
-                        
+
                         let DOMURL = window.URL || window.webkitURL || window;
                         let img = new Image();
                         let svg = new Blob([xml], {type: 'image/svg+xml'});
@@ -403,7 +520,7 @@ const DiagramComponent = Vue.extend({
                         let left = endpoint.parentElement.offsetLeft;
                         let top =  endpoint.parentElement.offsetTop;
                         img.onload = function() {
-                            targetCtx.drawImage(img, left, top); 
+                            targetCtx.drawImage(img, left, top);
                             DOMURL.revokeObjectURL(url);
                         }
 
@@ -412,13 +529,13 @@ const DiagramComponent = Vue.extend({
                     window.setTimeout(() => {
                         //document.body.appendChild(canvas);
                         //targetCtx.translate(-x0 + 50, -y0 + 50);
-                        
+
 
                         targetCtx.drawImage(canvas, 0, 0);
-                        
+
                         targetCtx.fillStyle = "black";
                         targetCtx.font = "12pt Verdana";
-                        targetCtx.fillText(`${self.workflow.name}. Image generated at ${new Date()}`, 
+                        targetCtx.fillText(`${self.workflow.name}. Image generated at ${new Date()}`,
                             20, targetCanvas.height - 20);
                         targetCtx.lineWidth = 4;
                         targetCtx.strokeStyle="#000000";
@@ -510,9 +627,9 @@ const DiagramComponent = Vue.extend({
                             let taskElem = document.getElementById(task.id);
                             let bounds = taskElem.getBoundingClientRect();
 
-                            // Uses task left and top because offset calculation 
+                            // Uses task left and top because offset calculation
                             // was already done
-                            /*console.debug(x1 <= task.left,  x2 >= task.left + bounds.width, 
+                            /*console.debug(x1 <= task.left,  x2 >= task.left + bounds.width,
                                     y1 <= task.top, y2 >= task.top + bounds.height,
                                     bounds.width, bounds.height, x1, x2, y1, y2)
                                     */
@@ -694,34 +811,6 @@ const DiagramComponent = Vue.extend({
                 return v.toString(16);
             });
         },
-        load(ev) {
-            console.debug('Reseting')
-            this.instance.reset();
-            this._bindJsPlumbEvents();
-            //let graph = JSON.parse(document.getElementById('save-area').value);
-            this.loadWorkflow();
-            //this.innerLoad(graph);
-            //this.$emit('load-workflow');
-        },
-        innerLoad(graph) {
-            let self = this;
-            this.changeWorkflowName(graph.name);
-            this.changeWorkflowId(graph.id);
-            self.clear();
-            graph.tasks.forEach((task) => {
-                let operation = self.getOperationFromId(task['operation']['id'])[0];
-                let classes = operation.categories.map((c) => {
-                    return c.type.replace(' ', '-');
-                }).join(' ');
-                self.addTask({
-                    id: task.id, operation, operation_id: operation.id,
-                    left: task.left || task.x, top: task.top || task.y, z_index: ++self.currentZIndex, classes,
-                    status: 'WAITING',
-                });
-
-            });
-            graph.flows.forEach(self.addFlow);
-        },
 
         setZoom(zoom, instance, transformOrigin, el) {
             transformOrigin = transformOrigin || [0.5, 0.5];
@@ -775,6 +864,40 @@ const DiagramComponent = Vue.extend({
             ev.preventDefault();
             return false;
         },
+        distribute(mode, prop){
+            if (this.selectedElements.length < 3){
+                return;
+            }
+            let self = this;
+            let selectedTasks = this.workflow.tasks.filter((task) => {
+                return lodash.includes(this.selectedElements, task.id);
+            }).sort((a, b) => {
+                return a[prop] - b[prop];
+            })
+            if (selectedTasks.length) {
+                let gap = 0;
+                let pos = 0;
+                selectedTasks.forEach((t, inx) => {
+                    let elem = document.getElementById(t.id);
+                    if (inx !== 0){
+                        gap += t[prop] - pos
+                    }
+                    pos = t[prop] + parseInt(elem.offsetWidth);
+                });
+                let distance = gap * 1.0 / (selectedTasks.length -1);
+                let finalPos = 0;
+                selectedTasks.forEach((t, inx) => {
+                    let elem = document.getElementById(t.id);
+                    if (inx !== 0){
+                        t[prop] = finalPos;
+                    }
+                    finalPos = t[prop] + distance + parseInt(elem.offsetWidth);
+                });
+                Vue.nextTick(function () {
+                    self.instance.repaintEverything();
+                })
+            }
+        },
         align(pos, fn) {
             let self = this;
             let selectedTasks = this.workflow.tasks.filter((task) => {
@@ -809,7 +932,7 @@ const DiagramComponent = Vue.extend({
             this.showExecutionModal = false;
 
             let cloned = JSON.parse(JSON.stringify(this.workflow));
-            cloned.platform_id = 1; //FIXME
+            cloned.platform_id = cloned.platform.id; 
             cloned.tasks.forEach((task) => {
                 task.operation = { id: task.operation.id };
                 delete task.version;
@@ -817,12 +940,18 @@ const DiagramComponent = Vue.extend({
 
             let body = {
                 workflow: cloned,
-                cluster: { id: 1 },
-                user: { id: 1, login: 'waltersf@gmail.com', 
+                cluster: { id: this.cluster },
+                name: this.name,
+                user: { id: 1, login: 'waltersf@gmail.com',
                     name: 'Walter dos Santos Filho' }
             }
             let self = this;
-            let headers = { 'X-Auth-Token': authToken };
+
+            let locale = this.$store.getters.getLanguage;
+            let headers = {
+                'X-Auth-Token': authToken,
+                'Locale': locale,
+            };
             Vue.http.post(`${standUrl}/jobs`, body, { headers })
                 .then(function (response) {
                     self.$router.push({
@@ -840,17 +969,115 @@ const DiagramComponent = Vue.extend({
                 });
         },
         onClickExecute() {
-            this.showExecutionModal = true;
+            let self = this;
+            let headers = {
+                'X-Auth-Token': authToken,
+            };
+            // Retrieve clusters
+            Vue.http.get(`${standUrl}/clusters`, {headers})
+                .then((response) => {
+                    self.clusters.length = 0;
+                    Array.prototype.push.apply(self.clusters, response.body);
+                    if (self.clusters.length){
+                        self.cluster = self.clusters[0].id;
+                        self.showExecutionModal = true;
+                        if (self.name === ''){
+                            self.name = self.workflow.name;
+                        }
+                    } else {
+                        self.$root.$refs.toastr.e("Unable to execute workflow: There is not cluster available.");
+                    }
+                }).catch((ex) => {
+                    if (ex.body) {
+                        self.$root.$refs.toastr.e(ex.body.message);
+                    } else if(ex.status === 0){
+                        self.$root.$refs.toastr.e(`Error connecting to the backend (connection refused).`);
+                    } else {
+                        self.$root.$refs.toastr.e(`Unhandled error: ${JSON.stringify(ex)}`);
+                    }
+                });
+           
+        },
+        _fixGroupConnections(self) {
+            return function(group){
+                let members = group.getMembers();
+                let groupConnections = group.connections;
+                ['internal', 'source', 'target'].forEach((m) => {
+                    groupConnections[m].length = 0;
+                });
+                members.forEach((member) => {
+                    let connections = self.instance.getConnections(
+                        {scope: '*', target: member.id}).concat(
+                            self.instance.getConnections({scope: '*', source: member.id}));
+                    connections.forEach((conn) =>{
+                        if (conn.target === member){
+                            if (members.indexOf(conn.source) > -1) {
+                                if (groupConnections.internal.indexOf(conn) === -1){
+                                    groupConnections.internal.push(conn);
+                                }
+                            } else if (groupConnections.target.indexOf(conn) === -1){
+                                groupConnections.target.push(conn);
+                            }
+                        } else if (conn.source === member){
+                            if (members.indexOf(conn.target) > -1) {
+                                if (groupConnections.internal.indexOf(conn) === -1){
+                                    groupConnections.internal.push(conn);
+                                }
+                            } else if (groupConnections.source.indexOf(conn) === -1){
+                                groupConnections.source.push(conn);
+                            }
+                        }
+                    });
+                });
+            }
+        },
+        _customUpdateConnectionsForGroup(_jsPlumb) {
+            return function(group) {
+                var members = group.getMembers();
+                var c1 = _jsPlumb.getConnections({source:members, scope: '*'}, true);
+                var c2 = _jsPlumb.getConnections({target:members, scope: '*'}, true);
+                var processed = {};
+                group.connections.source.length = 0;
+                group.connections.target.length = 0;
+                var oneSet = function(c) {
+                    for (var i = 0; i < c.length; i++) {
+                        if (processed[c[i].id]) {
+                            continue;
+                        }
+                        processed[c[i].id] = true;
+                        if (c[i].source._jsPlumbGroup === group) {
+                            if (c[i].target._jsPlumbGroup !== group) {
+                                group.connections.source.push(c[i]);
+                            }
+                            _connectionSourceMap[c[i].id] = group;
+                        }
+                        else if (c[i].target._jsPlumbGroup === group) {
+                            group.connections.target.push(c[i]);
+                            _connectionTargetMap[c[i].id] = group;
+                        }
+                    }
+                };
+                oneSet(c1); oneSet(c2);
+            }
         },
         _bindJsPlumbEvents() {
             let self = this;
             self.instance.setContainer("lemonade-diagram");
-
+            self.instance.getGroupManager().updateConnectionsForGroup = self._fixGroupConnections(self);
             // self.instance.getContainer().addEventListener('click', function (ev) {
             //     //self.clearSelection(ev);
             // });
             // self.instance.bind("click", self.flowClick);
 
+            self.instance.bind('group:removeMember', (p) => {
+                console.log("Group", p.group.id, "removed", p.el.id);
+                self._fixGroupConnections(self, p);
+            });
+            self.instance.bind('group:addMember', (p) => {
+                p.el._katavorioDrag.setConstrain(false);
+                console.log("Group", p.group.id, "added", p.el.id);
+                self._fixGroupConnections(self, p);
+            });
             self.instance.bind('connectionDetached', (info, originalEvent) => {
                 let source = info.sourceEndpoint.getUuid();
                 let target = info.targetEndpoint.getUuid();
@@ -862,7 +1089,7 @@ const DiagramComponent = Vue.extend({
                 let target = info.originalTargetEndpoint.getUuid();
 
                 self.removeFlow(source + '-' + target);
-                
+
                 let [source_id, source_port] = info.newSourceEndpoint.getUuid().split('/');
                 let [target_id, target_port] = info.newTargetEndpoint.getUuid().split('/');
                 self.addFlow({
@@ -876,8 +1103,7 @@ const DiagramComponent = Vue.extend({
               return info.sourceId !== info.targetId;
             });
             */
-
-            self.instance.bind('connection', (info, originalEvent) => {
+           self.instance.bind('connection', (info, originalEvent) => {
                 let con = info.connection;
                 var arr = self.instance.select({ source: con.sourceId, target: con.targetId });
                 if (false && arr.length > 1) { // @FIXME Review
@@ -890,11 +1116,12 @@ const DiagramComponent = Vue.extend({
                     let [target_id, target_port] = info.targetEndpoint.getUuid().split('/');
                     let source_port_name = '';
                     let target_port_name = '';
-                    self.instance.detach(con);
+                    // self.instance.detach(con);
                     self.addFlow({
-                        source_id, source_port, 
+                        source_id, source_port,
                         target_id, target_port,
-                        source_port_name, target_port_name
+                        source_port_name, target_port_name,
+                        connection: con
                     });
                     eventHub.$emit('add-flow');
                 }

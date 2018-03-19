@@ -43,12 +43,19 @@ const routes = [{
         name: 'editor',
         meta: { title: 'Edit workflow' }
     },
+    /**/
     {
-        path: '/workflows/list/:page',
+        path: '/workflows/list/:page/:sort/:asc/:name',
         component: WorkflowListView,
         name: 'workflow-page',
         meta: { title: 'Workflow list' }
     },
+    // {
+    //     path: '/workflows/list/:page',
+    //     component: WorkflowListView,
+    //     name: 'workflow-page',
+    //     meta: { title: 'Workflow list' }
+    // },
     {
         path: '/workflows/list',
         component: WorkflowListView,

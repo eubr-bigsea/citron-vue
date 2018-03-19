@@ -22,10 +22,10 @@ $elementHeight: 45px;
 
 .has-2-ports {
         text-align: center;
-        max-width: $elementWidth / 2;
+        max-width: $elementWidth / 2 + 5;
 }
 .has-3-ports {
-        margin: 10px 0;
+        margin: 0px 0;
         padding: 0px 5px;
         text-align: center;
         max-width: $elementWidth / 3;
@@ -45,6 +45,9 @@ body {
     padding: 5px;
     width: 100%;
     z-index: 100;
+    p {
+        margin: 1px;
+    }
 }
 .no-padding {
     [class*="col-"] {
@@ -62,7 +65,7 @@ body {
     background: white;
 }
 
-.jsplumb-overlay.labelClass {
+.jsplumb-overlay.labelClass, .jtk-overlay.labelClass {
     cursor: pointer;
 }
 .labelClass {
@@ -134,13 +137,50 @@ li.dragging {
     user-select: none;                     /* Non-prefixed version, currently
                                                                 not supported by any browser */
 
+    
+    .jtk-group-expanded, .jtk-group-collapsed {
+        background: transparent;
+        border: 2px solid #888;
+        height: 300px;
+        padding: 4px;
+        position: absolute;
+        width: 400px;
+        .command {
+            text-align: right;
+        }
+        .header {
+            padding: 5px;
+            background: #ed8;
+            overflow: auto;
+            > div {
+                float: left;
+                width: 50%;
+            }
+        }
+        .resizer {
+            position: absolute;
+            background: red;
+            width: 50px;
+            height: 50px;
+            bottom: 0;
+            right: 0;
+        }
+    }
+    .jtk-group-collapsed {
+        height: 80px !important;
+        width: 120px !important;
+        overflow: hidden;
+        .task {
+            display: none;
+        }
+    }
     .task {
         border-width: 1px;
         font-family: Verdana;
         font-size: 7pt;
         background: white;
         opacity: 1;
-        
+
         &.completed {
             border: none;
         };
@@ -151,13 +191,19 @@ li.dragging {
             -moz-box-sha: 0px 0px 50px #a93;
             -webkit-box-: 0px 0px 50px #a93;
         };
-        .decor {
+        .right-decor{
+            right: -10px;
+        }
+        .left-decor {
+            left:-10px;
+        }
+        .right-decor, .left-decor, .bottom-right-decor {
                 color: #aaa;
+                border: 1px solid #ccc;
                 background-color: #fff;
                 border-radius: 20px;
                 padding: 0px;
                 position: absolute;
-                right: -10px;
                 display: block;
                 top: -10px;
                 height: 20px;
@@ -206,6 +252,10 @@ li.dragging {
                                 @extend .fa-warning;
                         }
                 }
+        }
+        .bottom-right-decor {
+            right: 10px;
+            bottom: 0;
         }
         &.service {
             background-color: lighten($color5, 30%) !important;
@@ -267,7 +317,7 @@ li.dragging {
             box-shadow: -2px 1px 6px 0px    $color3;
         }
         em {
-            top: 55%;
+            top: 48%;
             padding: 0 5px;
             position: absolute;
             font-style: normal;
@@ -282,13 +332,13 @@ li.dragging {
             cursor: grab;
             cursor: -moz-grab;
             cursor: -webkit-grab;
-            
+
             height: $elementHeight;
             padding: 0px;
             position: absolute;
             width: $elementWidth;
             z-index: 2;
-            &.jsplumb-drag-selected {
+            &.jsplumb-drag-selected, &.jtk-drag-selected {
                 box-shadow: -2px 1px 6px 0px #f28d00;
             }
             .title {
@@ -333,6 +383,7 @@ li.dragging {
     &.output {
         margin-top: 20px;
     }
+    z-index: 100;
 }
 .xendpoint:hover {
     opacity: 1;
@@ -361,14 +412,14 @@ li .list-group-item{
 .icon-projection:before {
     content: '\03C3';
 }
-.jsplumb-drag-selected {
+.jsplumb-drag-selected, .jtk-drag-selected {
         border-width: 2px !important;
         border-color: $color5 !important;
 }
-.jsplumb-endpoint {
+.jsplumb-endpoint, .jtk-endpoint {
     background: transparent;
 }
-.jsplumb-connector {
+.jsplumb-connector, .jtk-connector {
     z-index: 2;
 }
 .log-item {

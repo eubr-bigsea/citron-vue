@@ -10,7 +10,7 @@
                         Basic information
                     </div>
                     <div class="panel-body">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label>{{$tc('common.name')}}: </label>
                                 <input type="text" class="form-control" v-model="dataSource.name"/>
                             </div>
@@ -32,21 +32,33 @@
                                 <small>{{ $t('dataSource.privacyAware') }}</small>
                                 <switches v-model="dataSource.privacy_aware" type-bold="true" theme="bootstrap" color="primary"></switches>
                             </div>
+                            <div class="col-md-1 text-center">
+                                <small>Has header</small>
+                                <switches v-model="dataSource.is_first_line_header" type-bold="true" theme="bootstrap" color="primary"></switches>
+                            </div>
                             <div class="col-md-12">
                                 <label>{{$tc('common.description')}}:</label>
                                 <textarea class="form-control" v-model="dataSource.description"></textarea>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label>Attribute delimiter (CSV only): </label>
-                                <input type="text" class="form-control" style="width: 60px" v-model="dataSource.attribute_delimiter"/>
+                                <v-select style="width: 250px" v-model="dataSource.attribute_delimiter" :options="delimiters" :taggable="true" ></v-select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label>Record delimiter (CSV only): </label>
-                                <input type="text" class="form-control" style="width: 60px" v-model="dataSource.record_delimiter"/>
+                                <v-select style="width: 250px" v-model="dataSource.record_delimiter" :options="delimiters" :taggable="true" ></v-select>
                             </div>
-                             <div class="col-md-3">
+                             <div class="col-md-4">
                                 <label>Text delimiter (CSV only): </label>
-                                <input type="text" class="form-control" style="width: 60px" v-model="dataSource.text_delimiter"/>
+                                <v-select style="width: 250px" v-model="dataSource.text_delimiter" :options="textDelimiters" :taggable="true" ></v-select>
+                            </div>
+                             <div class="col-md-4">
+                                <label>Encoding (optional): </label>
+                                <v-select style="width: 100%" v-model="dataSource.encoding" :options="encodings" :taggable="true" ></v-select>
+                            </div>
+                             <div class="col-md-8">
+                                <label>Treat these values as null (optional): </label>
+                                <v-select multiple style="width: 100%" v-model="missing" :taggable="true" ></v-select>
                             </div>
                             <div class="col-md-12 margin-top-10">
                                 <button class="btn btn-primary" @click.stop="save"><span class="fa fa-save"></span> {{$tc('actions.save')}}</button>
@@ -148,13 +160,26 @@
     import Vue from 'vue';
     import {standUrl, tahitiUrl, authToken, caipirinhaUrl, limoneroUrl} from '../config';
     import Switches from 'vue-switches';
+    import vSelect from "vue-select";
     const dataSourceComponent = Vue.extend({
         store,
         mounted: function () {
             this.performLoad()
         },
         components: {
-            Switches
+            Switches,
+            'v-select': vSelect
+        },
+        computed: {
+            missing: {
+                set(value) {
+                    this.dataSource.treat_as_missing = value.join(',');
+                },
+                get() {
+                    return this.dataSource.treat_as_missing ? 
+                        this.dataSource.treat_as_missing.split(','): [];
+                }
+            }
         },
         /* Data */
         data() {
@@ -164,7 +189,12 @@
                             'DATETIME', 'FLOAT','INTEGER', 'LONG',
                             'TEXT', 'TIME', 'TIMESTAMP', 'VECTOR'],
                 formats: ['XML_FILE','NETCDF4','HDF5','SHAPEFILE','TEXT',
-                        'CUSTOM','JSON','CSV','PICKLE']
+                        'CUSTOM','JSON','CSV','PICKLE'],
+                delimiters: [
+                    ',', ';', '.', '{tab}', '{new_line}',
+                ],
+                textDelimiters: ['"', "'"],
+                encodings: ['ISO-8859-1', 'UTF-8', 'UTF-16'],
             };
         },
         /* Methods */

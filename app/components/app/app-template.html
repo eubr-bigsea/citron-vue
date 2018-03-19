@@ -44,9 +44,6 @@
                             </div>
                         </div>
                         <div class="panel panel-primary panel-inverse" id="workflow" ref="workflow">
-                            <div class="panel-heading">
-                                Workflow
-                            </div>
                             <div class="panel-content">
                                 <diagram-component form-container="properties-form"></diagram-component>
                             </div>
@@ -62,8 +59,15 @@
                                 </div>
                                 <div id="properties-form" class="container" v-if="task">
                                     <div>
+                                        <p><strong>Task name (optional)</strong></p>
+                                        <input type="text" maxlength="50" v-model="task.name" class="form-control"/>
+                                    </div>
+                                    <div>
                                         <fieldset v-for="form in forms">
                                             <legend>{{form.name}}</legend>
+                                            <div v-if="!form.fields.length">
+                                                No parameters to configure.
+                                            </div>
                                             <div v-for="field in form.fields">
                                                 <keep-alive>
                                                     <component :is="field.suggested_widget + '-component'" :field="field" 
@@ -130,7 +134,7 @@
                                                 <tr v-for="ds in dataSources" @mouseover="selectTaskInDeploy(ds, true)" @mouseout="selectTaskInDeploy(ds, false)">
                                                     <td class="text-center">
                                                         <small>{{ds.operation.name}} <br/>
-                                                        <em v-if="ds.forms.comment.value">{{ds.forms.comment.value}}</em></small>
+                                                        <em v-if="ds.forms.comment.value">{{ds.forms                .comment.value}}</em></small>
                                                     </td>
                                                     <td>
                                                         <select class="form-control">
@@ -161,7 +165,7 @@
                                                         <th class="col-md-4 text-center">Output name</th>
                                                         <th class="col-md-2 text-center">Action</th>
                                                     </tr>
-                                                </thead>
+                                                </thead>                
                                                 -->
                                                 <tbody>
                                                 <tr v-for="ds in outputs" @mouseover="selectTaskInDeploy(ds, true)" @mouseout="selectTaskInDeploy(ds, false)">

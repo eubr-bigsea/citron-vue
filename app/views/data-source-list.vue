@@ -54,8 +54,8 @@
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="" title="Execute" @click="">
-                                            <span class="fa fa-play-circle-o"></span> Execute
+                                        <a :href="`${limoneroUrl}/datasources/${ds.id}/download?token=123456`" title="Execute">
+                                            <span class="fa fa-download"></span> Download
                                         </a>
                                     </li>
                                     <li class="divider" v-if="ds.privacy_aware"></li>
@@ -105,7 +105,8 @@
     const DataSourceListComponent = Vue.extend({
         data() {
             return {
-                dataSources: []
+                dataSources: [],
+                limoneroUrl
             };
         },
         /* Life-cycle */
@@ -133,17 +134,30 @@
                 ev.stopPropagation();
                 return false;
             },
-            infer(id){
+            download(id){
                 let self = this;
                 let headers = {'X-Auth-Token': authToken};
-                let params = {use_header: true, quote_char: '"'}
+                let params = {}
                 let url = `${limoneroUrl}/datasources/infer-schema/${id}`
                 Vue.http.post(url, params, {headers}).then(
                     (response) =>{
                         self.$root.$refs.toastr.s('Success');
                     },
                     (error) => {
-                       self.$root.$refs.toastr.e(error);
+                       self.$root.$refs.toastr.e(error.body.message);
+                    });
+            },
+            infer(id){
+                let self = this;
+                let headers = {'X-Auth-Token': authToken};
+                let params = {}
+                let url = `${limoneroUrl}/datasources/infer-schema/${id}`
+                Vue.http.post(url, params, {headers}).then(
+                    (response) =>{
+                        self.$root.$refs.toastr.s('Success');
+                    },
+                    (error) => {
+                       self.$root.$refs.toastr.e(error.body.message);
                     });
             },
             load(params) {
@@ -152,7 +166,7 @@
                     page: 'data-source-list',
                     params
                 });
-                let url = `${limoneroUrl}/datasources?enabled=true&simple=true&size=100`;
+                let url = `${limoneroUrl}/datasources?enabled=true&simple=true`;
                 let headers = {
                     'X-Auth-Token': authToken
                 }
@@ -183,7 +197,7 @@
                     }
                     let data = {
                         page: this.page,
-                        size: 20,
+                        size: 1000,
                         platform: this.platform,
                         sort: orderBy || '',
                         asc: this.asc,

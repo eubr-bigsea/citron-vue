@@ -1,7 +1,9 @@
 import Vue from 'vue';
 import vSelect from "vue-select";
 
-import _ from 'lodash'
+import _ from 'lodash';
+import Prism from 'prismjs';
+import prismCSS from 'prismjs/themes/prism.css';
 
 import ExpressionEditorComponent from '../expression-editor/expression-editor';
 import ModalComponent from '../modal/modal-component.js';
@@ -22,11 +24,20 @@ const projectionTemplate = `
     <p>{{field.label}} <span class="fa fa-asterisk" v-show="field.required"></span> 
         <span class="fa fa-question-circle-o pull-right" :title="field.help"></span></p>
     <div>
-    <v-select multiple :value.sync="value" :options="suggestions"
+    <v-select multiple :value.sync="value" :options="suggestions" :multiple="(!params || params.multiple)"
         :on-change="updated" :taggable="true"></v-select>
     </div>
 </div>
 `
+const tagTemplate = `
+<div>
+    <p>{{field.label}} <span class="fa fa-asterisk" v-show="field.required"></span> 
+        <span class="fa fa-question-circle-o pull-right" :title="field.help"></span></p>
+    <div>
+    <v-select multiple :value.sync="value" 
+        :on-change="updated" :taggable="true"></v-select>
+    </div>
+</div>`
 
 const DecimalComponent = Vue.extend({
     methods: {
@@ -81,11 +92,23 @@ const TextAreaComponent = Vue.extend({
 
 const CodeComponent = Vue.extend({
     methods: {
-        updated: _.debounce(function (e) { eventHub.$emit('update-form-field-value', this.field, e.target.value); }, 500)
+        updated: _.debounce(function (e) { 
+            let content = e.target.value || e.target.textContent;
+            eventHub.$emit('update-form-field-value', this.field, content); 
+        }, 500)
     },
     props: { value: 0, field: null },
-    template: '<div>' + baseLabel +
-    '<textarea class="form-control input-sm code" @keyup="updated" :value="value === null ? field.default: value"></textarea></div>',
+    template: 
+        `<div>${baseLabel}
+        <textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" 
+            class="form-control input-sm code" @keyup="updated" :value="value === null ? field.default: value"></textarea>
+        </div>`,
+    xtemplate: 
+    `<div>${baseLabel}
+        <pre ref="editor" contenteditable @input="updated" class="language-sql">{{value === null ? field.default: value}}</pre> 
+        <textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" 
+            class="form-control input-sm code" @keyup="updated" 
+            :value="value === null ? field.default: value"></textarea></div>`,
 
 });
 
@@ -317,6 +340,15 @@ const AttributeSelectorComponent = Vue.extend({
     components: {
         'v-select': vSelect
     },
+    computed: {
+        params() {
+            let result = null;
+            if (this.field.values){
+                result = JSON.parse(this.field.values);
+            }
+            return result;
+        }
+    },
     methods: {
         updated(val) {
             eventHub.$emit('update-form-field-value', this.field, val);
@@ -324,6 +356,19 @@ const AttributeSelectorComponent = Vue.extend({
     },
     props: { value: "", field: null, suggestions: { required: true} },
     template: projectionTemplate
+});
+
+const TagComponent = Vue.extend({
+    components: {
+        'v-select': vSelect
+    },
+    methods: {
+        updated(val) {
+            eventHub.$emit('update-form-field-value', this.field, val);
+        }
+    },
+    props: { value: "", field: null },
+    template: tagTemplate
 });
 
 const Select2Component = Vue.extend({
@@ -389,6 +434,7 @@ const AttributeFunctionComponent = Vue.extend({
         remove(e, index) {
             this.valueList.splice(index, 1);
             e.stopPropagation();
+            e.preventDefault();
             return false;
         },
         moveUp(e, index) {
@@ -440,6 +486,41 @@ const SortSelectorComponent = Vue.extend({
     template: projectionTemplate
 });
 
+const MultipleExpressionsComponent = Vue.extend({
+    computed: {
+        expression() {
+            if (this.value) {
+                return JSON.parse(this.value)['expression'];
+            } else {
+                return "";
+            }
+        }
+    },
+    components: {
+        'expression-editor-component': ExpressionEditorComponent
+    },
+    created() {
+        eventHub.$on('update-expression', (expression, tree) => {
+            let value = JSON.stringify({ expression, tree });
+            eventHub.$emit('update-form-field-value', this.field, value);
+        });
+    },
+    props: {
+        field: {},
+        value: {},
+    },
+    template: `
+    <div>
+        <p>{{field.label}} <span class="fa fa-asterisk" v-show="field.required"></span> 
+        <span class="fa fa-question-circle-o pull-right" :title="field.help"></span></p>
+
+        <expression-editor-component :expression="value">
+        </expression-editor-component>
+    </div>
+    `
+});
+
+
 const ExpressionComponent = Vue.extend({
     computed: {
         categories() {
@@ -489,7 +570,9 @@ export {
     PercentageComponent,
     SortSelectorComponent,
     ExpressionComponent,
+    MultipleExpressionsComponent,
     AttributeFunctionComponent,
     MultiSelectDropDownComponent,
-    Select2Component
+    Select2Component,
+    TagComponent
 };

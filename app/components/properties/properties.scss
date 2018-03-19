@@ -63,6 +63,10 @@ $color1: darken(#d9edf7, 50%);
             padding: 5px;
         }
     }
+    textarea.form-control {
+        overflow-x: hidden;
+        height: 100px;
+    }
     .v-select {
         $baseBackground: #d9edf7;
         .selected-tag {
@@ -142,7 +146,7 @@ $color1: darken(#d9edf7, 50%);
     }
     textarea.code {
         font-family: "Lucida Console", Monaco, monospace;
-        height: 500px;
+        height: 200px;
     }
 }
 .fixed_headers {

@@ -16,10 +16,16 @@ const FlowComponent = Vue.extend({
                 uuids = [`${this.flow['source_id']}/${this.flow['source_port']}`, 
                     `${this.flow['target_id']}/${this.flow['target_port']}`];
             }
-            this.connection = this.instance.connect({uuids: uuids});
+            if (!this.flow.connection){
+                this.connection = this.instance.connect({uuids: uuids});
+            } else {
+                this.connection = this.flow.connection;
+                this.flow.connection = null;
+            }
             if (this.connection){
                 let currentStyle = this.connection.getPaintStyle();
                 currentStyle['strokeStyle'] = this.connection.endpoints[0].getPaintStyle().fillStyle;
+                currentStyle['stroke'] = this.connection.endpoints[0].getPaintStyle().fill;
                 this.connection.setPaintStyle(currentStyle);
             }
         });

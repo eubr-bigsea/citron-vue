@@ -1,7 +1,7 @@
 import Vuex from 'vuex';
 import Vue from 'vue';
 import io from 'socket.io-client'
-import {standUrl, tahitiUrl} from '../../config';
+import {standUrl, tahitiUrl, authToken} from '../../config';
 
 Vue.use(Vuex);
 
@@ -13,7 +13,7 @@ const state = {
     count: 0,
     errors: [],
     groupedOperations: {},
-    language: 'en',
+    language: 'pt',
     lookupOperations: {},
     operations: [],
     user: { state: { logged: false } },
@@ -24,7 +24,8 @@ const state = {
         user_name: "admin",
         user_login: "admin",
         tasks: [],
-        flows: []
+        flows: [],
+        groups: []
     },
     pageParameters: {},
     workflowPage: { pagination: {} },
@@ -48,6 +49,10 @@ function addTask(state, task) {
     /* creates the form for each task */
     let a = [];
     task.forms = {};
+    task.step = {};
+    if (task.name === '' || task.name === undefined){
+        task.name = `${task.operation.slug.toLowerCase()}-${state.workflow.tasks.length}`;
+    }
     task.operation.forms.forEach((form) => {
         form.fields.forEach((field) => {
             task.forms[field.name] = {
@@ -56,6 +61,13 @@ function addTask(state, task) {
         });
     });
     state.workflow.tasks.push(task);
+}
+function addGroup(state, group) {
+    /* creates the form for each task */ 
+    group.id = Math.floor((1 + Math.random()) * 0x1000000000).toString(16)
+    group.height = '300px';
+    group.width = '200px';
+    state.workflow.groups.push(group);
 }
 const mutations = {
     SET_OPERATIONS(state, { operations, groupedOperations, lookupOperations }) {
@@ -68,17 +80,19 @@ const mutations = {
     },
     ADD_TASK(state, task) {
         addTask(state, task);
-        console.debug('ADD_TASK')
+    },
+    ADD_GROUP(state, group) {
+        addGroup(state, group);
     },
     REMOVE_TASK(state, task) {
         let inx = state.workflow.tasks.findIndex((n, inx, arr) => n.id === task.id);
-        state.workflow.tasks.splice(inx, 1);
-        let flows = state.workflow.flows;
-        for (let i = flows.length - 1; i > 0; i--) {
-            console.debug(flows[i].source_id, task.id)
-            if (flows[i].source_id === task.id) {
-                console.debug('Removendo', flows[i].source_id)
-                state.workflow.flows.splice(i, 1);
+        if (inx > -1) {
+            state.workflow.tasks.splice(inx, 1);
+            let flows = state.workflow.flows;
+            for (let i = flows.length - 1; i > 0; i--) {
+                if (flows[i].source_id === task.id) {
+                    state.workflow.flows.splice(i, 1);
+                }
             }
         }
     },
@@ -162,6 +176,7 @@ const mutations = {
             let workflow = response.data;
             workflow.tasks.forEach((t) => {
                 validTaskId.add(t.id);
+                t.step = {};
                 t.operation = state.lookupOperations.get(t.operation.id)[0];
                 if (t.operation == null) {
                     state.errors.push(new StoreException("Invalid workflow", 'WF0001'));
@@ -184,9 +199,34 @@ const mutations = {
                     });
                 }
             });
+            let url = `${standUrl}/jobs/latest`;
+            let params = {
+                workflow_id: state.workflow.id,
+            };
+            let headers = { 'X-Auth-Token': authToken,
+                'Content-Type': 'text/html' }
+            Vue.http.get(url, { headers, params }).then(response => {
+                let job = response.body;
+                if (job){
+                    let tasks = state.workflow.tasks;
+                    job.steps.forEach((step, i) => {
+                        let found_tasks = tasks.filter((t) => {
+                            return t.id === step.task.id;
+                        });
+                        if (found_tasks.length){
+                            found_tasks[0].step = step;
+                        }
+                    });
+                }
+            }, error => {
+                
+            });
             /* Cannot bind flows before binding tasks */
             let flows = workflow.flows;
             workflow.flows = [];
+            if (!workflow.groups){
+                workflow.groups = []
+            }
             let ids = new Set();
 
             state.workflow = workflow;
@@ -227,39 +267,38 @@ const mutations = {
     },
     CONNECT_WEBSOCKET(state, room) {
         return
-        let namespace = '/stand';
-        var counter = 0;
-        console.debug(standUrl + namespace)
-        var socket = io(standUrl + namespace, 
-            { upgrade: true, path: '/socket.io' });
+        // let namespace = '/stand';
+        // var counter = 0;
+        // console.debug(standUrl + namespace)
+        // var socket = io(standUrl + namespace, 
+        //     { upgrade: true, path: '/socket.io' });
 
-        socket.on('disconnect', () => {
-            console.debug('disconnect')
-        });
-         socket.on('response', (msg) => {
-            console.debug('response', msg)
-        });
-        socket.on('connect', () => {
-            if (store.workflow){
-                console.debug('Connecting to room', room);
-                socket.emit('join', { room: store.workflow['id'] });
-            }
-        });
-        socket.on('connect_error', () => {
-            console.debug('Web socket server offline');
-        });
-        socket.on('update task', (msg) => {
-            let inx = state.workflow.tasks.findIndex((n, inx, arr) => n.id === msg.id);
-            console.debug('Found', inx, msg.id)
-            if (inx > -1) {
-                state.workflow.tasks[inx].status = msg.status;
-                state.workflow.tasks[inx].forms.color.value = 'green';
-            }
-            console.debug('update task', msg)
-        });
-        socket.on('update job', (msg) => {
-            console.debug('update job', msg);
-        });
+        // socket.on('disconnect', () => {
+        //     console.debug('disconnect')
+        // });
+        //  socket.on('response', (msg) => {
+        //     console.debug('response', msg)
+        // });
+        // socket.on('connect', () => {
+        //     if (store.workflow){
+        //         console.debug('Connecting to room', room);
+        //         socket.emit('join', { room: store.workflow['id'] });
+        //     }
+        // });
+        // socket.on('connect_error', () => {
+        //     console.debug('Web socket server offline');
+        // });
+        // socket.on('update task', (msg) => {
+        //     let inx = state.workflow.tasks.findIndex((n, inx, arr) => n.id === msg.id);
+        //     if (inx > -1) {
+        //         state.workflow.tasks[inx].status = msg.status;
+        //         state.workflow.tasks[inx].forms.color.value = 'green';
+        //     }
+        //     // console.debug('update task', msg)
+        // });
+        // socket.on('update job', (msg) => {
+        //     console.debug('update job', msg);
+        // });
 
     },
     RAISE_COMPONENT_EXCEPTION(state, msg) {
@@ -282,8 +321,11 @@ const diagramModuleStore = {
     mutations,
     state,
     actions: {
-        loadOperations({ commit, state }, filterOp) {
-            let url = `${tahitiUrl}/operations?platform=spark&enabled=true&token=123456&lang=${state.language}`;
+        loadOperations({ commit, state }, filterOp, platform) {
+            if (! platform){
+                platform = 'spark';
+            } 
+            let url = `${tahitiUrl}/operations?platform=${platform}&enabled=true&token=123456&lang=${state.language}`;
             const load = function(operations) {
                 let groupedOperations = [... groupBy(operations, (op) => {
                     let groups = op.categories.filter((cat) => {
@@ -333,6 +375,9 @@ const diagramModuleStore = {
         addFlow({ commit, state }, flow) {
             return commit('ADD_FLOW', flow);
         },
+        addGroup({ commit, state }, group) {
+            return commit('ADD_GROUP', group);
+        },
         removeFlow({ commit, state }, id) {
             return commit('REMOVE_FLOW', id);
         },
@@ -357,6 +402,7 @@ const diagramModuleStore = {
 
         saveWorkflow({ commit, state }) {
             let cloned = JSON.parse(JSON.stringify(state.workflow));
+            console.debug(cloned)
 
             let url = `${tahitiUrl}/workflows`;
             let headers = { 'Content-Type': 'application/json', 'X-Auth-Token': '123456' }
@@ -404,6 +450,7 @@ const diagramModuleStore = {
         getOperations: (state) => state.operations,
         getGroupedOperations: (state) => state.groupedOperations,
         getTasks: (state) => state.workflow.tasks,
+        getGroups: (state) => state.workflow.groups,
         getFlows: (state) => state.workflow.flows,
         getLanguage: (state) => state.language,
         getUser: (state) => state.user,

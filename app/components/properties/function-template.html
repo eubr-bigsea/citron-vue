@@ -38,7 +38,7 @@
                             <th>Attribute</th>
                             <th>Function</th>
                             <th v-if="pairOptionValueList.options.show_alias">Alias</th>
-                            <th v-if="pairOptionValueList.options.show_value">Value (use col('attribute') for attributes)</th>
+                            <th v-if="pairOptionValueList.options.show_value">Value name of attribute without quotation</th>
                             <th style="width:15%"></th>
                         </thead>
                         <tbody>
@@ -50,7 +50,7 @@
                             </select>
                                 </td>
                                 <td v-if="pairOptionValueList.options.show_alias"><input class="form-control" :value="row.alias" @change="updated($event, row, 'alias')" /></td>
-                                <td v-if="pairOptionValueList.options.show_value"><input class="form-control" :value="row.value" @change="updated($event, row, 'value')" /></td>
+                                <td v-if="pairOptionValueList.options.show_value"><input class="form-control" :value="row.alias" @change="updated($event, row, 'alias')" /></td>
                                 <td style="width:15%">
                                     <a href="#" @click="remove($event, index)"><span class="fa fa-2x fa-minus-circle"></span></a>
                                     <a href="#" @click="moveUp($event, index)" v-if="index !== 0"><span class="fa fa-2x fa-chevron-circle-up"></span></a>

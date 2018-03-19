@@ -91,7 +91,7 @@
             let selfComponent = this;
             let resumable = new Resumable({
                 target: `${limoneroUrl}/datasources/upload?token=${authToken}`,
-                chunkSize: 1*1024*1024,
+                chunkSize: 10 * 1024 * 1024,
                 simultaneousUploads: 1,
                 testChunks: true,
                 throttleProgressCallbacks: 1,

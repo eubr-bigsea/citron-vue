@@ -66,7 +66,7 @@
                                 </p>
                                 <div class="log-result">
                                     <div class="task-status" v-for="step in job.steps" :id="'log-' + step.task.id" @mouseover="selectTask(step.task.id)" @mouseout="deselectTask(step.task.id)" v-if="step.operation.id !==25">
-                                        <div class="pull-left"><strong>{{getOperationName(step.operation.id)}}</strong></div>
+                                        <div class="pull-left" :id="'task-' + step.task.id"><strong>{{getOperationName(step.operation.id)}}</strong></div>
                                         <div class="pull-right">{{step.status}}</div>
                                         <div style="clear:both">
                                             <div v-if="step.logs.length === 0">
@@ -75,11 +75,10 @@
                                             <div v-else>
                                                 <transition-group name="log" tag="div">
                                                     <div v-for="log in step.logs" v-bind:key="log" class="log-item">
-                                                    {{log.date}}
+                                                    ({{log.id}}) {{log.date}}
                                                     <img :src="'data:image/png;base64,' + log.message" v-if="log.type == 'IMAGE'"/>
                                                     <span v-html="log.message" v-else></span>
                                                     </div>
-                                                    
                                                 </transition-group>
                                             </div>
                                         </div>
@@ -141,6 +140,16 @@
     }
     div.log-result {
         font-family: Courier New, Courier, monospace;
+        overflow-x: hidden;
+    
+    }
+    div.task-status table {
+        font-size: .8em;
+    }
+    div.task-status {
+        width: 100%;
+        overflow: auto;
+        /* max-height: 500px; */
     }
     div.log-result strong {
         text-decoration: underline
@@ -153,6 +162,10 @@
     div.panel.results {
         height: 90vh;
         overflow: auto
+    }
+    .selected-task {
+        border-left: 10px solid #aaa;
+        padding-left: 5px;
     }
 </style>
 <script>
@@ -176,8 +189,21 @@
                     self.connectWebSocket();
                 });
             });
+            eventHub.$on('onclick-task', (taskComponent) => {
+                let id = `#task-${taskComponent.task.id}`;
+                let container = this.$el.querySelector(id);
+                if (container){
+                    let selected = this.$el.querySelector('.selected-task')
+                    if (selected) {
+                        selected.classList.remove('selected-task');
+                    } 
+                    container.scrollIntoView();
+                    container.parentElement.classList.add('selected-task');
+                }
+
+            });
             eventHub.$on('route-change', (to, from) => {
-                if (from.name === 'job-detail'){
+                if (to.path.match(/\/jobs\//) === null) {
                     let room = self.job.id;
                     console.debug('Disconnecting from room', room);
                     let socket = self.socket;
@@ -205,6 +231,9 @@
             computeLink(result){
                 //return `${caipirinhaUrl}/visualizations/${this.job.id}/${result.task.id}?token=${authToken}`;
                 return `#jobs/${this.job.id}/result/${result.task.id}`;
+            },
+            disconnectWebSocket(){
+
             },
             connectWebSocket(){
                 let self = this;
@@ -234,7 +263,7 @@
                     //self.selectTask(msg.id, msg.status.toLowerCase());
 
                     let inx = self.job.workflow.tasks.findIndex(
-                        (n, inx, arr) => n.id === msg.id);
+                        (n, inx, arr) => (msg.task && n.id === msg.task.id));
                     
                     if (inx > -1) {
                         let task = self.job.workflow.tasks[inx];
@@ -242,17 +271,22 @@
                         let step = self.job.steps.find((step) => step.task.id === task.id);
                         if (step){
                             step.status = msg.status;
-                            step.logs.push({level: 'INFO', 
-                                date: msg.date,
-                                type: msg.type,
-                                message: msg.message || msg.msg})
+                            let found = step.logs.filter((v) => v.id === msg.id);
+                            if (found.length === 0){
+                                step.logs.push({
+                                    id: msg.step_id,
+                                    level: 'INFO', 
+                                    date: msg.date,
+                                    type: msg.type,
+                                    message: msg.message})
+                            }
                         }
                         //self.job.workflow.tasks[inx].forms.color.value = 'green';
                     }
                     //console.debug('update task', msg)
                 });
                 socket.on('update job', (msg) => {
-                    if (msg.id === self.job.id){
+                    if (msg.id === self.job.id && self.job.status !== 'COMPLETED'){
                         self.job.status = msg.status;
                         self.job.finished = msg.finished;
                         if (msg.message){
@@ -265,7 +299,7 @@
                             if (msg.status === 'COMPLETED'){
                                 self.$root.$refs.toastr.s(finalMsg, msg.status);
                             } else if (msg.status !== 'ERROR'){
-                                self.$root.$refs.toastr.i(finalMsg, msg.status);
+                                //self.$root.$refs.toastr.i(finalMsg, msg.status);
                             } else {
                                 self.$root.$refs.toastr.Add({
                                     title:  status,
